@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>زيزو وبلال - المنصة الدعوية</title>
+    <meta name="description" content="منصة دعوية تعليمية لنشر العلم الشرعي">
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- DOMPurify for XSS Protection -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <p>جاري التحميل...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-icon">🕌</div>
+            <h1 id="lessonTitle">منصة زيزو وبلال</h1>
+            <p class="subtitle" id="lessonSubtitle">منصة دعوية تعليمية</p>
+            <div class="tags" id="lessonTags"></div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-container" id="navContainer">
+            <a href="#lessons" class="nav-link active"><span class="nav-icon">📚</span><span
+                    class="nav-text">الدروس</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Lessons Selector -->
+        <section id="lessons" class="section">
+            <h2 class="section-title"><span>📚</span> اختر الدرس</h2>
+            <div id="lessonsGrid" class="characters-grid">
+                <div class="card featured" style="text-align: center; padding: 40px;">
+                    <div class="loader" style="margin: 0 auto;"></div>
+                    <p style="margin-top: 20px; color: var(--gold);">جاري تحميل الدروس...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Content Container -->
+        <div id="lessonContent"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <p>© 2024 زيزو وبلال - جميع الحقوق محفوظة</p>
+        <p class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا</p>
+    </footer>
+
+    <!-- Floating Buttons -->
+    <button class="scroll-top" id="scrollTop">⬆️</button>
+    <button class="search-btn" id="searchBtn">🔍</button>
+
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="ابحث في المحتوى...">
+            <button onclick="closeSearch()">✕</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============ Configuration ============
+        const API_URL = window.location.origin + '/api/lessons';
+
+        let currentLesson = null;
+        let allLessons = [];
+
+        // ============ Initialize ============
+        document.addEventListener('DOMContentLoaded', async function () {
+            await loadLessons();
+
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 800);
+
+            initScrollTop();
+            initSearch();
+        });
+
+        // ============ Load Lessons from API ============
+        async function loadLessons() {
+            try {
+                // Get ALL lessons (not just published)
+                const response = await fetch(API_URL);
+                const lessons = await response.json();
+                allLessons = lessons;
+
+                if (lessons.length === 0) {
+                    showEmptyState();
+                } else {
+                    renderLessonsGrid(lessons);
+                    // Auto-select first lesson (most recent)
+                    selectLessonByIndex(0);
+                }
+            } catch (error) {
+                console.error('Error loading lessons:', error);
+                showErrorState();
+            }
+        }
+
+        function showEmptyState() {
+            document.getElementById('lessonsGrid').innerHTML = `
+                <div class="card featured" style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                    <h3>🕌 لا توجد دروس منشورة بعد</h3>
+                    <p style="color: var(--gray);">أضف دروس من لوحة الأدمن واستخدم التحليل بالذكاء الاصطناعي</p>
+                    <a href="/admin" style="color: var(--gold); text-decoration: underline; margin-top: 15px; display: inline-block;">🔧 لوحة الأدمن</a>
+                </div>
+            `;
+        }
+
+        function showErrorState() {
+            document.getElementById('lessonsGrid').innerHTML = `
+                <div class="card warning" style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                    <h3>❌ خطأ في الاتصال</h3>
+                    <p style="color: var(--gray);">تأكد من إعداد MongoDB واتصال الإنترنت</p>
+                    <button onclick="location.reload()" style="background: var(--gold); color: var(--black); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px;">🔄 إعادة المحاولة</button>
+                </div>
+            `;
+        }
+
+        function renderLessonsGrid(lessons) {
+            const grid = document.getElementById('lessonsGrid');
+            grid.innerHTML = lessons.map((lesson, index) => `
+                <div class="character-card ${['gold', 'blue', 'purple', 'yellow'][index % 4]}" 
+                     onclick="selectLessonByIndex(${index})"
+                     style="cursor: pointer;" id="lesson-card-${index}">
+                    <div class="char-header">
+                        <span class="char-icon">📖</span>
+                        <div>
+                            <h4>${lesson.title}</h4>
+                            <span class="char-type">${lesson.subtitle || 'درس إسلامي'}</span>
+                        </div>
+                    </div>
+                    ${lesson.aiAnalyzed ? '<div class="char-lessons"><span>✅ تم التحليل بالذكاء الاصطناعي</span></div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        // ============ Select Lesson by Index ============
+        function selectLessonByIndex(index) {
+            if (index < 0 || index >= allLessons.length) return;
+
+            const lesson = allLessons[index];
+            selectLesson(lesson);
+
+            // Highlight selected card
+            document.querySelectorAll('.character-card').forEach((card, i) => {
+                card.classList.remove('selected');
+                if (i === index) card.classList.add('selected');
+            });
+        }
+
+        // ============ Select and Render Lesson ============
+        function selectLesson(lesson) {
+            currentLesson = lesson;
+
+            // Update header
+            document.getElementById('lessonTitle').textContent = lesson.title;
+            document.getElementById('lessonSubtitle').textContent = lesson.subtitle || 'درس إسلامي';
+
+            // Update tags
+            if (lesson.tags && lesson.tags.length > 0) {
+                document.getElementById('lessonTags').innerHTML = lesson.tags.map(tag =>
+                    `<span class="tag">${tag}</span>`
+                ).join('');
+            }
+
+            // Build navigation
+            buildNavigation(lesson);
+
+            // Render content
+            renderLessonContent(lesson);
+
+            // Scroll to content
+            document.getElementById('lessonContent').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function buildNavigation(lesson) {
+            const nav = document.getElementById('navContainer');
+            const sections = [];
+
+            // Known sections to skip when detecting dynamic ones
+            const knownKeys = ['title', 'subtitle', 'tags', 'rawContent', 'status', 'aiAnalyzed',
+                'overview', 'podcast', 'characters', 'quranHadith', 'fiqh',
+                'questions', 'benefits', 'stories', 'analysis', '_id', 'createdAt', 'updatedAt', '__v'];
+
+            // Check available known sections
+            sections.push({ id: 'lessons', icon: '📚', name: 'الدروس' });
+
+            if (lesson.overview?.message || lesson.overview?.points?.length) {
+                sections.push({ id: 'overview', icon: '📋', name: 'نظرة عامة' });
+            }
+            if (lesson.podcast?.length) {
+                sections.push({ id: 'podcast', icon: '🎙️', name: 'البودكاست' });
+            }
+            if (lesson.characters?.length) {
+                sections.push({ id: 'characters', icon: '👥', name: 'الشخصيات' });
+            }
+            if (lesson.quranHadith?.ayat?.length || lesson.quranHadith?.hadith?.length || lesson.quranHadith?.duaa?.length) {
+                sections.push({ id: 'quran', icon: '📖', name: 'الآيات والأحاديث' });
+            }
+            if (lesson.fiqh?.rewards?.length || lesson.fiqh?.sunan?.length || lesson.fiqh?.warnings?.length || lesson.fiqh?.qa?.length) {
+                sections.push({ id: 'fiqh', icon: '🕌', name: 'الأحكام' });
+            }
+            if (lesson.questions?.trueFalse?.length) {
+                sections.push({ id: 'questions', icon: '❓', name: 'الأسئلة' });
+            }
+            if (lesson.benefits?.length) {
+                sections.push({ id: 'benefits', icon: '💎', name: 'الفوائد' });
+            }
+            if (lesson.stories?.length) {
+                sections.push({ id: 'stories', icon: '📚', name: 'القصص' });
+            }
+            if (lesson.analysis?.map?.length || lesson.analysis?.actionPlan || lesson.analysis?.conclusion) {
+                sections.push({ id: 'analysis', icon: '🔍', name: 'التحليل' });
+            }
+
+            // Add dynamic/custom sections to navigation
+            for (const [key, value] of Object.entries(lesson)) {
+                if (knownKeys.includes(key)) continue;
+                if (value === null || value === undefined) continue;
+                if (Array.isArray(value) && value.length === 0) continue;
+                if (typeof value === 'object' && Object.keys(value).length === 0) continue;
+
+                // Generate readable label
+                const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+                sections.push({ id: key, icon: '✨', name: label });
+            }
+
+            nav.innerHTML = sections.map((s, i) => `
+                <a href="#${s.id}" class="nav-link ${i === 0 ? 'active' : ''}">
+                    <span class="nav-icon">${s.icon}</span>
+                    <span class="nav-text">${s.name}</span>
+                </a>
+            `).join('');
+
+            initNavigation();
+        }
+
+        function renderLessonContent(lesson) {
+            const container = document.getElementById('lessonContent');
+            let html = '';
+
+            // Overview Section
+            if (lesson.overview?.message || lesson.overview?.points?.length) {
+                html += renderOverview(lesson.overview);
+            }
+
+            // Podcast Section
+            if (lesson.podcast?.length) {
+                html += renderPodcast(lesson.podcast);
+            }
+
+            // Characters Section
+            if (lesson.characters?.length) {
+                html += renderCharacters(lesson.characters);
+            }
+
+            // Quran & Hadith Section
+            if (lesson.quranHadith?.ayat?.length || lesson.quranHadith?.hadith?.length) {
+                html += renderQuranHadith(lesson.quranHadith);
+            }
+
+            // Fiqh Section
+            if (lesson.fiqh?.rewards?.length || lesson.fiqh?.sunan?.length || lesson.fiqh?.warnings?.length) {
+                html += renderFiqh(lesson.fiqh);
+            }
+
+            // Questions Section
+            if (lesson.questions?.trueFalse?.length) {
+                html += renderQuestions(lesson.questions);
+            }
+
+            // Benefits Section
+            if (lesson.benefits?.length) {
+                html += renderBenefits(lesson.benefits);
+            }
+
+            // Stories Section
+            if (lesson.stories?.length) {
+                html += renderStories(lesson.stories);
+            }
+
+            // Analysis Section
+            if (lesson.analysis?.map?.length || lesson.analysis?.actionPlan || lesson.analysis?.conclusion) {
+                html += renderAnalysis(lesson.analysis);
+            }
+
+            // ============ DYNAMIC SECTIONS (Custom/Unknown) ============
+            // Render any additional sections not handled above
+            const knownKeys = ['title', 'subtitle', 'tags', 'rawContent', 'status', 'aiAnalyzed',
+                'overview', 'podcast', 'characters', 'quranHadith', 'fiqh',
+                'questions', 'benefits', 'stories', 'analysis', '_id', 'createdAt', 'updatedAt', '__v'];
+
+            for (const [key, value] of Object.entries(lesson)) {
+                if (knownKeys.includes(key)) continue;
+                if (value === null || value === undefined) continue;
+                if (Array.isArray(value) && value.length === 0) continue;
+                if (typeof value === 'object' && Object.keys(value).length === 0) continue;
+
+                html += renderDynamicSection(key, value);
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ============ Dynamic Section Renderer (for custom sections) ============
+        // Sanitize helper for XSS protection
+        function sanitize(text) {
+            if (typeof DOMPurify !== 'undefined') {
+                return DOMPurify.sanitize(String(text));
+            }
+            // Fallback: basic HTML entity encoding
+            return String(text).replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        function renderDynamicSection(key, data) {
+            // Generate a readable label from the key
+            const label = sanitize(key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'));
+            const icon = '✨'; // Default icon for custom sections
+
+            let contentHtml = '';
+
+            if (Array.isArray(data)) {
+                // Render array as cards or list
+                contentHtml = data.map((item, i) => {
+                    if (typeof item === 'object' && item !== null) {
+                        // Render object items as cards
+                        const title = item.title || item.name || item.text || '';
+                        const content = item.content || item.description || item.meaning || '';
+                        const subItems = [];
+
+                        for (const [k, v] of Object.entries(item)) {
+                            if (['title', 'name', 'text', 'content', 'description', 'meaning'].includes(k)) continue;
+                            if (typeof v === 'string' || typeof v === 'number') {
+                                subItems.push('<span class="badge">' + k + ': ' + v + '</span>');
+                            }
+                        }
+
+                        return '<div class="card">' +
+                            (title ? '<h4>' + title + '</h4>' : '') +
+                            (content ? '<p>' + content + '</p>' : '') +
+                            (subItems.length ? '<div class="badges">' + subItems.join(' ') + '</div>' : '') +
+                            '</div>';
+                    } else {
+                        // Simple string/number items as list
+                        return '<li>' + item + '</li>';
+                    }
+                }).join('');
+
+                // Wrap simple items in a list
+                if (typeof data[0] !== 'object') {
+                    contentHtml = '<ul class="styled-list">' + contentHtml + '</ul>';
+                } else {
+                    contentHtml = '<div class="cards-grid">' + contentHtml + '</div>';
+                }
+            } else if (typeof data === 'object') {
+                // Render object as key-value pairs
+                const items = [];
+                for (const [k, v] of Object.entries(data)) {
+                    if (Array.isArray(v)) {
+                        items.push('<div class="sub-section"><h4>' + k + '</h4><ul class="styled-list">' +
+                            v.map(item => '<li>' + (typeof item === 'object' ? (item.text || JSON.stringify(item)) : item) + '</li>').join('') +
+                            '</ul></div>');
+                    } else if (typeof v === 'object' && v !== null) {
+                        items.push('<div class="card"><h4>' + k + '</h4><p>' + (v.text || v.content || JSON.stringify(v)) + '</p></div>');
+                    } else {
+                        items.push('<p><strong>' + k + ':</strong> ' + v + '</p>');
+                    }
+                }
+                contentHtml = items.join('');
+            } else {
+                // Simple value
+                contentHtml = '<p>' + data + '</p>';
+            }
+
+            return '<section id="' + key + '" class="section dynamic-section">' +
+                '<h2 class="section-title"><span>' + icon + '</span> ' + label + '</h2>' +
+                '<div class="card featured">' + contentHtml + '</div>' +
+                '</section>';
+        }
+
+
+        // ============ Render Sections ============
+        function renderOverview(overview) {
+            return `
+                <section id="overview" class="section">
+                    <h2 class="section-title"><span>📋</span> نظرة عامة</h2>
+                    
+                    ${overview.message ? `
+                    <div class="card featured">
+                        <h3>🎯 الرسالة المركزية</h3>
+                        <p class="highlight-text">"${overview.message}"</p>
+                    </div>
+                    ` : ''
+                }
+
+                    ${(overview.lessonMap || overview.mapItems)?.length ? `
+                    <div class="card">
+                        <h3>🗺️ خريطة الدرس</h3>
+                        <div class="grid-2">
+                            ${(overview.lessonMap || overview.mapItems).map(item => `
+                                <div class="mini-card">
+                                    <div class="mini-icon">${item.icon || '📌'}</div>
+                                    <h4>${item.title}</h4>
+                                    <p>${item.description}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+
+                    ${overview.points?.length ? `
+                    <div class="card">
+                        <h3>📌 ملخص ${overview.points.length} نقاط رئيسية</h3>
+                        <div class="points-list">
+                            ${overview.points.map((point, i) => {
+                    const pointText = typeof point === 'object' ? (point.text || point.title || '') : point;
+                    const pointIcon = typeof point === 'object' ? (point.icon || '🌟') : '🌟';
+                    const pointNum = typeof point === 'object' ? (point.num || i + 1) : i + 1;
+                    return `
+                                <div class="point">
+                                    <span class="point-num">${pointNum}</span>
+                                    <span class="point-icon">${pointIcon}</span>
+                                    <span>${pointText}</span>
+                                </div>
+                            `}).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+                </section>
+            `;
+        }
+
+        function renderPodcast(podcast) {
+            return `
+                <section id="podcast" class="section">
+                    <h2 class="section-title"><span>🎙️</span> البودكاست</h2>
+                    <div class="timeline">
+                        ${podcast.map((item, i) => `
+                            <div class="timeline-item ${item.type === 'red' ? 'red' : ''}">
+                                <div class="timeline-badge">${i + 1}</div>
+                                <div class="timeline-content">
+                                    <h4>${item.title}</h4>
+                                    <p>${item.content}</p>
+                                    ${item.quote ? `<div class="quote">"${item.quote}"</div>` : ''}
+                                    ${item.highlight ? `<div class="highlight-box">${item.highlight}</div>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderCharacters(characters) {
+            const colors = ['gold', 'blue', 'yellow', 'purple'];
+            const icons = ['⭐', '🌟', '💛', '🏃', '👤'];
+
+            return `
+                <section id="characters" class="section">
+                    <h2 class="section-title"><span>👥</span> الشخصيات</h2>
+                    <div class="characters-grid">
+                        ${characters.map((char, i) => `
+                            <div class="character-card ${char.color || colors[i % colors.length]}">
+                                <div class="char-header">
+                                    <span class="char-icon">${char.icon || icons[i % icons.length]}</span>
+                                    <div>
+                                        <h4>${char.name}</h4>
+                                        <span class="char-type">${char.type || char.role || ''}</span>
+                                    </div>
+                                </div>
+                                ${char.events?.length ? `
+                                <ul class="char-events">
+                                    ${char.events.map(e => `<li>${e}</li>`).join('')}
+                                </ul>
+                                ` : ''}
+                                ${char.lessons?.length ? `
+                                <div class="char-lessons">
+                                    ${char.lessons.map(l => `<span>${l}</span>`).join('')}
+                                </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderQuranHadith(qh) {
+            return `
+                <section id="quran" class="section">
+                    <h2 class="section-title"><span>📖</span> الآيات والأحاديث</h2>
+                    
+                    ${qh.ayat?.length ? `
+                    <div class="card">
+                        <h3>📗 الآيات القرآنية</h3>
+                        <div class="ayat-list">
+                            ${qh.ayat.map(ayah => `
+                                <div class="ayah-card" onclick="copyText(this)">
+                                    <p class="ayah-text">${ayah.text}</p>
+                                    <div class="ayah-info">
+                                        <span class="surah">${ayah.surah}</span>
+                                        <span class="meaning">${ayah.meaning || ''}</span>
+                                    </div>
+                                    <span class="copy-hint">📋 اضغط للنسخ</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+
+                    ${qh.hadith?.length ? `
+                    <div class="card">
+                        <h3>📕 الأحاديث النبوية</h3>
+                        <div class="hadith-list">
+                            ${qh.hadith.map(h => `
+                                <div class="hadith-card" onclick="copyText(this)">
+                                    <p class="hadith-text">"${h.text}"</p>
+                                    <p class="hadith-purpose">🎯 ${h.purpose || ''}</p>
+                                    <span class="copy-hint">📋 اضغط للنسخ</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+
+                    ${qh.duaa?.length ? `
+                    <div class="card">
+                        <h3>🤲 الأدعية</h3>
+                        <div class="dua-list">
+                            ${qh.duaa.map(d => `
+                                <div class="dua-card" onclick="copyText(this)">
+                                    <p class="dua-text">${d.text}</p>
+                                    <span class="dua-type">${d.type || ''}</span>
+                                    <span class="copy-hint">📋 اضغط للنسخ</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+                </section>
+            `;
+        }
+
+        function renderFiqh(fiqh) {
+            return `
+                <section id="fiqh" class="section">
+                    <h2 class="section-title"><span>🕌</span> ${fiqh.title || 'الأحكام الفقهية'}</h2>
+                    
+                    ${fiqh.rewards?.length ? `
+                    <div class="card">
+                        <h3>🎁 ثواب التبكير</h3>
+                        <div class="rewards-grid">
+                            ${fiqh.rewards.map(r => `
+                                <div class="reward-item ${r.color || 'gold'}">
+                                    <span class="reward-time">${r.time}</span>
+                                    <span class="reward-value">${r.icon || ''} ${r.reward || r.value}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+
+                    ${fiqh.sunan?.length ? `
+                    <div class="card">
+                        <h3>✅ السنن</h3>
+                        <div class="sunan-grid">
+                            ${fiqh.sunan.map(s => `
+                                <div class="sunan-item">
+                                    <span>${s.icon || '✨'}</span>
+                                    ${s.text || s}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+
+                    ${fiqh.warnings?.length ? `
+                    <div class="card warning">
+                        <h3>🚫 المحذورات</h3>
+                        <ul class="warning-list">
+                            ${fiqh.warnings.map(w => `<li>${w}</li>`).join('')}
+                        </ul>
+                        ${fiqh.warningHadith ? `<div class="hadith-box">"${fiqh.warningHadith}"</div>` : ''}
+                    </div>
+                    ` : ''
+                }
+
+                    ${fiqh.qa?.length ? `
+                    <div class="card">
+                        <h3>❓ مسائل فقهية</h3>
+                        <div class="fiqh-qa">
+                            ${fiqh.qa.map(q => {
+                    const question = q.question || q.q;
+                    const answer = q.answer || q.a;
+                    const isCorrect = q.isCorrect === true || q.correct === true;
+                    return `
+                                <div class="fiqh-item">
+                                    <div class="fiqh-q">${question}</div>
+                                    <div class="fiqh-a">${isCorrect ? '✅' : '❌'} ${answer}</div>
+                                </div>
+                            `}).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+                </section>
+            `;
+        }
+
+        function renderQuestions(questions) {
+            return `
+                <section id="questions" class="section">
+                    <h2 class="section-title"><span>❓</span> الأسئلة</h2>
+                    
+                    ${questions.trueFalse?.length ? `
+                    <div class="card">
+                        <h3>✅ صح أم خطأ</h3>
+                        <div class="quiz-list">
+                            ${questions.trueFalse.map(q => {
+                // Handle both boolean and string answers
+                const isCorrect = q.isCorrect === true || q.answer === true || q.answer === 'صح' || q.answer === 'صحيح';
+                const answerText = typeof q.answer === 'boolean'
+                    ? (q.answer ? 'صحيح ✓' : 'خطأ ✗')
+                    : (q.answer || (isCorrect ? 'صحيح' : 'خطأ'));
+                const explanation = q.explanation || '';
+                return `
+                                <div class="quiz-item">
+                                    <span class="quiz-q">${q.question}</span>
+                                    <span class="quiz-a ${isCorrect ? 'correct' : 'wrong'}">
+                                        ${isCorrect ? '✅' : '❌'} ${answerText}
+                                    </span>
+                                    ${explanation ? `<p class="quiz-explanation" style="color:#888;font-size:0.9em;margin-top:5px;">💡 ${explanation}</p>` : ''}
+                                </div>
+                            `}).join('')}
+                        </div>
+                    </div>
+                    ` : ''
+                }
+                </section>
+            `;
+        }
+
+        function renderBenefits(benefits) {
+            const colors = ['green', 'blue', 'purple', 'red', 'yellow'];
+
+            return `
+                <section id="benefits" class="section">
+                    <h2 class="section-title"><span>💎</span> الفوائد</h2>
+                    <div class="benefits-table">
+                        <div class="benefits-header">
+                            <span>#</span>
+                            <span>الفائدة</span>
+                            <span>التصنيف</span>
+                        </div>
+                        ${benefits.map((b, i) => `
+                            <div class="benefit-row">
+                                <span>${i + 1}</span>
+                                <span>${b.text || b}</span>
+                                <span class="benefit-tag ${b.color || colors[i % colors.length]}">${b.category || 'عامة'}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderStories(stories) {
+            return `
+                <section id="stories" class="section">
+                    <h2 class="section-title"><span>📚</span> القصص</h2>
+                    ${stories.map(story => `
+                        <div class="story-card">
+                            <h3>📖 ${story.title}</h3>
+                            <div class="story-stages">
+                                ${story.stages?.map(stage => `
+                                    <div class="stage">
+                                        <span class="stage-num">${stage.num}</span>
+                                        <div class="stage-content">
+                                            <h4>${stage.title}</h4>
+                                            <p>${stage.content}</p>
+                                        </div>
+                                    </div>
+                                `).join('') || `<p>${story.content || ''}</p>`}
+                            </div>
+                        </div>
+                    `).join('')
+                }
+                </section>
+            `;
+        }
+
+        function renderAnalysis(analysis) {
+            return `
+                <section id="analysis" class="section">
+                    <h2 class="section-title"><span>🔍</span> التحليل</h2>
+                    
+                    ${analysis.map?.length ? `
+                    <div class="card">
+                        <h3>🗺️ خريطة التحليل</h3>
+                        <div class="grid-2">
+                            ${analysis.map.map(item => `
+                                <div class="mini-card">
+                                    <div class="mini-icon">${item.icon || '📌'}</div>
+                                    <h4>${item.title}</h4>
+                                    <p>${item.content}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${analysis.actionPlan ? `
+                    <div class="card">
+                        <h3>📋 خطة العمل</h3>
+                        ${analysis.actionPlan.immediate?.length ? `
+                            <div class="action-section">
+                                <h4 style="color: #e74c3c;">⚡ فوري</h4>
+                                <ul class="styled-list">${analysis.actionPlan.immediate.map(a => `<li>${a}</li>`).join('')}</ul>
+                            </div>
+                        ` : ''}
+                        ${analysis.actionPlan.shortTerm?.length ? `
+                            <div class="action-section">
+                                <h4 style="color: #f39c12;">📅 قريب المدى</h4>
+                                <ul class="styled-list">${analysis.actionPlan.shortTerm.map(a => `<li>${a}</li>`).join('')}</ul>
+                            </div>
+                        ` : ''}
+                        ${analysis.actionPlan.longTerm?.length ? `
+                            <div class="action-section">
+                                <h4 style="color: #27ae60;">🎯 بعيد المدى</h4>
+                                <ul class="styled-list">${analysis.actionPlan.longTerm.map(a => `<li>${a}</li>`).join('')}</ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                    ` : ''}
+                    
+                    ${analysis.conclusion ? `
+                    <div class="card featured">
+                        <h3>📝 الخلاصة</h3>
+                        <p class="highlight-text">"${analysis.conclusion}"</p>
+                    </div>
+                    ` : ''}
+                </section>
+            `;
+        }
+
+        // ============ Navigation ============
+        function initNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+
+                    if (targetSection) {
+                        const navHeight = document.querySelector('.main-nav').offsetHeight;
+                        const targetPosition = targetSection.offsetTop - navHeight - 10;
+
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Scroll tracking
+            window.addEventListener('scroll', () => {
+                const sections = document.querySelectorAll('.section');
+                let current = '';
+                const navHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - navHeight - 50;
+                    if (window.scrollY >= sectionTop) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // ============ Utilities ============
+        function copyText(element) {
+            const text = element.querySelector('.ayah-text, .hadith-text, .dua-text')?.textContent || element.textContent;
+            navigator.clipboard.writeText(text.trim()).then(() => {
+                showToast('تم النسخ بنجاح! 📋');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function initScrollTop() {
+            const scrollTopBtn = document.getElementById('scrollTop');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 500) {
+                    scrollTopBtn.classList.add('visible');
+                } else {
+                    scrollTopBtn.classList.remove('visible');
+                }
+            });
+
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        function initSearch() {
+            const searchBtn = document.getElementById('searchBtn');
+            const searchModal = document.getElementById('searchModal');
+            const searchInput = document.getElementById('searchInput');
+
+            searchBtn.addEventListener('click', () => {
+                searchModal.classList.add('active');
+                searchInput.focus();
+            });
+
+            searchModal.addEventListener('click', (e) => {
+                if (e.target === searchModal) closeSearch();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeSearch();
+                if (e.ctrlKey && e.key === 'f') {
+                    e.preventDefault();
+                    searchModal.classList.add('active');
+                    searchInput.focus();
+                }
+            });
+        }
+
+        function closeSearch() {
+            document.getElementById('searchModal').classList.remove('active');
+            document.getElementById('searchInput').value = '';
+        }
+    </script>
+</body>
+
+</html>
