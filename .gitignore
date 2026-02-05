@@ -3,6 +3,7 @@ node_modules/
 
 # Automation
 upload.bat
+upload.py
 push_to_github.bat
 
 # Environment
