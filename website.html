@@ -7,6 +7,121 @@
     <title>زيزو وبلال - المنصة الدعوية</title>
     <meta name="description" content="منصة دعوية تعليمية لنشر العلم الشرعي">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ============ 🎨 تحسين الكروت الديناميكية ============ */
+        .dynamic-section .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .dynamic-section .card {
+            background: linear-gradient(145deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.98));
+            border: 1px solid rgba(218, 165, 32, 0.25);
+            border-radius: 14px;
+            padding: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dynamic-section .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #DAA520, #B8860B);
+            border-radius: 0 14px 14px 0;
+        }
+
+        .dynamic-section .card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(218, 165, 32, 0.5);
+            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.15);
+        }
+
+        .dynamic-section .card h4 {
+            color: #DAA520;
+            font-size: 1.05em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .dynamic-section .card p {
+            color: #d4d4d4;
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+
+        .dynamic-section .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .dynamic-section .badge {
+            background: rgba(218, 165, 32, 0.12);
+            color: #f0d060;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            border: 1px solid rgba(218, 165, 32, 0.2);
+            display: inline-block;
+        }
+
+        .dynamic-section .sub-section {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border-right: 3px solid rgba(218, 165, 32, 0.3);
+        }
+
+        .dynamic-section .sub-section strong {
+            color: #DAA520;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .dynamic-section .styled-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .dynamic-section .styled-list li {
+            padding: 8px 14px;
+            margin: 4px 0;
+            background: rgba(218, 165, 32, 0.06);
+            border-radius: 8px;
+            border-right: 3px solid #DAA520;
+            color: #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        .dynamic-section .styled-list li:hover {
+            background: rgba(218, 165, 32, 0.12);
+        }
+
+        .dynamic-section .section-title {
+            font-size: 1.4em;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .dynamic-section .section-title span {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 600px) {
+            .dynamic-section .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap"
         rel="stylesheet">
@@ -138,6 +253,238 @@
             `;
         }
 
+        // ============ 📖 قاموس ترجمة الأقسام (Section Labels Map) ============
+        const SECTION_LABELS = {
+            // الأقسام الأساسية
+            metadata: { name: 'بيانات الدرس', icon: '📋' },
+            overview: { name: 'نظرة عامة', icon: '📋' },
+            podcast: { name: 'البودكاست', icon: '🎙️' },
+            characters: { name: 'الشخصيات', icon: '👥' },
+            quranHadith: { name: 'الآيات والأحاديث', icon: '📖' },
+            fiqh: { name: 'الأحكام الفقهية', icon: '🕌' },
+            questions: { name: 'الأسئلة', icon: '❓' },
+            benefits: { name: 'الفوائد', icon: '💎' },
+            stories: { name: 'القصص', icon: '📚' },
+            analysis: { name: 'التحليل', icon: '🔍' },
+            // الأقسام الجديدة (13+ قسم)
+            lessonMap: { name: 'خريطة الدرس', icon: '🗺️' },
+            mainPoints: { name: 'النقاط الرئيسية', icon: '📌' },
+            comprehensiveSummary: { name: 'الملخص الشامل', icon: '📋' },
+            rulings: { name: 'ميزان الأحكام', icon: '⚖️' },
+            fatawa: { name: 'الفتاوى والمسائل', icon: '❓' },
+            kidsCorner: { name: 'بستان الأطفال', icon: '🎨' },
+            practicalApplications: { name: 'التطبيقات العملية', icon: '🎯' },
+            terminology: { name: 'شرح المصطلحات', icon: '📖' },
+            scholarQuotes: { name: 'أقوال العلماء', icon: '📜' },
+            realLifeScenarios: { name: 'ربط بالواقع', icon: '🌍' },
+            etiquettes: { name: 'الآداب والسلوكيات', icon: '🎩' },
+            mindMap: { name: 'الخريطة الذهنية', icon: '🧠' },
+            flashcards: { name: 'بطاقات الحفظ', icon: '🃏' },
+            socialMedia: { name: 'للسوشيال ميديا', icon: '📱' },
+            commonMistakes: { name: 'أخطاء شائعة', icon: '⚠️' },
+            ideas: { name: 'الأفكار الرئيسية', icon: '💡' },
+            advice: { name: 'النصائح العملية', icon: '🎯' },
+            prosAndCons: { name: 'الإيجابي والسلبي', icon: '💎' },
+            // أقسام زيزو الخاصة
+            suggestions: { name: 'اقتراحات ومقترحات', icon: '💡' },
+            opinion: { name: 'الرأي والتحليل', icon: '👁️' },
+            proTips: { name: 'لمسة احترافية', icon: '👔' },
+            innovation: { name: 'ركن الابتكار', icon: '🚀' },
+            strategy: { name: 'الاستراتيجية والخطط', icon: '♟️' },
+            bestPractice: { name: 'الأفضل والأحسن', icon: '🏆' },
+            smartInsights: { name: 'لمسات ذكية', icon: '🧠' },
+            flexibility: { name: 'المرونة والبدائل', icon: '🔄' },
+            dynamicFlow: { name: 'الديناميكية والتطور', icon: '🌊' },
+            conclusion: { name: 'الخلاصة', icon: '🏁' },
+            // أقسام اكتُشفت من الـ JSON
+            bookmarks: { name: 'العلامات المرجعية', icon: '🔖' },
+            weeklyPlan: { name: 'خطة الأسبوع', icon: '📆' },
+            visualization: { name: 'مشهد تخيلي', icon: '🎬' },
+            beforeAfter: { name: 'قبل وبعد', icon: '🔄' },
+            progressLadder: { name: 'سلم التدرج', icon: '🪜' },
+            badges: { name: 'شارات الإنجاز', icon: '🏆' },
+            imaginaryDialogues: { name: 'حوارات متخيلة', icon: '💬' },
+            habitLink: { name: 'ربط بالعادات', icon: '🔗' },
+            funStats: { name: 'إحصائيات ممتعة', icon: '📊' },
+            faqs: { name: 'الأسئلة الشائعة', icon: '❓' },
+            relatedTopics: { name: 'مواضيع مرتبطة', icon: '🔗' },
+            references: { name: 'روابط ومراجع', icon: '📚' },
+            timeline: { name: 'التسلسل الزمني', icon: '📅' },
+        };
+
+        // ============ 📖 قاموس ترجمة المحتوى الداخلي (Sub-Key Labels) ============
+        const SUB_KEY_LABELS = {
+            ageRange: 'الفئة العمرية',
+            learningOutcome: 'ماذا يتعلم الطفل',
+            activity: 'النشاط',
+            duration: 'المدة',
+            tools: 'الأدوات',
+            steps: 'الخطوات',
+            rule: 'الحكم',
+            evidence: 'الدليل',
+            explanation: 'الشرح',
+            source: 'المصدر',
+            scholar: 'العالم',
+            quote: 'القول',
+            scenario: 'السيناريو',
+            application: 'التطبيق',
+            mistake: 'الخطأ',
+            correction: 'التصحيح',
+            term: 'المصطلح',
+            definition: 'التعريف',
+            meaning: 'المعنى',
+            category: 'التصنيف',
+            priority: 'الأولوية',
+            status: 'الحالة',
+            type: 'النوع',
+            role: 'الدور',
+            lesson: 'الدرس المستفاد',
+            benefit: 'الفائدة',
+            warning: 'التحذير',
+            tip: 'نصيحة',
+            note: 'ملاحظة',
+            reference: 'المرجع',
+            icon: 'الأيقونة',
+            num: 'الرقم',
+            color: 'اللون',
+            image: 'الصورة',
+            link: 'الرابط',
+            hashtag: 'هاشتاج',
+            platform: 'المنصة',
+            postText: 'نص المنشور',
+            front: 'الوجه',
+            back: 'الخلف',
+            question: 'السؤال',
+            answer: 'الإجابة',
+            isCorrect: 'صحيح؟',
+            // مفاتيح إضافية اكتُشفت من JSON
+            topic: 'الموضوع',
+            connection: 'الارتباط',
+            posts: 'المنشورات',
+            branches: 'الفروع',
+            items: 'العناصر',
+            center: 'المحور',
+            habit: 'العادة',
+            action: 'الفعل',
+            stat: 'الإحصائية',
+            equals: 'يعادل',
+            q: 'السؤال',
+            a: 'الإجابة',
+            day: 'اليوم',
+            task: 'المهمة',
+            level: 'المستوى',
+            goal: 'الهدف',
+            reward: 'الجائزة',
+            condition: 'الشرط',
+            aspect: 'الجانب',
+            before: 'قبل',
+            after: 'بعد',
+            result: 'النتيجة',
+            scene: 'المشهد',
+            speaker: 'المتحدث',
+            dialogue: 'الحوار',
+            dialogues: 'الحوارات',
+            event: 'الحدث',
+            details: 'التفاصيل',
+            practice: 'العمل',
+            whyWrong: 'لماذا خطأ',
+            consequence: 'النتيجة',
+            prohibition: 'النهي',
+            degree: 'الدرجة',
+            oneLine: 'باختصار',
+            quickSummary: 'الملخص السريع',
+            keyPoints: 'النقاط الرئيسية',
+            mainTakeaway: 'الدرس الأساسي',
+            dashboard: 'لوحة المتابعة',
+            doThis: 'افعل ✅',
+            dontDoThis: 'لا تفعل ❌',
+            rewards: 'الثواب',
+            correctPractices: 'الأعمال الصحيحة',
+            wrongPractices: 'الأخطاء الشائعة',
+            important: 'المهم',
+            days: 'الأيام',
+            levels: 'المستويات',
+            habits: 'العادات',
+            stats: 'الإحصائيات',
+            list: 'القائمة',
+            cards: 'البطاقات',
+            topics: 'المواضيع',
+            comparisons: 'المقارنات',
+            events: 'الأحداث',
+            books: 'الكتب',
+            author: 'المؤلف',
+            hadithSources: 'مصادر الأحاديث',
+            sunan: 'السنن',
+            hashtags: 'الهاشتاجات',
+            content: 'المحتوى',
+            moral: 'العبرة',
+            challenge: 'التحدي',
+            discussion: 'للنقاش',
+            reflection: 'للتأمل',
+            keyInsight: 'البصيرة',
+            visualDescription: 'الوصف البصري',
+            situation: 'الموقف',
+            wrong: 'الخطأ',
+            right: 'الصح',
+            etiquette: 'الأدب',
+            how: 'كيف',
+            ruling: 'الحكم',
+            song: 'الأنشودة',
+            // مفاتيح اكتُشفت من practicalApplications
+            daily: 'يومي',
+            weekly: 'أسبوعي',
+            monthly: 'شهري',
+            forFamily: 'للأسرة',
+            time: 'الوقت',
+            when: 'متى',
+            // مفاتيح اكتُشفت من terminology
+            origin: 'الأصل',
+            context: 'السياق',
+            opposite: 'العكس',
+            cause: 'السبب',
+            // مفاتيح من lessonMap و kidsCorner
+            mainTopic: 'الموضوع الرئيسي',
+            subtopics: 'المواضيع الفرعية',
+            simpleSummary: 'ملخص بسيط',
+            funFacts: 'حقائق ممتعة',
+            // مفاتيح من questions
+            review: 'مراجعة',
+            thinking: 'تفكير',
+            hint: 'تلميح',
+            // مفاتيح من characters
+            bio: 'نبذة',
+            whyMentioned: 'لماذا ذُكر',
+            traits: 'الصفات',
+            lessons: 'الدروس المستفادة',
+            stage: 'المرحلة',
+            // مفاتيح من benefits
+            creed: 'عقيدة',
+            manners: 'أخلاق',
+            spiritual: 'روحاني',
+            // مفاتيح من quranHadith
+            surah: 'السورة',
+            ayahNumber: 'رقم الآية',
+            authenticity: 'الثحقيق',
+            narrator: 'الراوي',
+            purpose: 'الغرض',
+            dua: 'الأدعية',
+            ayat: 'الآيات',
+            hadith: 'الأحاديث',
+            // مفاتيح عامة
+            title: 'العنوان',
+            subtitle: 'العنوان الفرعي',
+            difficulty: 'المستوى',
+            readingTime: 'وقت القراءة',
+            date: 'التاريخ',
+            scenarios: 'السيناريوهات',
+            prohibitions: 'المحظورات',
+            toddlers: 'للصغار جداً',
+            kids: 'للأطفال',
+            teens: 'للمراهقين',
+            women: 'للنساء',
+            adults: 'للكبار',
+        };
+
         function renderLessonsGrid(lessons) {
             const grid = document.getElementById('lessonsGrid');
             grid.innerHTML = lessons.map((lesson, index) => `
@@ -235,16 +582,19 @@
                 sections.push({ id: 'analysis', icon: '🔍', name: 'التحليل' });
             }
 
-            // Add dynamic/custom sections to navigation
+            // Add dynamic/custom sections to navigation (مع الترجمة العربية)
             for (const [key, value] of Object.entries(lesson)) {
                 if (knownKeys.includes(key)) continue;
                 if (value === null || value === undefined) continue;
                 if (Array.isArray(value) && value.length === 0) continue;
                 if (typeof value === 'object' && Object.keys(value).length === 0) continue;
 
-                // Generate readable label
-                const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
-                sections.push({ id: key, icon: '✨', name: label });
+                // استخدام القاموس العربي + أيقونة افتراضية لو مش موجود
+                const sectionInfo = SECTION_LABELS[key];
+                const label = sectionInfo ? sectionInfo.name : key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+                const icon = sectionInfo ? sectionInfo.icon : '✨';
+                if (!sectionInfo) console.warn(`⚠️ قسم جديد مش في القاموس: "${key}" - ضيفه في SECTION_LABELS`);
+                sections.push({ id: key, icon: icon, name: label });
             }
 
             nav.innerHTML = sections.map((s, i) => `
@@ -324,7 +674,7 @@
             container.innerHTML = html;
         }
 
-        // ============ Dynamic Section Renderer (for custom sections) ============
+        // ============ Dynamic Section Renderer (مع الترجمة العربية) ============
         // Sanitize helper for XSS protection
         function sanitize(text) {
             if (typeof DOMPurify !== 'undefined') {
@@ -336,63 +686,128 @@
             }[m]));
         }
 
+        // ترجمة المفتاح الداخلي للعربي
+        function translateKey(key) {
+            return SUB_KEY_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+        }
+
+        // عرض أي قيمة بشكل ذكي (recursive)
+        function smartRenderValue(value) {
+            if (value === null || value === undefined) return '';
+            if (typeof value === 'boolean') return value ? '✅ نعم' : '❌ لا';
+            if (typeof value === 'string' || typeof value === 'number') return String(value);
+            if (Array.isArray(value)) {
+                if (value.length === 0) return '';
+                if (typeof value[0] === 'string' || typeof value[0] === 'number') {
+                    return '<ul class="styled-list">' + value.map(v => '<li>' + v + '</li>').join('') + '</ul>';
+                }
+                // Array of objects
+                return value.map(item => smartRenderObject(item)).join('');
+            }
+            if (typeof value === 'object') {
+                return smartRenderObject(value);
+            }
+            return String(value);
+        }
+
+        // عرض Object ككارت جميل مع ترجمة المفاتيح
+        function smartRenderObject(obj) {
+            if (!obj || typeof obj !== 'object') return String(obj || '');
+
+            // استخراج العنوان والمحتوى الرئيسي
+            const title = obj.title || obj.name || obj.term || obj.question || obj.mistake || obj.front || '';
+            const content = obj.content || obj.description || obj.meaning || obj.definition || obj.explanation
+                || obj.answer || obj.correction || obj.back || obj.application || obj.text || '';
+            const icon = obj.icon || '';
+
+            // مفاتيح تم استخدامها في العنوان/المحتوى (نتجاهلها في التفاصيل)
+            const usedKeys = ['title', 'name', 'term', 'question', 'mistake', 'front',
+                'content', 'description', 'meaning', 'definition', 'explanation',
+                'answer', 'correction', 'back', 'application', 'text', 'icon'];
+
+            // باقي التفاصيل
+            const details = [];
+            for (const [k, v] of Object.entries(obj)) {
+                if (usedKeys.includes(k)) continue;
+                if (v === null || v === undefined || v === '') continue;
+
+                const label = translateKey(k);
+
+                if (Array.isArray(v)) {
+                    if (v.length === 0) continue;
+                    if (typeof v[0] === 'string' || typeof v[0] === 'number') {
+                        details.push('<div class="sub-section"><strong>' + label + ':</strong><ul class="styled-list">' +
+                            v.map(item => '<li>' + item + '</li>').join('') + '</ul></div>');
+                    } else {
+                        details.push('<div class="sub-section"><strong>' + label + ':</strong>' +
+                            v.map(item => smartRenderObject(item)).join('') + '</div>');
+                    }
+                } else if (typeof v === 'object' && v !== null) {
+                    details.push('<div class="sub-section"><strong>' + label + ':</strong>' +
+                        smartRenderObject(v) + '</div>');
+                } else if (typeof v === 'boolean') {
+                    details.push('<span class="badge">' + label + ': ' + (v ? '✅ نعم' : '❌ لا') + '</span>');
+                } else {
+                    details.push('<span class="badge">' + label + ': ' + v + '</span>');
+                }
+            }
+
+            return '<div class="card">' +
+                (icon ? '<span style="font-size:1.3em;margin-left:8px;">' + icon + '</span>' : '') +
+                (title ? '<h4>' + title + '</h4>' : '') +
+                (content ? '<p>' + content + '</p>' : '') +
+                (details.length ? '<div class="badges" style="margin-top:8px;flex-wrap:wrap;gap:6px;">' + details.join(' ') + '</div>' : '') +
+                '</div>';
+        }
+
         function renderDynamicSection(key, data) {
-            // Generate a readable label from the key
-            const label = sanitize(key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'));
-            const icon = '✨'; // Default icon for custom sections
+            // استخدام القاموس العربي للعنوان والأيقونة
+            const sectionInfo = SECTION_LABELS[key];
+            const label = sectionInfo ? sectionInfo.name : key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+            const icon = sectionInfo ? sectionInfo.icon : '✨';
 
             let contentHtml = '';
 
             if (Array.isArray(data)) {
-                // Render array as cards or list
-                contentHtml = data.map((item, i) => {
-                    if (typeof item === 'object' && item !== null) {
-                        // Render object items as cards
-                        const title = item.title || item.name || item.text || '';
-                        const content = item.content || item.description || item.meaning || '';
-                        const subItems = [];
-
-                        for (const [k, v] of Object.entries(item)) {
-                            if (['title', 'name', 'text', 'content', 'description', 'meaning'].includes(k)) continue;
-                            if (typeof v === 'string' || typeof v === 'number') {
-                                subItems.push('<span class="badge">' + k + ': ' + v + '</span>');
-                            }
-                        }
-
-                        return '<div class="card">' +
-                            (title ? '<h4>' + title + '</h4>' : '') +
-                            (content ? '<p>' + content + '</p>' : '') +
-                            (subItems.length ? '<div class="badges">' + subItems.join(' ') + '</div>' : '') +
-                            '</div>';
-                    } else {
-                        // Simple string/number items as list
-                        return '<li>' + item + '</li>';
-                    }
-                }).join('');
-
-                // Wrap simple items in a list
-                if (typeof data[0] !== 'object') {
-                    contentHtml = '<ul class="styled-list">' + contentHtml + '</ul>';
+                if (data.length === 0) {
+                    contentHtml = '<p style="color:#888;">لا يوجد محتوى في هذا القسم</p>';
+                } else if (typeof data[0] === 'string' || typeof data[0] === 'number') {
+                    // قائمة نصوص بسيطة
+                    contentHtml = '<ul class="styled-list">' +
+                        data.map(item => '<li>' + item + '</li>').join('') + '</ul>';
                 } else {
-                    contentHtml = '<div class="cards-grid">' + contentHtml + '</div>';
+                    // قائمة Objects → كروت
+                    contentHtml = '<div class="cards-grid">' +
+                        data.map(item => smartRenderObject(item)).join('') + '</div>';
                 }
-            } else if (typeof data === 'object') {
-                // Render object as key-value pairs
+            } else if (typeof data === 'object' && data !== null) {
+                // Object واحد → عرض كل مفتاح بترجمته
                 const items = [];
                 for (const [k, v] of Object.entries(data)) {
+                    if (v === null || v === undefined || v === '') continue;
+                    const subLabel = translateKey(k);
+
                     if (Array.isArray(v)) {
-                        items.push('<div class="sub-section"><h4>' + k + '</h4><ul class="styled-list">' +
-                            v.map(item => '<li>' + (typeof item === 'object' ? (item.text || JSON.stringify(item)) : item) + '</li>').join('') +
-                            '</ul></div>');
+                        if (v.length === 0) continue;
+                        if (typeof v[0] === 'string' || typeof v[0] === 'number') {
+                            items.push('<div class="card"><h4>' + subLabel + '</h4>' +
+                                '<ul class="styled-list">' + v.map(item => '<li>' + item + '</li>').join('') + '</ul></div>');
+                        } else {
+                            items.push('<div class="card"><h4>' + subLabel + '</h4>' +
+                                v.map(item => smartRenderObject(item)).join('') + '</div>');
+                        }
                     } else if (typeof v === 'object' && v !== null) {
-                        items.push('<div class="card"><h4>' + k + '</h4><p>' + (v.text || v.content || JSON.stringify(v)) + '</p></div>');
+                        items.push('<div class="card"><h4>' + subLabel + '</h4>' +
+                            smartRenderObject(v) + '</div>');
+                    } else if (typeof v === 'boolean') {
+                        items.push('<p><strong>' + subLabel + ':</strong> ' + (v ? '✅ نعم' : '❌ لا') + '</p>');
                     } else {
-                        items.push('<p><strong>' + k + ':</strong> ' + v + '</p>');
+                        items.push('<p><strong>' + subLabel + ':</strong> ' + v + '</p>');
                     }
                 }
                 contentHtml = items.join('');
             } else {
-                // Simple value
+                // قيمة بسيطة (نص/رقم)
                 contentHtml = '<p>' + data + '</p>';
             }
 
