@@ -11,6 +11,9 @@ const LessonSchema = new mongoose.Schema({
     status: { type: String, default: 'draft' },
     aiAnalyzed: { type: Boolean, default: false },
     rawContent: String,
+    // 🔒 المصدر المرجعي الداخلي - للأدمن والـ AI فقط
+    // لا يظهر في website.html ولا يرجع في API العام
+    rawSource: String,
     tags: [String],
 
     // ALL SECTIONS USE MIXED TYPE FOR FLEXIBILITY

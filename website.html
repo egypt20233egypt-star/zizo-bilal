@@ -310,6 +310,9 @@
             relatedTopics: { name: 'مواضيع مرتبطة', icon: '🔗' },
             references: { name: 'روابط ومراجع', icon: '📚' },
             timeline: { name: 'التسلسل الزمني', icon: '📅' },
+            // أقسام اكتُشفت من API v3.6
+            practicalApplication: { name: 'التطبيق العملي', icon: '🏆' },
+            commonMistakes: { name: 'أخطاء شائعة', icon: '⚠️' },
         };
 
         // ============ 📖 قاموس ترجمة المحتوى الداخلي (Sub-Key Labels) ============
@@ -489,6 +492,51 @@
             right: '✅ الصح',
             lesson: '💡 الدرس المستفاد',
             condition: '🎯 المطلوب',
+            // مفاتيح من podcast
+            hook: 'المقدمة الجذابة',
+            intro: 'المقدمة',
+            mainContent: 'المحتوى الرئيسي',
+            callToAction: 'دعوة للعمل',
+            estimatedDuration: 'المدة المتوقعة',
+            tone: 'النبرة',
+            conclusion: 'الخاتمة',
+            // مفاتيح من stories
+            stages: 'المراحل',
+            story: 'القصة',
+            // مفاتيح من commonMistakes
+            severity: 'الخطورة',
+            reason: 'السبب',
+            // مفاتيح من socialMedia
+            tweet: 'تغريدة',
+            whatsappStatus: 'حالة واتساب',
+            designQuote: 'اقتباس تصميمي',
+            instagramCaption: 'نص انستجرام',
+            // مفاتيح من analysis
+            finalConclusion: 'الخلاصة النهائية',
+            lessonAxes: 'محاور الدرس',
+            axis: 'المحور',
+            connections: 'الروابط',
+            previousTopics: 'مواضيع سابقة',
+            nextTopics: 'مواضيع قادمة',
+            requiredKnowledge: 'معرفة مطلوبة',
+            strengths: 'نقاط القوة',
+            expectedImpact: 'الأثر المتوقع',
+            emotional: 'الأثر العاطفي',
+            behavioral: 'الأثر السلوكي',
+            // مفاتيح من practicalApplication
+            immediate: 'فوري',
+            shortTerm: 'قريب المدى',
+            longTerm: 'بعيد المدى',
+            weeklyChallenge: 'تحدي الأسبوع',
+            checklist: 'قائمة المراجعة',
+            // مفاتيح من rulings
+            correctPractices: 'الممارسات الصحيحة',
+            prohibitions: 'المحظورات',
+            // مفاتيح إضافية
+            description: 'الوصف',
+            name: 'الاسم',
+            text: 'النص',
+            duration: 'المدة',
         };
 
         function renderLessonsGrid(lessons) {
@@ -553,7 +601,7 @@
             const sections = [];
 
             // Known sections to skip when detecting dynamic ones
-            const knownKeys = ['title', 'subtitle', 'tags', 'rawContent', 'status', 'aiAnalyzed',
+            const knownKeys = ['title', 'subtitle', 'tags', 'rawContent', 'rawSource', 'status', 'aiAnalyzed',
                 'overview', 'podcast', 'characters', 'quranHadith', 'fiqh',
                 'questions', 'benefits', 'stories', 'analysis', '_id', 'createdAt', 'updatedAt', '__v'];
 

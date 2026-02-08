@@ -6,7 +6,7 @@ const LessonHistory = require('../models/LessonHistory');
 // GET all lessons
 router.get('/', async (req, res) => {
     try {
-        const lessons = await Lesson.find().sort({ createdAt: -1 });
+        const lessons = await Lesson.find().select('-rawSource').sort({ createdAt: -1 });
         res.json(lessons);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 // GET published lessons only
 router.get('/published', async (req, res) => {
     try {
-        const lessons = await Lesson.find({ status: 'published' }).sort({ createdAt: -1 });
+        const lessons = await Lesson.find({ status: 'published' }).select('-rawSource').sort({ createdAt: -1 });
         res.json(lessons);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -26,7 +26,7 @@ router.get('/published', async (req, res) => {
 // GET single lesson
 router.get('/:id', async (req, res) => {
     try {
-        const lesson = await Lesson.findById(req.params.id);
+        const lesson = await Lesson.findById(req.params.id).select('-rawSource');
         if (!lesson) {
             return res.status(404).json({ error: 'Lesson not found' });
         }

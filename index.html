@@ -384,6 +384,18 @@
                 <textarea id="lessonContent" placeholder="الصق هنا نص الدرس كاملاً..."></textarea>
             </div>
 
+            <div class="form-group"
+                style="background: linear-gradient(135deg, rgba(142,68,173,0.15), rgba(155,89,182,0.08)); border: 2px solid rgba(155,89,182,0.5); border-radius: 12px; padding: 15px;">
+                <label style="color: #9b59b6; font-weight: 700;">🔒 المصدر المرجعي الداخلي <small
+                        style="color:#999;">(اختياري -
+                        للأدمن والـ AI فقط)</small></label>
+                <textarea id="lessonRawSource"
+                    placeholder="📝 ألصق هنا النص الأصلي للشيخ أو ملاحظات سرية... (لن يظهر في الموقع)"
+                    style="border: 1px solid rgba(155,89,182,0.4); background: rgba(155,89,182,0.05); min-height: 100px; border-radius: 8px;"></textarea>
+                <small style="color: #8e44ad; display:block; margin-top:5px;">⚠️ يتحفظ في قاعدة البيانات فقط • لا يظهر
+                    في الموقع نهائياً • للـ AI مستقبلاً</small>
+            </div>
+
             <div class="form-group">
                 <button class="btn btn-info" onclick="analyzeWithAI()">🧠 تحليل بالذكاء الاصطناعي</button>
                 <button class="btn btn-primary" onclick="openImportModal()">📋 استيراد JSON/نص</button>
@@ -412,6 +424,20 @@
             <div class="modal-header">
                 <h2>📋 استيراد محتوى خارجي</h2>
                 <button class="close-btn" onclick="closeImportModal()">×</button>
+            </div>
+
+            <!-- 🔒 المصدر المرجعي - تصميم مميز بنفسجي -->
+            <div
+                style="background: linear-gradient(135deg, rgba(142,68,173,0.15), rgba(155,89,182,0.08)); border: 2px solid rgba(155,89,182,0.5); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                <label style="color: #9b59b6; font-weight: 700; font-size: 1rem; display: block; margin-bottom: 8px;">
+                    🔒 المصدر المرجعي الداخلي
+                    <span style="font-weight: 400; font-size: 0.8rem; color: #999;">(اختياري - للأدمن والـ AI
+                        فقط)</span>
+                </label>
+                <textarea id="importRawSource" placeholder="📝 ألصق هنا النص الأصلي للشيخ أو ملاحظاتك السرية..."
+                    style="border: 1px solid rgba(155,89,182,0.4); background: rgba(155,89,182,0.05); min-height: 80px; border-radius: 8px; width: 100%; box-sizing: border-box; padding: 10px; color: var(--text); font-family: inherit;"></textarea>
+                <small style="color: #8e44ad; display: block; margin-top: 5px;">⚠️ يتحفظ في قاعدة البيانات فقط • لا يظهر
+                    في الموقع نهائياً • للـ AI مستقبلاً</small>
             </div>
 
             <div class="import-tabs">
@@ -542,6 +568,7 @@
             const subtitle = document.getElementById('lessonSubtitle').value.trim();
             const tags = document.getElementById('lessonTags').value.split(',').map(t => t.trim()).filter(t => t);
             const rawContent = document.getElementById('lessonContent').value.trim();
+            const rawSource = document.getElementById('lessonRawSource').value.trim();
 
             if (!title) { alert('أدخل عنوان الدرس!'); return; }
             if (!rawContent && !currentAnalysis) { alert('أدخل محتوى الدرس أو حلله بالذكاء الاصطناعي!'); return; }
@@ -555,6 +582,11 @@
                 aiAnalyzed: !!currentAnalysis,
                 ...(currentAnalysis || {})
             };
+
+            // 🔒 المصدر المرجعي الداخلي - يتحفظ بس لو فيه محتوى
+            if (rawSource) {
+                lessonData.rawSource = rawSource;
+            }
 
             try {
                 const response = await fetch(API_URL, {
@@ -572,6 +604,7 @@
                 document.getElementById('lessonSubtitle').value = '';
                 document.getElementById('lessonTags').value = '';
                 document.getElementById('lessonContent').value = '';
+                document.getElementById('lessonRawSource').value = '';
                 document.getElementById('aiStatus').style.display = 'none';
                 document.getElementById('jsonPreview').style.display = 'none';
                 currentAnalysis = null;
@@ -762,6 +795,7 @@ ${rawContent.substring(0, 4000)}
         function openImportModal() {
             document.getElementById('importModal').classList.add('active');
             document.getElementById('importContent').value = '';
+            document.getElementById('importRawSource').value = '';
             document.getElementById('importResult').innerHTML = '';
             document.getElementById('previewSections').style.display = 'none';
             document.getElementById('applyBtn').disabled = true;
@@ -998,6 +1032,12 @@ ${rawContent.substring(0, 4000)}
 
             closeImportModal();
             alert('✅ تم استيراد البيانات بنجاح!\n\nيمكنك الآن حفظ الدرس أو نشره.');
+
+            // 🔒 نقل المصدر المرجعي من المودال للفورم الرئيسي
+            const modalRawSource = document.getElementById('importRawSource').value.trim();
+            if (modalRawSource) {
+                document.getElementById('lessonRawSource').value = modalRawSource;
+            }
         }
 
         // ============ History Functions ============
