@@ -108,8 +108,8 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 
 | البند | القيمة |
 |-------|--------|
-| الإصدار | v2.0 |
-| الحالة | 🔄 تطوير لوحة التحكم |
+| الإصدار | v3.9.2 |
+| الحالة | ✅ navigation centering في RTL محلولة |
 | آخر commit آمن | `effd10ee307faa5ec92ffab8698ba6db6de2b5de` |
 
 ## 🏆 سجل الإنجازات
@@ -126,6 +126,8 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 | 8 | إنشاء تصميم v2 كـ demo (`demo_cards_v2.html`) | `demo_cards_v2.html` |
 | 9 | إنشاء `GEMINI.md` لحماية الملفات | `GEMINI.md` |
 | 10 | استرجاع الملفات بعد مسح بالغلط | `website.html`, `style.css` |
+| 11 | إصلاح sticky navigation (إزالة overflow-x: hidden من html) | `v3_enhancements.css` |
+| 12 | إصلاح nav centering في RTL باستخدام getBoundingClientRect | `website.html` |
 
 ## 🗺️ خارطة الطريق (Roadmap)
 
@@ -153,6 +155,8 @@ Phase 5: شات ذكي (Chatbot)             ⏳ قدام
 | #1 | [UI] | **لما عايز تغيير تصميم → غير CSS فقط، مش تمسح ملف كامل** | الـ AI لازم يفهم إن `website.html` = موقع عام 1355 سطر مع JS كامل، مش ملف بسيط يتكتب من الصفر |
 | #2 | [UI] | **اعمل backup دايماً قبل أي تعديل كبير: `git commit -m "قبل تعديل التصميم"`** | لولا الـ Git كان الملف ضاع خالص |
 | #3 | [Config] | **أمر استرجاع ملف من Git: `git checkout <commit_hash> -- filename`** | ده الأمر اللي بيرجع ملف واحد لنسخة معينة من غير ما يأثر على باقي الملفات |
+| #4 | [CSS] | **`overflow-x: hidden` على html/body بيكسر `position: sticky`!** | الـ sticky nav كان مش بيشتغل بسبب `overflow-x: hidden` - استخدم `overflow-x: clip` على body بس |
+| #5 | [RTL] | **في RTL: استخدم `getBoundingClientRect` + `scrollBy(delta)` مش `offsetLeft` + `scrollTo`** | `offsetLeft` بيتلخبط في RTL - `getBoundingClientRect` بيقيس على الشاشة الفعلية فبيشتغل LTR و RTL |
 
 ## 🔒 قواعد حماية الملفات
 
