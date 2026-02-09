@@ -1,0 +1,263 @@
+/* ============================================
+   🎨 v3 ENHANCEMENTS - Ultra Premium Design
+   ============================================ */
+
+/* === Arabesque Pattern Background === */
+body {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30L30 0z' fill='none' stroke='%23d4af37' stroke-opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* === Glassmorphism Effects === */
+.main-header {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, rgba(10, 10, 15, 0.95) 0%, rgba(18, 18, 26, 0.98) 50%, rgba(10, 10, 15, 0.95) 100%) !important;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.main-nav {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(18, 18, 26, 0.85) !important;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+/* === FAB Container & Styles (v3 exact) === */
+.fab-container {
+    position: fixed;
+    bottom: 90px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    outline: none !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    transition: all 0.3s ease;
+    animation: float-fab 3s ease-in-out infinite;
+}
+
+.fab:hover {
+    transform: scale(1.15);
+}
+
+.fab:active {
+    transform: scale(0.9);
+}
+
+.fab-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--black);
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+    animation-delay: 0.5s;
+}
+
+.fab-gold:hover {
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+}
+
+.fab-blue {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.35);
+}
+
+.fab-blue:hover {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+}
+
+@keyframes float-fab {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* === Enhanced Card Glow === */
+.card:hover,
+.character-card:hover {
+    box-shadow: 0 8px 32px rgba(212, 175, 55, 0.2) !important;
+}
+
+.card.featured:hover {
+    box-shadow: 0 12px 40px rgba(212, 175, 55, 0.3) !important;
+}
+
+/* === Scroll Reveal Animation (fadeInUp like mixed-version) === */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* scroll-reveal class removed - no longer hiding elements */
+/* .scroll-reveal {
+    opacity: 0;
+} */
+
+/* === Performance Optimizations === */
+html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* overflow-x: hidden REMOVED - breaks position: sticky on nav! */
+}
+
+/* Fix: Prevent horizontal scrollbar */
+body {
+    overflow-x: clip;
+    /* clip prevents horizontal scroll WITHOUT breaking sticky */
+}
+
+/* REMOVED: contain, content-visibility - were causing cards to disappear on scroll */
+
+/* REMOVED: GPU acceleration (translateZ, backface-visibility, will-change) - was causing rendering issues */
+
+/* === Text Rendering === */
+body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Enhanced Section Titles === */
+.section-title {
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    right: 0;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    border-radius: 2px;
+}
+
+/* === Smooth Transitions === */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === No JS Fallback === */
+.no-js .scroll-reveal {
+    opacity: 1;
+    transform: none;
+}
+
+/* === Card Share Actions (from v3) === */
+.card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-action-btn:active {
+    transform: scale(0.93);
+}
+
+.share-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--black);
+}
+
+.share-btn:hover {
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+}
+
+.save-btn {
+    background: transparent;
+    border: 1px solid rgba(212, 175, 55, 0.25) !important;
+    color: var(--gold);
+}
+
+.save-btn:hover {
+    background: rgba(212, 175, 55, 0.08);
+}
+
+.save-btn.saved {
+    background: linear-gradient(135deg, #c0392b, #e74c3c) !important;
+    border-color: #c0392b !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(192, 57, 43, 0.3);
+}
+
+.save-btn.saved:hover {
+    box-shadow: 0 6px 20px rgba(192, 57, 43, 0.45);
+}
+
+.copy-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--gray);
+}
+
+.copy-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--white);
+}
+
+/* === Toast Notification === */
+.toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(18, 18, 26, 0.95);
+    color: var(--gold);
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    font-weight: 600;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    backdrop-filter: blur(12px);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

@@ -7,195 +7,120 @@
     <title>زيزو وبلال - المنصة الدعوية</title>
     <meta name="description" content="منصة دعوية تعليمية لنشر العلم الشرعي">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="v3_enhancements.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ============ 🏰 Phase 2.5: Royal Islamic Card Design ============ */
-        /* ⚠️ التصميم القديم (الفلات) محفوظ في git - ممكن ترجعله بـ git checkout */
-
-        /* === الشبكة === */
+        /* ============ 🎨 تحسين الكروت الديناميكية ============ */
         .dynamic-section .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 18px;
-            margin-top: 14px;
+            gap: 16px;
+            margin-top: 12px;
         }
 
-        /* === الكارت الأساسي - Glassmorphism + Islamic Pattern === */
         .dynamic-section .card {
-            background: linear-gradient(145deg, rgba(26, 26, 42, 0.92), rgba(16, 16, 28, 0.96));
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(212, 175, 55, 0.18);
-            border-radius: 16px;
-            padding: 20px;
+            background: linear-gradient(145deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.98));
+            border: 1px solid rgba(218, 165, 32, 0.25);
+            border-radius: 14px;
+            padding: 18px;
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-            animation: cardFadeIn 0.4s ease both;
         }
 
-        /* زخرفة إسلامية خفيفة جداً في الخلفية */
-        .dynamic-section .card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0L40 20L20 40L0 20Z' fill='none' stroke='%23d4af37' stroke-opacity='0.03' stroke-width='0.5'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* الشريط الجانبي الذهبي */
         .dynamic-section .card::before {
             content: '';
             position: absolute;
-            top: 8px;
+            top: 0;
             right: 0;
-            width: 3px;
-            height: calc(100% - 16px);
-            background: linear-gradient(to bottom, #DAA520, #B8860B, rgba(218, 165, 32, 0.3));
-            border-radius: 3px;
-            z-index: 1;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #DAA520, #B8860B);
+            border-radius: 0 14px 14px 0;
         }
 
-        /* Hover - توهج ذهبي ناعم */
         .dynamic-section .card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(212, 175, 55, 0.4);
-            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.1),
-                0 2px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            border-color: rgba(218, 165, 32, 0.5);
+            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.15);
         }
 
-        /* ظهور تدريجي للكروت */
-        @keyframes cardFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* === عناوين الكروت === */
         .dynamic-section .card h4 {
             color: #DAA520;
             font-size: 1.05em;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed rgba(212, 175, 55, 0.2);
-            position: relative;
-            z-index: 1;
         }
 
-        /* === النصوص === */
         .dynamic-section .card p {
             color: #d4d4d4;
-            line-height: 1.8;
-            font-size: 0.95em;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* === القوائم المنسقة === */
-        .dynamic-section .styled-list {
-            list-style: none;
-            padding: 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .dynamic-section .styled-list li {
-            padding: 10px 16px;
-            margin: 5px 0;
-            background: rgba(212, 175, 55, 0.04);
-            border-radius: 10px;
-            border-right: 3px solid rgba(218, 165, 32, 0.5);
-            color: #e0e0e0;
             line-height: 1.7;
-            transition: background 0.25s ease, border-color 0.25s ease;
+            font-size: 0.95em;
         }
 
-        .dynamic-section .styled-list li:hover {
-            background: rgba(212, 175, 55, 0.1);
-            border-right-color: #DAA520;
-        }
-
-        /* === الشارات (Badges) === */
         .dynamic-section .badges {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-top: 10px;
-            position: relative;
-            z-index: 1;
         }
 
         .dynamic-section .badge {
-            background: rgba(212, 175, 55, 0.08);
-            color: #e8c84a;
-            padding: 5px 14px;
+            background: rgba(218, 165, 32, 0.12);
+            color: #f0d060;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.85em;
-            border: 1px solid rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(218, 165, 32, 0.2);
             display: inline-block;
-            transition: background 0.2s ease;
         }
 
-        .dynamic-section .badge:hover {
-            background: rgba(212, 175, 55, 0.15);
-        }
-
-        /* === الأقسام الفرعية === */
         .dynamic-section .sub-section {
-            margin-top: 12px;
-            padding: 12px 14px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            border-right: 3px solid rgba(212, 175, 55, 0.25);
-            position: relative;
-            z-index: 1;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border-right: 3px solid rgba(218, 165, 32, 0.3);
         }
 
         .dynamic-section .sub-section strong {
             color: #DAA520;
             display: block;
             margin-bottom: 6px;
-            font-family: 'Tajawal', sans-serif;
         }
 
-        /* === عنوان القسم === */
+        .dynamic-section .styled-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .dynamic-section .styled-list li {
+            padding: 8px 14px;
+            margin: 4px 0;
+            background: rgba(218, 165, 32, 0.06);
+            border-radius: 8px;
+            border-right: 3px solid #DAA520;
+            color: #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        .dynamic-section .styled-list li:hover {
+            background: rgba(218, 165, 32, 0.12);
+        }
+
         .dynamic-section .section-title {
             font-size: 1.4em;
             color: #fff;
-            margin-bottom: 18px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid transparent;
-            background-image: linear-gradient(var(--bg, #0d0d1a), var(--bg, #0d0d1a)),
-                linear-gradient(90deg, #DAA520, transparent);
-            background-origin: padding-box, border-box;
-            background-clip: padding-box, border-box;
+            margin-bottom: 16px;
         }
 
         .dynamic-section .section-title span {
             font-size: 1.2em;
-            margin-left: 6px;
         }
 
-        /* === Responsive === */
         @media (max-width: 600px) {
             .dynamic-section .cards-grid {
                 grid-template-columns: 1fr;
-                gap: 14px;
-            }
-
-            .dynamic-section .card {
-                padding: 16px;
             }
         }
     </style>
@@ -254,9 +179,11 @@
         <p class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا</p>
     </footer>
 
-    <!-- Floating Buttons -->
-    <button class="scroll-top" id="scrollTop">⬆️</button>
-    <button class="search-btn" id="searchBtn">🔍</button>
+    <!-- Floating Buttons (v3 Style) -->
+    <div class="fab-container">
+        <button class="fab fab-blue" id="searchBtn" aria-label="بحث"><i class="fas fa-search"></i></button>
+        <button class="fab fab-gold" id="scrollTop" aria-label="للأعلى"><i class="fas fa-arrow-up"></i></button>
+    </div>
 
     <!-- Search Modal -->
     <div class="search-modal" id="searchModal">
@@ -1426,6 +1353,149 @@
             document.getElementById('searchModal').classList.remove('active');
             document.getElementById('searchInput').value = '';
         }
+
+        // ============ 🎨 v3 Enhancements ============
+
+        // Scroll Reveal with fadeInUp (like mixed-version - works on laptop + mobile)
+        let revealObserver = null;
+        const revealOptions = {
+            root: null,
+            rootMargin: '0px 0px -50px 0px',
+            threshold: 0.05
+        };
+
+        revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.5s ease forwards';
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, revealOptions);
+
+        // Don't apply animation to existing cards - they should be visible immediately
+        // Animation will only apply to dynamically loaded cards (via addCardActions)
+
+        // Active Section Highlight on Scroll (RTL-aware, dynamic content support)
+        window.addEventListener('scroll', () => {
+            requestAnimationFrame(() => {
+                // Re-query every time to support dynamically loaded content
+                const sections = document.querySelectorAll('.section');
+                const navLinks = document.querySelectorAll('.nav-link');
+                const navContainer = document.getElementById('navContainer');
+
+                let current = '';
+                const middleY = window.innerHeight / 2;
+
+                // Find section that contains the middle of the screen
+                sections.forEach(section => {
+                    if (!section.id) return;
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= middleY && rect.bottom >= middleY) {
+                        current = section.id;
+                    }
+                });
+
+                // Fallback: if no section at middle, use closest to top
+                if (!current) {
+                    sections.forEach(section => {
+                        const top = section.getBoundingClientRect().top;
+                        if (top < 200 && section.id) {
+                            current = section.id;
+                        }
+                    });
+                }
+
+                if (current && navContainer) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === '#' + current) {
+                            link.classList.add('active');
+                            // Center active tab using getBoundingClientRect (RTL-safe)
+                            const containerRect = navContainer.getBoundingClientRect();
+                            const linkRect = link.getBoundingClientRect();
+                            const delta = (linkRect.left + linkRect.width / 2) - (containerRect.left + containerRect.width / 2);
+                            navContainer.scrollBy({ left: delta, behavior: 'smooth' });
+                        }
+                    });
+                }
+            });
+        }, { passive: true });
+
+        // ============ 📤 Share / Save / Copy Buttons ============
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Add share/save/copy buttons to MAIN sections only
+        function addCardActions() {
+            document.querySelectorAll('.dynamic-section').forEach(section => {
+                if (section.querySelector('.card-actions')) return;
+
+                const actions = document.createElement('div');
+                actions.className = 'card-actions';
+                actions.innerHTML = `
+                    <button class="card-action-btn share-btn" onclick="shareCard(this)">
+                        <i class="fas fa-share-alt"></i> مشاركة
+                    </button>
+                    <button class="card-action-btn save-btn" onclick="saveCard(this)">
+                        <i class="fas fa-bookmark"></i> حفظ
+                    </button>
+                    <button class="card-action-btn copy-btn" onclick="copyCard(this)">
+                        <i class="fas fa-copy"></i> نسخ
+                    </button>
+                `;
+                section.appendChild(actions);
+            });
+            // Dynamic cards are now visible immediately - no animation hiding
+        }
+
+        // Share section content
+        function shareCard(btn) {
+            const section = btn.closest('.dynamic-section');
+            const text = section.innerText.replace(/مشاركة|حفظ|نسخ/g, '').trim();
+
+            if (navigator.share) {
+                navigator.share({ title: 'زيزو وبلال', text: text.substring(0, 300) })
+                    .catch(() => { });
+            } else {
+                navigator.clipboard.writeText(text.substring(0, 500))
+                    .then(() => showToast('✅ تم النسخ للمشاركة'))
+                    .catch(() => showToast('❌ فشل النسخ'));
+            }
+        }
+
+        // Save section (bookmark)
+        function saveCard(btn) {
+            const saveBtn = btn.closest('.save-btn') || btn;
+            saveBtn.classList.toggle('saved');
+            const isSaved = saveBtn.classList.contains('saved');
+            saveBtn.innerHTML = isSaved
+                ? '<i class="fas fa-heart"></i> محفوظ'
+                : '<i class="fas fa-bookmark"></i> حفظ';
+            showToast(isSaved ? '🔖 تم الحفظ' : '❌ تم إلغاء الحفظ');
+        }
+
+        // Copy section content
+        function copyCard(btn) {
+            const section = btn.closest('.dynamic-section');
+            const text = section.innerText.replace(/مشاركة|حفظ|نسخ/g, '').trim();
+            navigator.clipboard.writeText(text)
+                .then(() => showToast('✅ تم النسخ'))
+                .catch(() => showToast('❌ فشل النسخ'));
+        }
+
+        // Run addCardActions now and also observe for dynamically loaded cards
+        addCardActions();
+        const cardObserver = new MutationObserver(() => addCardActions());
+        cardObserver.observe(document.getElementById('lessonContent') || document.body,
+            { childList: true, subtree: true });
     </script>
 </body>
 
