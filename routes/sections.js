@@ -1,74 +1,175 @@
 const express = require('express');
 const router = express.Router();
-const Section = require('../models/Section');
+const SectionRegistry = require('../models/SectionRegistry');
 
-// الحصول على كل الأقسام
+/**
+ * Middleware للحماية - نفس اللي في admin.js
+ */
+function requireAuth(req, res, next) {
+    if (!req.session.adminId) {
+        return res.status(401).json({ error: 'غير مصرح - سجل دخول الأول' });
+    }
+    next();
+}
+
+// ============================================
+// PUBLIC Routes (للموقع العام)
+// ============================================
+
+/**
+ * GET /api/sections
+ * جلب الأقسام النشطة فقط (للـ website.html)
+ */
 router.get('/', async (req, res) => {
     try {
-        const sections = await Section.find({ isActive: true }).sort('order');
+        const sections = await SectionRegistry.find({ isActive: true })
+            .sort({ order: 1 })
+            .select('sectionKey labelAr icon schemaHint order');
         res.json(sections);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    } catch (error) {
+        console.error('❌ Get Sections Error:', error);
+        res.status(500).json({ error: 'فشل جلب الأقسام' });
     }
 });
 
-// إضافة قسم جديد
-router.post('/', async (req, res) => {
+/**
+ * GET /api/sections/variables
+ * ⭐ الدالة الأساسية للـ AI
+ * ترجع الأقسام كـ variables جاهزة لبناء البرومبت
+ */
+router.get('/variables', async (req, res) => {
     try {
-        const section = new Section(req.body);
-        await section.save();
-        res.status(201).json(section);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+        const sections = await SectionRegistry.find({ isActive: true })
+            .sort({ order: 1 })
+            .select('sectionKey labelAr icon description schemaHint');
+
+        res.json({
+            count: sections.length,
+            sections: sections.map(s => ({
+                key: s.sectionKey,
+                labelAr: s.labelAr,
+                icon: s.icon,
+                description: s.description,
+                hint: s.schemaHint
+            }))
+        });
+    } catch (error) {
+        console.error('❌ Get Variables Error:', error);
+        res.status(500).json({ error: 'فشل جلب المتغيرات' });
     }
 });
 
-// تعديل قسم
-router.put('/:id', async (req, res) => {
+// ============================================
+// ADMIN Routes (محمية - لازم login)
+// ============================================
+
+/**
+ * GET /api/sections/all
+ * جلب كل الأقسام (النشطة والمعطلة) - للأدمن فقط
+ */
+router.get('/all', requireAuth, async (req, res) => {
     try {
-        const section = await Section.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(section);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+        const sections = await SectionRegistry.find({}).sort({ order: 1 });
+        res.json(sections);
+    } catch (error) {
+        console.error('❌ Get All Sections Error:', error);
+        res.status(500).json({ error: 'فشل جلب الأقسام' });
     }
 });
 
-// حذف قسم (soft delete)
-router.delete('/:id', async (req, res) => {
+/**
+ * POST /api/sections
+ * إضافة قسم جديد
+ */
+router.post('/', requireAuth, async (req, res) => {
     try {
-        await Section.findByIdAndUpdate(req.params.id, { isActive: false });
-        res.json({ message: 'تم حذف القسم' });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
+        const { sectionKey, labelAr, icon, description, schemaHint, order } = req.body;
 
-// إضافة الأقسام الافتراضية (Seed)
-router.post('/seed', async (req, res) => {
-    try {
-        const defaultSections = [
-            { name: 'verses', nameAr: 'آيات قرآنية', icon: '📖', order: 1 },
-            { name: 'hadiths', nameAr: 'أحاديث نبوية', icon: '🕌', order: 2 },
-            { name: 'characters', nameAr: 'شخصيات إسلامية', icon: '👤', order: 3 },
-            { name: 'rulings', nameAr: 'أحكام شرعية', icon: '⚖️', order: 4 },
-            { name: 'benefits', nameAr: 'فوائد وحكم', icon: '💡', order: 5 },
-            { name: 'summary', nameAr: 'ملخص الدرس', icon: '📝', order: 6 },
-            { name: 'questions', nameAr: 'أسئلة', icon: '❓', order: 7, isOptional: true },
-            { name: 'podcast', nameAr: 'بودكاست', icon: '🎙️', order: 8, isOptional: true },
-            { name: 'chat', nameAr: 'اسأل شلبي', icon: '🤖', order: 9 }
-        ];
-
-        for (const section of defaultSections) {
-            await Section.findOneAndUpdate(
-                { name: section.name },
-                section,
-                { upsert: true }
-            );
+        // تحقق من الحقول المطلوبة
+        if (!sectionKey || !labelAr) {
+            return res.status(400).json({ error: 'sectionKey و labelAr مطلوبين' });
         }
 
-        res.json({ message: 'تم إضافة الأقسام الافتراضية' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        // تحقق من key format
+        if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(sectionKey)) {
+            return res.status(400).json({ error: 'الـ key لازم يبدأ بحرف إنجليزي ويكون بدون مسافات' });
+        }
+
+        // تحقق من عدم التكرار
+        const existing = await SectionRegistry.findOne({ sectionKey });
+        if (existing) {
+            return res.status(409).json({ error: `القسم "${sectionKey}" موجود بالفعل` });
+        }
+
+        const section = new SectionRegistry({
+            sectionKey,
+            labelAr,
+            icon: icon || '✨',
+            description: description || '',
+            schemaHint: schemaHint || 'mixed',
+            order: order || 0
+        });
+
+        await section.save();
+        console.log(`✅ Section added: ${sectionKey} (${labelAr})`);
+        res.status(201).json(section);
+
+    } catch (error) {
+        console.error('❌ Add Section Error:', error);
+        res.status(500).json({ error: 'فشل إضافة القسم' });
+    }
+});
+
+/**
+ * PUT /api/sections/:id
+ * تعديل قسم موجود
+ */
+router.put('/:id', requireAuth, async (req, res) => {
+    try {
+        const { labelAr, icon, description, schemaHint, isActive, order } = req.body;
+
+        const section = await SectionRegistry.findByIdAndUpdate(
+            req.params.id,
+            { labelAr, icon, description, schemaHint, isActive, order },
+            { new: true, runValidators: true }
+        );
+
+        if (!section) {
+            return res.status(404).json({ error: 'القسم مش موجود' });
+        }
+
+        console.log(`✅ Section updated: ${section.sectionKey}`);
+        res.json(section);
+
+    } catch (error) {
+        console.error('❌ Update Section Error:', error);
+        res.status(500).json({ error: 'فشل تعديل القسم' });
+    }
+});
+
+/**
+ * DELETE /api/sections/:id
+ * حذف قسم (أو تعطيله)
+ */
+router.delete('/:id', requireAuth, async (req, res) => {
+    try {
+        // Soft delete - نعمله inactive بدل ما نحذفه
+        const section = await SectionRegistry.findByIdAndUpdate(
+            req.params.id,
+            { isActive: false },
+            { new: true }
+        );
+
+        if (!section) {
+            return res.status(404).json({ error: 'القسم مش موجود' });
+        }
+
+        console.log(`🗑️ Section deactivated: ${section.sectionKey}`);
+        res.json({ success: true, message: `تم تعطيل القسم "${section.labelAr}"` });
+
+    } catch (error) {
+        console.error('❌ Delete Section Error:', error);
+        res.status(500).json({ error: 'فشل حذف القسم' });
     }
 });
 

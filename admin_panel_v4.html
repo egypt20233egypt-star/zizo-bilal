@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الأدمن v4.0 - مشروع القلب السليم</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gold: #d4af37;
+            --dark-bg: #1a1a2e;
+            --darker-bg: #16213e;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(212, 175, 55, 0.3);
+            --text-white: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --success: #27ae60;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+            color: var(--text-white);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            color: var(--primary-gold);
+            font-size: 1.5rem;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-white);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: var(--primary-gold);
+            color: var(--dark-bg);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #f4d03f 100%);
+            color: var(--dark-bg);
+            border: none;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* AI Input Section */
+        .ai-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .ai-section h2 {
+            color: var(--primary-gold);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-count {
+            background: var(--primary-gold);
+            color: var(--dark-bg);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-white);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Sections Display */
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .section-card:hover {
+            border-color: var(--primary-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .section-card.active {
+            border-color: var(--success);
+            background: rgba(39, 174, 96, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+        }
+
+        .section-label {
+            font-weight: bold;
+            color: var(--primary-gold);
+        }
+
+        .section-key {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: 'Courier New', monospace;
+        }
+
+        .section-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        /* Lessons Section */
+        .lessons-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .lesson-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lesson-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 1rem;
+        }
+
+        .lesson-title {
+            color: var(--primary-gold);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Loading & Messages */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary-gold);
+        }
+
+        .spinner {
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid var(--primary-gold);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .message.success {
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid var(--success);
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sections-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <span style="font-size: 2rem;">🌙</span>
+            <div>
+                <h1>لوحة الأدمن v4.0</h1>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">مشروع القلب السليم - إدارة المحتوى الديناميكي
+                </div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="username" style="color: var(--primary-gold);"></span>
+            <a href="/api/admin/logout" class="btn">تسجيل الخروج</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- AI Input Section -->
+        <div class="ai-section">
+            <h2>
+                🤖 حقل الذكاء الاصطناعي (Master Input)
+                <span class="section-count" id="sectionCount">0 أقسام</span>
+            </h2>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                اكتب المحتوى الخام هنا، والذكاء الاصطناعي هيوزعه تلقائياً على الأقسام المتاحة.
+            </p>
+            <textarea id="aiInput" placeholder="مثال: اكتب نص الدرس، أو رابط يوتيوب، أو أي محتوى نصي..."></textarea>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button class="btn btn-primary" onclick="analyzeContent()">
+                    ✨ تحليل بالذكاء الاصطناعي
+                </button>
+                <button class="btn" onclick="saveAsDraft()">
+                    💾 حفظ كمسودة
+                </button>
+                <button class="btn" onclick="clearInput()">
+                    🗑️ مسح
+                </button>
+            </div>
+
+            <!-- Available Sections -->
+            <h3 style="color: var(--primary-gold); margin: 2rem 0 1rem;">
+                📂 الأقسام المتاحة <span style="font-size: 0.85rem; color: var(--text-muted);">(سيتم توزيع المحتوى
+                    عليها)</span>
+            </h3>
+            <div id="sectionsGrid" class="sections-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    جاري تحميل الأقسام...
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons Section -->
+        <div class="lessons-section">
+            <h2 style="color: var(--primary-gold); margin-bottom: 1rem;">📚 الدروس الموجودة</h2>
+            <div id="lessonsList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    جاري تحميل الدروس...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sections = [];
+        let lessons = [];
+
+        // Load sections on page load
+        async function loadSections() {
+            try {
+                const res = await fetch('/api/sections/variables');
+                const data = await res.json();
+
+                sections = data.sections;
+                document.getElementById('sectionCount').textContent = `${data.count} أقسام`;
+
+                const grid = document.getElementById('sectionsGrid');
+                grid.innerHTML = sections.map(sec => `
+                    <div class="section-card active">
+                        <div class="section-header">
+                            <span class="section-icon">${sec.icon}</span>
+                            <span class="section-label">${sec.labelAr}</span>
+                        </div>
+                        <div class="section-key">${sec.key}</div>
+                        <div class="section-desc">${sec.description || 'لا يوجد وصف'}</div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading sections:', error);
+                document.getElementById('sectionsGrid').innerHTML = `
+                    <div class="message error">❌ فشل تحميل الأقسام</div>
+                `;
+            }
+        }
+
+        // Load lessons
+        async function loadLessons() {
+            try {
+                const res = await fetch('/api/lessons');
+                const data = await res.json();
+
+                lessons = data;
+                const list = document.getElementById('lessonsList');
+
+                if (lessons.length === 0) {
+                    list.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد دروس حالياً. ابدأ بإضافة درس جديد!</p>';
+                    return;
+                }
+
+                list.innerHTML = lessons.map(lesson => `
+                    <div class="lesson-item" onclick="viewLesson('${lesson._id}')">
+                        <div class="lesson-title">${lesson.title || 'بدون عنوان'}</div>
+                        <div class="lesson-meta">
+                            <span>🆔 ${lesson._id}</span>
+                            <span>📅 ${new Date(lesson.createdAt).toLocaleDateString('ar-EG')}</span>
+                            <span>📊 ${lesson.status || 'draft'}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading lessons:', error);
+                document.getElementById('lessonsList').innerHTML = `
+                    <div class="message error">❌ فشل تحميل الدروس</div>
+                `;
+            }
+        }
+
+        // AI Analysis (placeholder for now)
+        function analyzeContent() {
+            const content = document.getElementById('aiInput').value;
+
+            if (!content.trim()) {
+                alert('❌ الرجاء كتابة محتوى أولاً!');
+                return;
+            }
+
+            alert('🤖 تحليل الذكاء الاصطناعي قادم في Phase 4!\n\nحالياً: الأقسام متوفرة والنظام جاهز للتوزيع الديناميكي.');
+        }
+
+        // Save as draft
+        function saveAsDraft() {
+            const content = document.getElementById('aiInput').value;
+            localStorage.setItem('admin_draft', content);
+            alert('✅ تم حفظ المسودة محلياً!');
+        }
+
+        // Clear input
+        function clearInput() {
+            if (confirm('هل أنت متأكد من مسح المحتوى؟')) {
+                document.getElementById('aiInput').value = '';
+                localStorage.removeItem('admin_draft');
+            }
+        }
+
+        // View lesson
+        function viewLesson(id) {
+            alert(`عرض الدرس ${id} قادم قريباً!`);
+        }
+
+        // Check auth and load username
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/check');
+                const data = await res.json();
+
+                if (!data.loggedIn) {
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                document.getElementById('username').textContent = `👤 ${data.username}`;
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = '/admin';
+            }
+        }
+
+        // Auto-restore draft
+        function restoreDraft() {
+            const draft = localStorage.getItem('admin_draft');
+            if (draft) {
+                document.getElementById('aiInput').value = draft;
+            }
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            restoreDraft();
+            await loadSections();
+            await loadLessons();
+        });
+    </script>
+</body>
+
+</html>

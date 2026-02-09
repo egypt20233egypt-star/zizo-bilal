@@ -22,16 +22,45 @@ if (MONGO_URI) {
     console.log('⚠️ No MongoDB URI found - API routes will not work');
 }
 
+// ============ Session (Admin v4.0) ============
+const session = require('express-session');
+// TODO: سنضيف MongoStore لاحقاً - دلوقتي memory store للاختبار
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'zizo-bilal-secret-2025',
+    resave: false,
+    saveUninitialized: false,
+    // store: سيستخدم MemoryStore الافتراضي (مؤقت للاختبار)
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        httpOnly: true,
+        secure: false
+    }
+}));
+
+
 // ============ API Routes ============
 app.use('/api/lessons', require('./routes/lessons'));
+app.use('/api/admin', require('./routes/admin')); // Admin v4.0 API
+app.use('/api/sections', require('./routes/sections')); // Section Registry API
 
 // ============ Page Routes ============
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Admin v4.0 Routes
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'admin_v4.html')); // صفحة Login
+});
+
+app.get('/admin/panel', (req, res) => {
+    // لو مش مسجل دخول، حوّله للـ login
+    if (!req.session.adminId) {
+        return res.redirect('/admin');
+    }
+    // النسخة المدمجة: localStorage UI + MongoDB Backend
+    res.sendFile(path.join(__dirname, 'admin_panel_v4_merged.html'));
 });
 
 app.get('/website', (req, res) => {

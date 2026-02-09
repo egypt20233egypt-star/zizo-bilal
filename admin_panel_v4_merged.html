@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الأدمن v4.0 - Merged</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --burgundy: #722F37;
+            --green: #27ae60;
+            --text: #f5f5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--darker);
+            border-bottom: 2px solid var(--gold);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            color: var(--gold);
+            font-size: 1.6rem;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: var(--gold);
+            color: var(--dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold) 0%, #e6c547 100%);
+            color: var(--dark);
+            border: none;
+        }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            border: none;
+        }
+
+        .btn-danger {
+            background: var(--burgundy);
+            color: white;
+            border: none;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: var(--darker);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab:hover,
+        .tab.active {
+            background: var(--gold);
+            color: var(--dark);
+        }
+
+        /* Panels */
+        .panel {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel h2 {
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* List Items */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .badge-draft {
+            background: #95a5a6;
+            color: white;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--gold);
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .section-card h4 {
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .content-box {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.8rem;
+            border-radius: 5px;
+            margin-top: 0.5rem;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Import Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--darker);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid var(--gold);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .import-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .import-tab {
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--text);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .import-tab:hover,
+        .import-tab.active {
+            background: var(--gold);
+            color: var(--dark);
+            border-color: var(--gold);
+        }
+
+        .preview-sections {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <span style="font-size: 2rem;">🌙</span>
+            <div>
+                <h1>لوحة الأدمن v4.0 (Merged)</h1>
+                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">MongoDB + Authentication + All Features
+                </div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="username" style="color: var(--gold); font-weight: 600;"></span>
+            <a href="/api/admin/logout" class="btn">🚪 تسجيل الخروج</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="sectionsCount">0</h3>
+                <p>📚 الأقسام</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="sheikhsCount">0</h3>
+                <p>👤 الشيوخ</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="lessonsCount">0</h3>
+                <p>📖 الدروس</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('aiInput')">🤖 AI Master Input</button>
+            <button class="tab" onclick="showTab('sections')">📚 الأقسام</button>
+            <button class="tab" onclick="showTab('sheikhs')">👤 الشيوخ</button>
+            <button class="tab" onclick="showTab('lessons')">📖 الدروس</button>
+            <button class="tab" onclick="showTab('addLesson')">➕ إضافة درس</button>
+            <button class="tab" onclick="showTab('preview')">👁️ معاينة</button>
+        </div>
+
+        <!-- AI Input Panel -->
+        <div id="aiInput" class="panel active">
+            <h2>🤖 حقل الذكاء الاصطناعي (Master Input)</h2>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
+                اكتب المحتوى الخام هنا، والذكاء الاصطناعي هيوزعه تلقائياً على الأقسام المتاحة.
+            </p>
+            <textarea id="rawInput" placeholder="مثال: اكتب نص الدرس، أو رابط يوتيوب، أو أي محتوى نصي..."
+                style="min-height: 250px;"></textarea>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="analyzeWithAI()">
+                    ✨ تحليل بالذكاء الاصطناعي
+                </button>
+                <button class="btn" onclick="saveDraft()">
+                    💾 حفظ كمسودة
+                </button>
+                <button class="btn" onclick="clearInput()">
+                    🗑️ مسح
+                </button>
+            </div>
+
+            <h3 style="color: var(--gold); margin: 2rem 0 1rem;">
+                📂 الأقسام المتاحة <span style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">(سيتم توزيع المحتوى
+                    عليها)</span>
+            </h3>
+            <div id="availableSections"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+                <div class="alert">جاري تحميل الأقسام...</div>
+            </div>
+        </div>
+
+        <!-- Sections Panel -->
+        <div id="sections" class="panel">
+            <h2>📚 إدارة الأقسام (ديناميكية)</h2>
+            <div class="alert">
+                ℹ️ الأقسام ديناميكية - يمكنك إضافة أو حذف أي قسم من MongoDB
+            </div>
+            <button class="btn btn-primary" onclick="seedSections()">🌱 ملء الأقسام الافتراضية (15 قسم)</button>
+            <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
+
+            <div class="form-group">
+                <label>إضافة قسم جديد</label>
+                <div style="display:flex; gap:10px; flex-wrap:wrap">
+                    <input type="text" id="newSectionKey" placeholder="sectionKey (انجليزي)" style="flex:1">
+                    <input type="text" id="newSectionLabel" placeholder="الاسم بالعربي" style="flex:1">
+                    <input type="text" id="newSectionIcon" placeholder="📖" style="width:80px">
+                    <button class="btn btn-primary" onclick="addSection()">إضافة</button>
+                </div>
+            </div>
+
+            <div id="sectionsList"></div>
+        </div>
+
+        <!-- Sheikhs Panel -->
+        <div id="sheikhs" class="panel">
+            <h2>👤 إدارة الشيوخ</h2>
+            <div class="form-group">
+                <label>اسم الشيخ</label>
+                <div style="display:flex; gap:10px">
+                    <input type="text" id="sheikhName" placeholder="مثال: الشيخ الشعراوي" style="flex:1">
+                    <button class="btn btn-primary" onclick="addSheikh()">➕ إضافة</button>
+                </div>
+            </div>
+            <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
+            <div id="sheikhsList"></div>
+        </div>
+
+        <!-- Lessons Panel -->
+        <div id="lessons" class="panel">
+            <h2>📖 الدروس المضافة</h2>
+            <div id="lessonsList"></div>
+        </div>
+
+        <!-- Add Lesson Panel -->
+        <div id="addLesson" class="panel">
+            <h2>➕ إضافة درس جديد</h2>
+            <div class="form-group">
+                <label>عنوان الدرس</label>
+                <input type="text" id="lessonTitle" placeholder="مثال: درس عن مصعب بن عمير">
+            </div>
+            <div class="form-group">
+                <label>الشيخ</label>
+                <select id="lessonSheikh"></select>
+            </div>
+            <div class="form-group">
+                <label>المحتوى الخام (التفريغ)</label>
+                <textarea id="lessonContent" placeholder="ألصق هنا تفريغ الدرس..."></textarea>
+            </div>
+            <div class="form-group"
+                style="border: 1px dashed var(--gold); padding: 15px; border-radius: 10px; background: rgba(212,175,55,0.05);">
+                <label style="color: var(--gold);">🔒 المصدر المرجعي الداخلي <small style="color:#999;">(اختياري -
+                        للأدمن والـ AI فقط)</small></label>
+                <textarea id="lessonRawSource"
+                    placeholder="ألصق هنا النص الأصلي للشيخ أو ملاحظات سرية... (لن يظهر في الموقع)"
+                    style="border-color: var(--gold); min-height: 100px;"></textarea>
+                <small style="color:#888; display:block; margin-top:5px;">⚠️ هذا الحقل لا يظهر للمستخدمين ولا يدخل في
+                    التحليل - للحفظ الداخلي فقط</small>
+            </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="saveLesson(false)">💾 حفظ كمسودة</button>
+                <button class="btn btn-success" onclick="saveLesson(true)">🚀 نشر مباشرة</button>
+                <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()">📋 استيراد
+                    JSON/نص</button>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div id="preview" class="panel">
+            <h2>👁️ معاينة الموقع</h2>
+            <div class="form-group">
+                <label>اختر درس للمعاينة</label>
+                <select id="previewLesson" onchange="showPreview()"></select>
+            </div>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 استيراد محتوى خارجي</h2>
+                <button class="close-btn" onclick="closeImportModal()">×</button>
+            </div>
+
+            <!-- 🔒 المصدر المرجعي - تصميم بنفسجي -->
+            <div
+                style="background: linear-gradient(135deg, rgba(142,68,173,0.15), rgba(155,89,182,0.08)); border: 2px solid rgba(155,89,182,0.5); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                <label style="color: #9b59b6; font-weight: 700; font-size: 1rem; display: block; margin-bottom: 8px;">
+                    🔒 المصدر المرجعي الداخلي
+                    <span style="font-weight: 400; font-size: 0.8rem; color: #999;">(اختياري - للأدمن والـ AI
+                        فقط)</span>
+                </label>
+                <textarea id="importRawSource" placeholder="📝 ألصق هنا النص الأصلي للشيخ أو ملاحظاتك السرية..."
+                    style="border: 1px solid rgba(155,89,182,0.4); background: rgba(155,89,182,0.05); min-height: 80px; border-radius: 8px; width: 100%; box-sizing: border-box; padding: 10px; color: var(--text); font-family: inherit;"></textarea>
+                <small style="color: #8e44ad; display: block; margin-top: 5px;">⚠️ يتحفظ في قاعدة البيانات فقط • لا يظهر
+                    في الموقع نهائياً • للـ AI مستقبلاً</small>
+            </div>
+
+            <div class="import-tabs">
+                <button class="import-tab active" onclick="setImportType('json')">📦 JSON جاهز</button>
+                <button class="import-tab" onclick="setImportType('text')">📝 نص عادي</button>
+            </div>
+
+            <div class="form-group">
+                <label id="importLabel">الصق كود JSON هنا:</label>
+                <textarea id="importContent" placeholder='{ "title": "...", "overview": {...} }'></textarea>
+            </div>
+
+            <div id="importResult"></div>
+            <div id="previewSections" class="preview-sections" style="display:none;"></div>
+
+            <div style="margin-top: 20px; display: flex; gap: 1rem;">
+                <button class="btn" style="background: #3498db; color: white;" onclick="parseAndPreview()">🔍 معاينة
+                    وتحليل</button>
+                <button class="btn btn-success" onclick="applyImport()" id="applyBtn" disabled>✅ تطبيق على
+                    الدرس</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ Auth Check ============
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/check');
+                const data = await res.json();
+
+                if (!data.loggedIn) {
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                document.getElementById('username').textContent = `👤 ${data.username || 'Admin'}`;
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = '/admin';
+            }
+        }
+
+        // ============ Tab Navigation ============
+        function showTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            if (tabId === 'preview') updatePreviewSelect();
+        }
+
+        // ============ Sections ============
+        let sections = [];
+
+        async function loadSections() {
+            try {
+                const res = await fetch('/api/sections/variables');
+                const data = await res.json();
+
+                sections = data.sections || [];
+                document.getElementById('sectionsCount').textContent = data.count || 0;
+
+                // Display in AI tab
+                document.getElementById('availableSections').innerHTML = sections.map(sec => `
+                    <div class="section-card">
+                        <h4>${sec.icon} ${sec.labelAr}</h4>
+                        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">${sec.key}</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">${sec.description || ''}</div>
+                    </div>
+                `).join('');
+
+                // Display in sections management tab
+                const res2 = await fetch('/api/sections/all', {
+                    credentials: 'include'
+                });
+                const allSections = await res2.json();
+
+                document.getElementById('sectionsList').innerHTML = allSections.map(s => `
+                    <div class="list-item">
+                        <span>${s.icon} ${s.labelAr} <small style="color:#999;">(${s.sectionKey})</small></span>
+                        <span class="badge ${s.isActive ? 'badge-success' : 'badge-warning'}">
+                            ${s.isActive ? 'نشط' : 'معطل'}
+                        </span>
+                        <button class="btn btn-danger" onclick="deleteSection('${s._id}')">حذف</button>
+                    </div>
+                `).join('') || '<p>لا توجد أقسام</p>';
+
+            } catch (error) {
+                console.error('Error loading sections:', error);
+                document.getElementById('availableSections').innerHTML = `
+                    <div class="alert" style="background: rgba(231,76,60,0.2); border-color: #e74c3c;">
+                        ❌ فشل تحميل الأقسام
+                    </div>
+                `;
+            }
+        }
+
+        async function seedSections() {
+            if (!confirm('هل تريد ملء الأقسام الافتراضية (15 قسم)؟')) return;
+
+            try {
+                const res = await fetch('/scripts/seed_sections.js');
+                const text = await res.text();
+                eval(text); // Execute seed script
+
+                alert('✅ تم ملء الأقسام بنجاح!');
+                loadSections();
+            } catch (error) {
+                console.error('Seed error:', error);
+                alert('❌ فشل ملء الأقسام. استخدم: node scripts/seed_sections.js');
+            }
+        }
+
+        async function addSection() {
+            const key = document.getElementById('newSectionKey').value.trim();
+            const labelAr = document.getElementById('newSectionLabel').value.trim();
+            const icon = document.getElementById('newSectionIcon').value.trim() || '📚';
+
+            if (!key || !labelAr) return alert('أدخل البيانات كاملة');
+
+            try {
+                const res = await fetch('/api/sections', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ sectionKey: key, labelAr, icon, isActive: true })
+                });
+
+                if (res.ok) {
+                    document.getElementById('newSectionKey').value = '';
+                    document.getElementById('newSectionLabel').value = '';
+                    document.getElementById('newSectionIcon').value = '';
+                    loadSections();
+                    alert('✅ تم إضافة القسم');
+                } else {
+                    alert('❌ فشل إضافة القسم');
+                }
+            } catch (error) {
+                console.error('Add section error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
+        }
+
+        async function deleteSection(id) {
+            if (!confirm('هل تريد حذف هذا القسم؟')) return;
+
+            try {
+                const res = await fetch(`/api/sections/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                if (res.ok) {
+                    loadSections();
+                    alert('✅ تم الحذف');
+                } else {
+                    alert('❌ فشل الحذف');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+            }
+        }
+
+        // ============ Sheikhs (localStorage for now) ============
+        const DB = {
+            get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
+            set: (key, data) => localStorage.setItem(key, JSON.stringify(data))
+        };
+
+        function loadSheikhs() {
+            const sheikhs = DB.get('sheikhs');
+            document.getElementById('sheikhsCount').textContent = sheikhs.length;
+
+            document.getElementById('sheikhsList').innerHTML = sheikhs.map(s => `
+                <div class="list-item">
+                    <span>👤 ${s.name}</span>
+                    <button class="btn btn-danger" onclick="deleteSheikh(${s.id})">حذف</button>
+                </div>
+            `).join('') || '<p>لا يوجد شيوخ</p>';
+
+            // Update select
+            const select = document.getElementById('lessonSheikh');
+            select.innerHTML = '<option value="">اختر الشيخ</option>' +
+                sheikhs.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+
+        function addSheikh() {
+            const name = document.getElementById('sheikhName').value.trim();
+            if (!name) return alert('أدخل اسم الشيخ');
+
+            const sheikhs = DB.get('sheikhs');
+            const newId = sheikhs.length ? Math.max(...sheikhs.map(s => s.id)) + 1 : 1;
+            sheikhs.push({ id: newId, name });
+            DB.set('sheikhs', sheikhs);
+
+            document.getElementById('sheikhName').value = '';
+            loadSheikhs();
+        }
+
+        function deleteSheikh(id) {
+            if (!confirm('هل تريد حذف هذا الشيخ؟')) return;
+            const sheikhs = DB.get('sheikhs').filter(s => s.id !== id);
+            DB.set('sheikhs', sheikhs);
+            loadSheikhs();
+        }
+
+        // ============ Lessons (MongoDB) ============
+        async function loadLessons() {
+            try {
+                const res = await fetch('/api/lessons');
+                const lessons = await res.json();
+
+                document.getElementById('lessonsCount').textContent = lessons.length;
+
+                const sheikhs = DB.get('sheikhs');
+                document.getElementById('lessonsList').innerHTML = lessons.map(l => {
+                    const sheikh = sheikhs.find(s => s.id === l.sheikhId);
+                    return `
+                        <div class="list-item">
+                            <div>
+                                <strong>📖 ${l.title}</strong>
+                                <small style="color:#999"> - ${sheikh?.name || 'غير محدد'}</small>
+                                <span class="badge badge-${l.status === 'published' ? 'success' : 'draft'}">
+                                    ${l.status === 'published' ? 'منشور' : 'مسودة'}
+                                </span>
+                            </div>
+                            <div>
+                                <button class="btn btn-success" onclick="publishLesson('${l._id}')">نشر</button>
+                                <button class="btn btn-danger" onclick="deleteLesson('${l._id}')">حذف</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('') || '<p>لا توجد دروس بعد</p>';
+
+            } catch (error) {
+                console.error('Load lessons error:', error);
+            }
+        }
+
+        async function saveLesson(publish = false) {
+            const title = document.getElementById('lessonTitle').value.trim();
+            const sheikhId = parseInt(document.getElementById('lessonSheikh').value);
+            const rawContent = document.getElementById('lessonContent').value.trim();
+            const rawSource = document.getElementById('lessonRawSource').value.trim();
+
+            if (!title) return alert('أدخل عنوان الدرس');
+
+            const lessonData = {
+                title,
+                sheikhId,
+                rawContent,
+                rawSource,
+                status: publish ? 'published' : 'draft'
+            };
+
+            try {
+                const res = await fetch('/api/lessons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(lessonData)
+                });
+
+                if (res.ok) {
+                    document.getElementById('lessonTitle').value = '';
+                    document.getElementById('lessonContent').value = '';
+                    document.getElementById('lessonRawSource').value = '';
+                    loadLessons();
+                    alert(publish ? '🚀 تم نشر الدرس' : '💾 تم حفظ الدرس كمسودة');
+                    showTab('lessons');
+                } else {
+                    alert('❌ فشل حفظ الدرس');
+                }
+            } catch (error) {
+                console.error('Save lesson error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
+        }
+
+        async function publishLesson(id) {
+            // TODO: Implement update lesson status API
+            alert('قريباً: تحديث حالة الدرس');
+        }
+
+        async function deleteLesson(id) {
+            if (!confirm('هل تريد حذف هذا الدرس؟')) return;
+
+            try {
+                const res = await fetch(`/api/lessons/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    loadLessons();
+                    alert('✅ تم الحذف');
+                } else {
+                    alert('❌ فشل الحذف');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+            }
+        }
+
+        // ============ AI Functions ============
+        function analyzeWithAI() {
+            const content = document.getElementById('rawInput').value;
+
+            if (!content.trim()) {
+                return alert('❌ الرجاء كتابة محتوى أولاً!');
+            }
+
+            alert('🤖 تحليل الذكاء الاصطناعي قادم في Phase 4!\n\nحالياً: الأقسام متوفرة والنظام جاهز للتوزيع الديناميكي.');
+        }
+
+        function saveDraft() {
+            const content = document.getElementById('rawInput').value;
+            localStorage.setItem('aiDraft', content);
+            alert('✅ تم حفظ المسودة محلياً!');
+        }
+
+        function clearInput() {
+            if (confirm('هل أنت متأكد من مسح المحتوى؟')) {
+                document.getElementById('rawInput').value = '';
+                localStorage.removeItem('aiDraft');
+            }
+        }
+
+        function restoreDraft() {
+            const draft = localStorage.getItem('aiDraft');
+            if (draft) {
+                document.getElementById('rawInput').value = draft;
+            }
+        }
+
+        // ============ Preview ============
+        function updatePreviewSelect() {
+            // TODO: Implement preview
+            alert('قريباً: معاينة الدروس');
+        }
+
+        function showPreview() {
+            // TODO
+        }
+
+        // ============ Import Modal Functions ============
+        let importType = 'json';
+        let importedData = null;
+
+        function openImportModal() {
+            document.getElementById('importModal').classList.add('active');
+            document.getElementById('importContent').value = '';
+            document.getElementById('importRawSource').value = '';
+            document.getElementById('importResult').innerHTML = '';
+            document.getElementById('previewSections').style.display = 'none';
+            document.getElementById('applyBtn').disabled = true;
+            importedData = null;
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.remove('active');
+        }
+
+        function setImportType(type) {
+            importType = type;
+            document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const label = document.getElementById('importLabel');
+            const textarea = document.getElementById('importContent');
+
+            if (type === 'json') {
+                label.textContent = 'الصق كود JSON هنا:';
+                textarea.placeholder = '{ "title": "...", "overview": {...} }';
+            } else {
+                label.textContent = 'الصق النص هنا (العناوين بـ ## أو إيموجي):';
+                textarea.placeholder = '## نظرة عامة\nالرسالة المركزية...\n\n## الآيات\n- آية 1\n- آية 2';
+            }
+        }
+
+        function parseAndPreview() {
+            const content = document.getElementById('importContent').value.trim();
+            const resultDiv = document.getElementById('importResult');
+            const previewDiv = document.getElementById('previewSections');
+
+            if (!content) {
+                resultDiv.innerHTML = '<div class="alert" style="background: rgba(231,76,60,0.2); border-color: #e74c3c;">❌ الرجاء إدخال محتوى أولاً</div>';
+                return;
+            }
+
+            try {
+                if (importType === 'json') {
+                    importedData = JSON.parse(content);
+                    resultDiv.innerHTML = '<div class="alert" style="background: rgba(46,204,113,0.2); border-color: #2ecc71;">✅ JSON صحيح - تم التحليل بنجاح!</div>';
+
+                    // Show preview
+                    previewDiv.style.display = 'block';
+                    previewDiv.innerHTML = `
+                        <h4 style="color: var(--gold);">📋 معاينة المحتوى:</h4>
+                        <p><strong>العنوان:</strong> ${importedData.title || 'غير محدد'}</p>
+                        <p><strong>عدد الأقسام:</strong> ${Object.keys(importedData).length}</p>
+                        <pre style="background: var(--dark); padding: 10px; border-radius: 8px; max-height: 200px; overflow: auto; font-size: 0.8rem;">${JSON.stringify(importedData, null, 2).substring(0, 500)}...</pre>
+                    `;
+                } else {
+                    // Parse plain text
+                    importedData = parseTextContent(content);
+                    resultDiv.innerHTML = '<div class="alert" style="background: rgba(46,204,113,0.2); border-color: #2ecc71;">✅ تم تحليل النص بنجاح!</div>';
+
+                    previewDiv.style.display = 'block';
+                    previewDiv.innerHTML = `
+                        <h4 style="color: var(--gold);">📋 معاينة المحتوى:</h4>
+                        <p><strong>الأقسام المكتشفة:</strong> ${Object.keys(importedData).length}</p>
+                    `;
+                }
+
+                document.getElementById('applyBtn').disabled = false;
+
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert" style="background: rgba(231,76,60,0.2); border-color: #e74c3c;">❌ خطأ في التحليل: ${error.message}</div>`;
+                importedData = null;
+                document.getElementById('applyBtn').disabled = true;
+            }
+        }
+
+        function parseTextContent(text) {
+            // Simple text parser
+            const sections = {};
+            const lines = text.split('\n');
+            let currentSection = 'general';
+
+            lines.forEach(line => {
+                if (line.startsWith('##') || line.match(/^[📖🕌👤⚖️💡📝❓🎙️🤖📚✨🔒📋🌟]/)) {
+                    currentSection = line.replace(/^##\s*/, '').replace(/^[📖🕌👤⚖️💡📝❓🎙️🤖📚✨🔒📋🌟]\s*/, '').trim();
+                    sections[currentSection] = [];
+                } else if (line.trim()) {
+                    if (!sections[currentSection]) sections[currentSection] = [];
+                    sections[currentSection].push(line.trim());
+                }
+            });
+
+            return sections;
+        }
+
+        function applyImport() {
+            if (!importedData) return;
+
+            const rawSource = document.getElementById('importRawSource').value.trim();
+
+            // Apply to lesson form
+            if (importedData.title) {
+                document.getElementById('lessonTitle').value = importedData.title;
+            }
+
+            // Store full data in lessonContent as JSON
+            document.getElementById('lessonContent').value = JSON.stringify(importedData, null, 2);
+
+            // Set rawSource if provided
+            if (rawSource) {
+                document.getElementById('lessonRawSource').value = rawSource;
+            }
+
+            closeImportModal();
+            alert('✅ تم استيراد المحتوى بنجاح! يمكنك الآن حفظ الدرس.');
+        }
+
+        // ============ Initialize ============
+        window.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            restoreDraft();
+            await loadSections();
+            loadSheikhs();
+            await loadLessons();
+        });
+    </script>
+</body>
+
+</html>
