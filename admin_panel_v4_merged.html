@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الأدمن v4.0 - Merged</title>
+    <title>لوحة التحكم - Admin Panel v4</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -412,7 +413,9 @@
         <!-- Tabs -->
         <div class="tabs">
             <button class="tab active" onclick="showTab('aiInput')">🤖 AI Master Input</button>
-            <button class="tab" onclick="showTab('sections')">📚 الأقسام</button>
+            <button class="tab" onclick="showTab('categories')"><i class="fa-solid fa-sitemap"></i> الأقسام
+                الرئيسية</button>
+            <button class="tab" onclick="showTab('sections')">📚 أقسام الدروس</button>
             <button class="tab" onclick="showTab('sheikhs')">👤 الشيوخ</button>
             <button class="tab" onclick="showTab('lessons')">📖 الدروس</button>
             <button class="tab" onclick="showTab('addLesson')">➕ إضافة درس</button>
@@ -447,6 +450,68 @@
                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
                 <div class="alert">جاري تحميل الأقسام...</div>
             </div>
+        </div>
+
+        <!-- ============ Categories Panel (الأقسام الرئيسية الهرمية) ============ -->
+        <div id="categories" class="panel">
+            <h2><i class="fa-solid fa-sitemap" style="color: var(--gold)"></i> إدارة الأقسام الرئيسية</h2>
+            <div class="alert">
+                <i class="fa-solid fa-circle-info"></i> نظام هرمي مرن - أضف أيقونة جوا أيقونة براحتك بلا حدود!
+            </div>
+
+            <!-- Breadcrumb Navigation -->
+            <div id="catBreadcrumb"
+                style="display:flex; align-items:center; gap:8px; margin:15px 0; flex-wrap:wrap; font-size:0.95rem;">
+                <span onclick="loadCategories(null)" style="cursor:pointer; color:var(--gold); font-weight:700;"><i
+                        class="fa-solid fa-house"></i> الرئيسية</span>
+            </div>
+
+            <!-- Add Category Form -->
+            <div
+                style="background:rgba(218,165,32,0.08); border:1px solid rgba(218,165,32,0.25); border-radius:12px; padding:18px; margin-bottom:20px;">
+                <h4 style="color:var(--gold); margin-bottom:12px;"><i class="fa-solid fa-circle-plus"></i> إضافة قسم
+                    جديد</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div class="form-group" style="margin:0">
+                        <label>اسم القسم</label>
+                        <input type="text" id="catName" placeholder="مثال: القرآن الكريم">
+                    </div>
+                    <div class="form-group" style="margin:0">
+                        <label>الوصف (اختياري)</label>
+                        <input type="text" id="catDesc" placeholder="وصف مختصر">
+                    </div>
+                </div>
+                <div style="display:flex; gap:12px; margin-top:12px; align-items:flex-end; flex-wrap:wrap;">
+                    <div class="form-group" style="margin:0; flex:1">
+                        <label>الأيقونة (Font Awesome)</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="text" id="catIcon" value="fa-solid fa-folder" style="flex:1"
+                                oninput="previewIcon()">
+                            <div id="catIconPreview"
+                                style="width:45px; height:45px; display:flex; align-items:center; justify-content:center; background:rgba(218,165,32,0.15); border-radius:10px; font-size:1.4rem; color:#DAA520;">
+                                <i class="fa-solid fa-folder"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin:0; width:120px;">
+                        <label>اللون</label>
+                        <input type="color" id="catColor" value="#DAA520"
+                            style="height:42px; width:100%; border:none; border-radius:8px; cursor:pointer;">
+                    </div>
+                    <button class="btn btn-primary" onclick="addCategory()" style="height:42px; white-space:nowrap;">
+                        <i class="fa-solid fa-plus"></i> إضافة
+                    </button>
+                </div>
+
+                <!-- Popular Icons Grid -->
+                <div style="margin-top:12px;">
+                    <small style="color:rgba(255,255,255,0.5);">أيقونات سريعة:</small>
+                    <div id="quickIcons" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
+                </div>
+            </div>
+
+            <!-- Categories Tree -->
+            <div id="categoriesList" style="min-height:100px;"></div>
         </div>
 
         <!-- Sections Panel -->
@@ -604,10 +669,22 @@
         function showTab(tabId) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            event.target.classList.add('active');
+            // Find the clicked tab button
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => {
+                if (t.textContent.includes(tabId === 'categories' ? 'الأقسام الرئيسية' :
+                    tabId === 'sections' ? 'أقسام الدروس' :
+                        tabId === 'sheikhs' ? 'الشيوخ' :
+                            tabId === 'lessons' ? 'الدروس' :
+                                tabId === 'addLesson' ? 'إضافة درس' :
+                                    tabId === 'preview' ? 'معاينة' : 'AI')) {
+                    t.classList.add('active');
+                }
+            });
             document.getElementById(tabId).classList.add('active');
 
             if (tabId === 'preview') updatePreviewSelect();
+            if (tabId === 'categories') loadCategories(currentParentId);
         }
 
         // ============ Sections ============
@@ -1132,10 +1209,274 @@
             alert('✅ تم استيراد المحتوى بنجاح! يمكنك الآن حفظ الدرس.');
         }
 
+        // ============ Categories Management (الأقسام الهرمية) ============
+        let currentParentId = null;
+        let breadcrumbPath = []; // [{id, name}]
+        let allCategoriesCache = [];
+
+        const QUICK_ICONS = [
+            { icon: 'fa-solid fa-book-quran', label: 'قرآن' },
+            { icon: 'fa-solid fa-hands-praying', label: 'دعاء' },
+            { icon: 'fa-solid fa-mosque', label: 'مسجد' },
+            { icon: 'fa-solid fa-user-tie', label: 'شيخ' },
+            { icon: 'fa-solid fa-graduation-cap', label: 'درس' },
+            { icon: 'fa-solid fa-scroll', label: 'تفسير' },
+            { icon: 'fa-solid fa-scale-balanced', label: 'أحكام' },
+            { icon: 'fa-solid fa-gem', label: 'فوائد' },
+            { icon: 'fa-solid fa-microphone', label: 'بودكاست' },
+            { icon: 'fa-solid fa-book-open', label: 'كتاب' },
+            { icon: 'fa-solid fa-star', label: 'نجمة' },
+            { icon: 'fa-solid fa-heart', label: 'قلب' },
+            { icon: 'fa-solid fa-moon', label: 'هلال' },
+            { icon: 'fa-solid fa-sun', label: 'شمس' },
+            { icon: 'fa-solid fa-users', label: 'مجموعة' },
+            { icon: 'fa-solid fa-circle-question', label: 'سؤال' },
+            { icon: 'fa-solid fa-lightbulb', label: 'فكرة' },
+            { icon: 'fa-solid fa-bell', label: 'تذكير' },
+            { icon: 'fa-solid fa-layer-group', label: 'طبقات' },
+            { icon: 'fa-solid fa-magnifying-glass', label: 'بحث' },
+            { icon: 'fa-solid fa-play', label: 'تشغيل' },
+            { icon: 'fa-solid fa-chart-pie', label: 'إحصائيات' },
+            { icon: 'fa-solid fa-clock', label: 'وقت' },
+            { icon: 'fa-solid fa-map', label: 'خريطة' },
+        ];
+
+        function renderQuickIcons() {
+            document.getElementById('quickIcons').innerHTML = QUICK_ICONS.map(q => `
+                <button type="button" onclick="pickIcon('${q.icon}')" title="${q.label}"
+                    style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+                    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:8px;
+                    cursor:pointer; color:#ccc; font-size:1rem; transition:all 0.2s;"
+                    onmouseover="this.style.background='rgba(218,165,32,0.2)'; this.style.color='#DAA520'; this.style.borderColor='rgba(218,165,32,0.4)';"
+                    onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.color='#ccc'; this.style.borderColor='rgba(255,255,255,0.12)';">
+                    <i class="${q.icon}"></i>
+                </button>
+            `).join('');
+        }
+
+        function pickIcon(iconClass) {
+            document.getElementById('catIcon').value = iconClass;
+            previewIcon();
+        }
+
+        function previewIcon() {
+            const iconClass = document.getElementById('catIcon').value.trim();
+            document.getElementById('catIconPreview').innerHTML = `<i class="${iconClass}"></i>`;
+        }
+
+        async function loadCategories(parentId) {
+            currentParentId = parentId;
+
+            try {
+                const url = parentId
+                    ? `/api/categories/children/${parentId}`
+                    : '/api/categories/all';
+                const res = await fetch(url);
+                let categories = await res.json();
+
+                // لو في الرئيسية، اعرض الـ root بس
+                if (!parentId) {
+                    categories = categories.filter(c => !c.parentId);
+                }
+
+                allCategoriesCache = categories;
+                renderCategories(categories);
+                renderBreadcrumb();
+
+                // Update stat
+                const allRes = await fetch('/api/categories/all');
+                const allCats = await allRes.json();
+                const catCountEl = document.getElementById('categoriesCount');
+                if (catCountEl) catCountEl.textContent = allCats.length;
+
+            } catch (error) {
+                console.error('Load categories error:', error);
+                document.getElementById('categoriesList').innerHTML = `
+                    <div class="alert" style="background:rgba(231,76,60,0.2); border-color:#e74c3c;">❌ فشل تحميل الأقسام</div>
+                `;
+            }
+        }
+
+        function renderBreadcrumb() {
+            const bc = document.getElementById('catBreadcrumb');
+            let html = `<span onclick="navigateToRoot()" style="cursor:pointer; color:var(--gold); font-weight:700;"><i class="fa-solid fa-house"></i> الرئيسية</span>`;
+
+            breadcrumbPath.forEach((item, idx) => {
+                html += ` <i class="fa-solid fa-chevron-left" style="color:rgba(255,255,255,0.3); font-size:0.7rem;"></i> `;
+                if (idx === breadcrumbPath.length - 1) {
+                    html += `<span style="color:white; font-weight:600;">${item.name}</span>`;
+                } else {
+                    html += `<span onclick="navigateToBreadcrumb(${idx})" style="cursor:pointer; color:var(--gold);">${item.name}</span>`;
+                }
+            });
+            bc.innerHTML = html;
+        }
+
+        function navigateToRoot() {
+            breadcrumbPath = [];
+            loadCategories(null);
+        }
+
+        function navigateToBreadcrumb(index) {
+            const item = breadcrumbPath[index];
+            breadcrumbPath = breadcrumbPath.slice(0, index + 1);
+            loadCategories(item.id);
+        }
+
+        function openCategory(id, name) {
+            breadcrumbPath.push({ id, name });
+            loadCategories(id);
+        }
+
+        function renderCategories(categories) {
+            if (categories.length === 0) {
+                document.getElementById('categoriesList').innerHTML = `
+                    <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.4);">
+                        <i class="fa-solid fa-folder-open" style="font-size:3rem; margin-bottom:15px; display:block;"></i>
+                        <p>لا توجد أقسام هنا بعد</p>
+                        <p style="font-size:0.85rem;">أضف قسم جديد من الفورم أعلاه ⬆️</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('categoriesList').innerHTML = `
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:14px;">
+                    ${categories.map(cat => `
+                        <div class="cat-card" style="background:linear-gradient(145deg, rgba(30,30,40,0.95), rgba(20,20,30,0.98));
+                            border:1px solid ${cat.color || '#DAA520'}30; border-radius:14px; padding:18px;
+                            cursor:pointer; transition:all 0.3s; position:relative;"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='${cat.color || '#DAA520'}80'; this.style.boxShadow='0 8px 25px ${cat.color || '#DAA520'}20';"
+                            onmouseout="this.style.transform=''; this.style.borderColor='${cat.color || '#DAA520'}30'; this.style.boxShadow='none';">
+                            
+                            <!-- الدخول عند الضغط على الأيقونة/الاسم -->
+                            <div onclick="openCategory('${cat._id}', '${cat.name.replace(/'/g, "\\'")}')"
+                                style="text-align:center; margin-bottom:12px;">
+                                <div style="width:55px; height:55px; margin:0 auto 10px; display:flex; align-items:center;
+                                    justify-content:center; background:${cat.color || '#DAA520'}18; border-radius:14px;
+                                    font-size:1.8rem; color:${cat.color || '#DAA520'};">
+                                    <i class="${cat.icon || 'fa-solid fa-folder'}"></i>
+                                </div>
+                                <h4 style="color:white; font-size:1rem; margin:0;">${cat.name}</h4>
+                                ${cat.description ? `<small style="color:rgba(255,255,255,0.4); font-size:0.8rem;">${cat.description}</small>` : ''}
+                            </div>
+                            
+                            <!-- أزرار التعديل والحذف -->
+                            <div style="display:flex; gap:6px; justify-content:center; border-top:1px solid rgba(255,255,255,0.08); padding-top:10px;">
+                                <button onclick="event.stopPropagation(); editCategory('${cat._id}')" 
+                                    style="background:rgba(52,152,219,0.15); border:1px solid rgba(52,152,219,0.3); color:#3498db;
+                                    border-radius:8px; padding:5px 12px; cursor:pointer; font-size:0.8rem; transition:all 0.2s;"
+                                    onmouseover="this.style.background='rgba(52,152,219,0.3)'"
+                                    onmouseout="this.style.background='rgba(52,152,219,0.15)'">
+                                    <i class="fa-solid fa-pen"></i> تعديل
+                                </button>
+                                <button onclick="event.stopPropagation(); deleteCategory('${cat._id}', '${cat.name.replace(/'/g, "\\\'")}')" 
+                                    style="background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.3); color:#e74c3c;
+                                    border-radius:8px; padding:5px 12px; cursor:pointer; font-size:0.8rem; transition:all 0.2s;"
+                                    onmouseover="this.style.background='rgba(231,76,60,0.3)'"
+                                    onmouseout="this.style.background='rgba(231,76,60,0.15)'">
+                                    <i class="fa-solid fa-trash"></i> حذف
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function addCategory() {
+            const name = document.getElementById('catName').value.trim();
+            const icon = document.getElementById('catIcon').value.trim() || 'fa-solid fa-folder';
+            const color = document.getElementById('catColor').value || '#DAA520';
+            const description = document.getElementById('catDesc').value.trim();
+
+            if (!name) return alert('أدخل اسم القسم!');
+
+            try {
+                const res = await fetch('/api/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name, icon, color, description,
+                        parentId: currentParentId
+                    })
+                });
+
+                if (res.ok) {
+                    document.getElementById('catName').value = '';
+                    document.getElementById('catDesc').value = '';
+                    loadCategories(currentParentId);
+                    alert('✅ تم إضافة القسم!');
+                } else {
+                    const err = await res.json();
+                    alert('❌ فشل: ' + (err.error || 'خطأ غير معروف'));
+                }
+            } catch (error) {
+                console.error('Add category error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
+        }
+
+        async function editCategory(id) {
+            try {
+                // Get current data
+                const allRes = await fetch('/api/categories/all');
+                const allCats = await allRes.json();
+                const cat = allCats.find(c => c._id === id);
+                if (!cat) return alert('القسم غير موجود');
+
+                const newName = prompt('اسم القسم:', cat.name);
+                if (newName === null) return; // cancelled
+
+                const newIcon = prompt('الأيقونة (Font Awesome class):', cat.icon || 'fa-solid fa-folder');
+                if (newIcon === null) return;
+
+                const newColor = prompt('اللون (hex):', cat.color || '#DAA520');
+                if (newColor === null) return;
+
+                const res = await fetch(`/api/categories/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: newName || cat.name,
+                        icon: newIcon || cat.icon,
+                        color: newColor || cat.color
+                    })
+                });
+
+                if (res.ok) {
+                    loadCategories(currentParentId);
+                    alert('✅ تم التعديل!');
+                } else {
+                    alert('❌ فشل التعديل');
+                }
+            } catch (error) {
+                console.error('Edit category error:', error);
+            }
+        }
+
+        async function deleteCategory(id, name) {
+            if (!confirm(`⚠️ حذف "${name}" وكل الأقسام الفرعية؟\nهذا لا يمكن التراجع عنه!`)) return;
+
+            try {
+                const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadCategories(currentParentId);
+                    alert('✅ تم الحذف!');
+                } else {
+                    alert('❌ فشل الحذف');
+                }
+            } catch (error) {
+                console.error('Delete category error:', error);
+            }
+        }
+
         // ============ Initialize ============
         window.addEventListener('DOMContentLoaded', async () => {
             await checkAuth();
             restoreDraft();
+            renderQuickIcons();
+            await loadCategories(null);
             await loadSections();
             await loadSheikhs();
             await loadLessons();

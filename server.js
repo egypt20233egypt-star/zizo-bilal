@@ -44,6 +44,7 @@ app.use('/api/lessons', require('./routes/lessons'));
 app.use('/api/admin', require('./routes/admin')); // Admin v4.0 API
 app.use('/api/sections', require('./routes/sections')); // Section Registry API
 app.use('/api/sheikhs', require('./routes/sheikhs')); // Sheikhs API
+app.use('/api/categories', require('./routes/categories')); // Categories API (هرمي)
 
 // ============ Page Routes ============
 app.get('/', (req, res) => {
