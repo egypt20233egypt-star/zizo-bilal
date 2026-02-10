@@ -493,7 +493,7 @@
 
         <!-- Add Lesson Panel -->
         <div id="addLesson" class="panel">
-            <h2>➕ إضافة درس جديد</h2>
+            <h2 id="formTitle">➕ إضافة درس جديد</h2>
             <div class="form-group">
                 <label>عنوان الدرس</label>
                 <input type="text" id="lessonTitle" placeholder="مثال: درس عن مصعب بن عمير">
@@ -517,10 +517,12 @@
                     التحليل - للحفظ الداخلي فقط</small>
             </div>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="saveLesson(false)">💾 حفظ كمسودة</button>
-                <button class="btn btn-success" onclick="saveLesson(true)">🚀 نشر مباشرة</button>
+                <button class="btn btn-primary" id="saveDraftBtn" onclick="saveLesson(false)">💾 حفظ كمسودة</button>
+                <button class="btn btn-success" id="savePublishBtn" onclick="saveLesson(true)">🚀 نشر مباشرة</button>
                 <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()">📋 استيراد
                     JSON/نص</button>
+                <button class="btn btn-danger" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;">❌ إلغاء
+                    التعديل</button>
             </div>
         </div>
 
@@ -720,50 +722,72 @@
             }
         }
 
-        // ============ Sheikhs (localStorage for now) ============
-        const DB = {
-            get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
-            set: (key, data) => localStorage.setItem(key, JSON.stringify(data))
-        };
+        // ============ Sheikhs (MongoDB API) ============
+        let sheikhsList = [];
 
-        function loadSheikhs() {
-            const sheikhs = DB.get('sheikhs');
-            document.getElementById('sheikhsCount').textContent = sheikhs.length;
+        async function loadSheikhs() {
+            try {
+                const res = await fetch('/api/sheikhs');
+                sheikhsList = await res.json();
+                document.getElementById('sheikhsCount').textContent = sheikhsList.length;
 
-            document.getElementById('sheikhsList').innerHTML = sheikhs.map(s => `
-                <div class="list-item">
-                    <span>👤 ${s.name}</span>
-                    <button class="btn btn-danger" onclick="deleteSheikh(${s.id})">حذف</button>
-                </div>
-            `).join('') || '<p>لا يوجد شيوخ</p>';
+                document.getElementById('sheikhsList').innerHTML = sheikhsList.map(s => `
+                    <div class="list-item">
+                        <span>👤 ${s.name}</span>
+                        <button class="btn btn-danger" onclick="deleteSheikh('${s._id}')">حذف</button>
+                    </div>
+                `).join('') || '<p>لا يوجد شيوخ</p>';
 
-            // Update select
-            const select = document.getElementById('lessonSheikh');
-            select.innerHTML = '<option value="">اختر الشيخ</option>' +
-                sheikhs.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+                // Update select
+                const select = document.getElementById('lessonSheikh');
+                select.innerHTML = '<option value="">اختر الشيخ</option>' +
+                    sheikhsList.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+            } catch (error) {
+                console.error('Load sheikhs error:', error);
+            }
         }
 
-        function addSheikh() {
+        async function addSheikh() {
             const name = document.getElementById('sheikhName').value.trim();
             if (!name) return alert('أدخل اسم الشيخ');
 
-            const sheikhs = DB.get('sheikhs');
-            const newId = sheikhs.length ? Math.max(...sheikhs.map(s => s.id)) + 1 : 1;
-            sheikhs.push({ id: newId, name });
-            DB.set('sheikhs', sheikhs);
-
-            document.getElementById('sheikhName').value = '';
-            loadSheikhs();
+            try {
+                const res = await fetch('/api/sheikhs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                if (res.ok) {
+                    document.getElementById('sheikhName').value = '';
+                    loadSheikhs();
+                    alert('✅ تم إضافة الشيخ');
+                } else {
+                    alert('❌ فشل إضافة الشيخ');
+                }
+            } catch (error) {
+                console.error('Add sheikh error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
         }
 
-        function deleteSheikh(id) {
+        async function deleteSheikh(id) {
             if (!confirm('هل تريد حذف هذا الشيخ؟')) return;
-            const sheikhs = DB.get('sheikhs').filter(s => s.id !== id);
-            DB.set('sheikhs', sheikhs);
-            loadSheikhs();
+            try {
+                const res = await fetch(`/api/sheikhs/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadSheikhs();
+                    alert('✅ تم الحذف');
+                } else {
+                    alert('❌ فشل الحذف');
+                }
+            } catch (error) {
+                console.error('Delete sheikh error:', error);
+            }
         }
 
         // ============ Lessons (MongoDB) ============
+        let currentEditId = null;
+
         async function loadLessons() {
             try {
                 const res = await fetch('/api/lessons');
@@ -771,21 +795,22 @@
 
                 document.getElementById('lessonsCount').textContent = lessons.length;
 
-                const sheikhs = DB.get('sheikhs');
                 document.getElementById('lessonsList').innerHTML = lessons.map(l => {
-                    const sheikh = sheikhs.find(s => s.id === l.sheikhId);
+                    const sheikhName = l.sheikhName || l.sheikhId || 'غير محدد';
+                    const isPublished = l.status === 'published';
                     return `
                         <div class="list-item">
                             <div>
                                 <strong>📖 ${l.title}</strong>
-                                <small style="color:#999"> - ${sheikh?.name || 'غير محدد'}</small>
-                                <span class="badge badge-${l.status === 'published' ? 'success' : 'draft'}">
-                                    ${l.status === 'published' ? 'منشور' : 'مسودة'}
+                                <small style="color:#999"> - ${sheikhName}</small>
+                                <span class="badge badge-${isPublished ? 'success' : 'draft'}">
+                                    ${isPublished ? 'منشور' : 'مسودة'}
                                 </span>
                             </div>
-                            <div>
-                                <button class="btn btn-success" onclick="publishLesson('${l._id}')">نشر</button>
-                                <button class="btn btn-danger" onclick="deleteLesson('${l._id}')">حذف</button>
+                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                                <button class="btn" style="background:#3498db;color:white;" onclick="editLesson('${l._id}')">✏️ تعديل</button>
+                                <button class="btn btn-success" onclick="togglePublish('${l._id}', ${isPublished})">${isPublished ? '📤 إلغاء النشر' : '🚀 نشر'}</button>
+                                <button class="btn btn-danger" onclick="deleteLesson('${l._id}')">🗑️ حذف</button>
                             </div>
                         </div>
                     `;
@@ -798,7 +823,7 @@
 
         async function saveLesson(publish = false) {
             const title = document.getElementById('lessonTitle').value.trim();
-            const sheikhId = parseInt(document.getElementById('lessonSheikh').value);
+            const sheikhId = document.getElementById('lessonSheikh').value;
             const rawContent = document.getElementById('lessonContent').value.trim();
             const rawSource = document.getElementById('lessonRawSource').value.trim();
 
@@ -813,21 +838,34 @@
             };
 
             try {
-                const res = await fetch('/api/lessons', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(lessonData)
-                });
+                let res;
+                if (currentEditId) {
+                    // ✏️ تحديث درس موجود
+                    res = await fetch(`/api/lessons/${currentEditId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(lessonData)
+                    });
+                } else {
+                    // ➕ إضافة درس جديد
+                    res = await fetch('/api/lessons', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(lessonData)
+                    });
+                }
 
                 if (res.ok) {
-                    document.getElementById('lessonTitle').value = '';
-                    document.getElementById('lessonContent').value = '';
-                    document.getElementById('lessonRawSource').value = '';
+                    const wasEditing = !!currentEditId;
+                    cancelEdit();
                     loadLessons();
-                    alert(publish ? '🚀 تم نشر الدرس' : '💾 تم حفظ الدرس كمسودة');
+                    alert(wasEditing ? '✅ تم تحديث الدرس بنجاح' : (publish ? '🚀 تم نشر الدرس' : '💾 تم حفظ الدرس كمسودة'));
                     showTab('lessons');
+                    // click the lessons tab to make it active
+                    document.querySelectorAll('.tab')[3]?.click();
                 } else {
-                    alert('❌ فشل حفظ الدرس');
+                    const err = await res.json();
+                    alert('❌ فشل: ' + (err.error || 'خطأ غير معروف'));
                 }
             } catch (error) {
                 console.error('Save lesson error:', error);
@@ -835,9 +873,83 @@
             }
         }
 
-        async function publishLesson(id) {
-            // TODO: Implement update lesson status API
-            alert('قريباً: تحديث حالة الدرس');
+        async function editLesson(id) {
+            try {
+                const res = await fetch(`/api/lessons/${id}`);
+                const lesson = await res.json();
+
+                if (!lesson || lesson.error) {
+                    return alert('❌ فشل تحميل الدرس');
+                }
+
+                currentEditId = id;
+
+                // ملء الفورم
+                document.getElementById('lessonTitle').value = lesson.title || '';
+                document.getElementById('lessonContent').value = lesson.rawContent || (typeof lesson.overview === 'string' ? lesson.overview : JSON.stringify(lesson, null, 2));
+                document.getElementById('lessonRawSource').value = lesson.rawSource || '';
+
+                // اختيار الشيخ
+                const sheikhSelect = document.getElementById('lessonSheikh');
+                if (lesson.sheikhId) {
+                    sheikhSelect.value = lesson.sheikhId;
+                }
+
+                // تغيير UI لوضع التعديل
+                document.getElementById('formTitle').innerHTML = '✏️ تعديل الدرس: <span style="color:#3498db">' + lesson.title + '</span>';
+                document.getElementById('cancelEditBtn').style.display = 'inline-block';
+                document.getElementById('saveDraftBtn').textContent = '💾 حفظ التعديل';
+                document.getElementById('savePublishBtn').textContent = '🚀 حفظ ونشر';
+
+                // الانتقال لتاب الإضافة
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.tab')[4].classList.add('active');
+                document.getElementById('addLesson').classList.add('active');
+
+                // Scroll للأعلى
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Edit lesson error:', error);
+                alert('❌ خطأ في تحميل الدرس');
+            }
+        }
+
+        function cancelEdit() {
+            currentEditId = null;
+            document.getElementById('lessonTitle').value = '';
+            document.getElementById('lessonContent').value = '';
+            document.getElementById('lessonRawSource').value = '';
+            document.getElementById('lessonSheikh').selectedIndex = 0;
+            document.getElementById('formTitle').textContent = '➕ إضافة درس جديد';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('saveDraftBtn').textContent = '💾 حفظ كمسودة';
+            document.getElementById('savePublishBtn').textContent = '🚀 نشر مباشرة';
+        }
+
+        async function togglePublish(id, isCurrentlyPublished) {
+            const newStatus = isCurrentlyPublished ? 'draft' : 'published';
+            const msg = isCurrentlyPublished ? 'إلغاء نشر الدرس؟' : 'نشر الدرس؟';
+            if (!confirm(msg)) return;
+
+            try {
+                const res = await fetch(`/api/lessons/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (res.ok) {
+                    loadLessons();
+                    alert(isCurrentlyPublished ? '📤 تم إلغاء النشر' : '🚀 تم النشر بنجاح');
+                } else {
+                    alert('❌ فشل تحديث الحالة');
+                }
+            } catch (error) {
+                console.error('Publish error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
         }
 
         async function deleteLesson(id) {
@@ -1025,7 +1137,7 @@
             await checkAuth();
             restoreDraft();
             await loadSections();
-            loadSheikhs();
+            await loadSheikhs();
             await loadLessons();
         });
     </script>
