@@ -1,47 +1,77 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const Admin = require('../models/Admin');
 
-// مستخدم أدمن افتراضي (في الإنتاج يكون في قاعدة البيانات)
-const adminUser = {
-    username: 'admin',
-    password: '$2a$10$rQZL.JXz5P5L5L5L5L5L5OQ5L5L5L5L5L5L5L5L5L5L5L5L5L' // سيتم تحديثه
-};
-
-// تسجيل الدخول
+/**
+ * POST /api/admin/login
+ * تسجيل الدخول
+ */
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // للتطوير فقط - كلمة سر افتراضية
-        if (username === 'admin' && password === 'admin123') {
-            const token = jwt.sign(
-                { username },
-                process.env.JWT_SECRET || 'secret-key',
-                { expiresIn: '24h' }
-            );
-            return res.json({ token, message: 'تم تسجيل الدخول بنجاح' });
+        if (!username || !password) {
+            return res.status(400).json({ error: 'اسم المستخدم وكلمة المرور مطلوبان' });
         }
 
-        res.status(401).json({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        // البحث عن الأدمن
+        const admin = await Admin.findOne({ username });
+        if (!admin) {
+            return res.status(401).json({ error: 'بيانات خاطئة' });
+        }
+
+        // التحقق من الباسورد
+        const isMatch = await admin.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'بيانات خاطئة' });
+        }
+
+        // حفظ الجلسة
+        req.session.adminId = admin._id;
+        req.session.username = admin.username;
+
+        // تحديث آخر دخول
+        admin.lastLogin = new Date();
+        await admin.save();
+
+        res.json({
+            success: true,
+            message: 'تم تسجيل الدخول بنجاح',
+            username: admin.username
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'خطأ في السيرفر' });
     }
 });
 
-// التحقق من التوكن
-router.get('/verify', (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ error: 'لا يوجد توكن' });
-    }
+/**
+ * GET /api/admin/logout
+ * تسجيل الخروج
+ */
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Logout error:', err);
+            return res.status(500).json({ error: 'خطأ في تسجيل الخروج' });
+        }
+        res.redirect('/admin');
+    });
+});
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-key');
-        res.json({ valid: true, user: decoded });
-    } catch (err) {
-        res.status(401).json({ error: 'توكن غير صالح' });
+/**
+ * GET /api/admin/check
+ * فحص الجلسة
+ */
+router.get('/check', (req, res) => {
+    if (req.session && req.session.adminId) {
+        res.json({
+            authenticated: true,
+            username: req.session.username
+        });
+    } else {
+        res.json({ authenticated: false });
     }
 });
 

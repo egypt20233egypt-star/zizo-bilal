@@ -24,27 +24,36 @@ if (MONGO_URI) {
 
 // ============ Session (Admin v4.0) ============
 const session = require('express-session');
-// TODO: سنضيف MongoStore لاحقاً - دلوقتي memory store للاختبار
+const MongoStore = require('connect-mongo');
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'zizo-bilal-secret-2025',
+    secret: process.env.SESSION_SECRET || 'علم ينتفع به-secret-2025',
     resave: false,
     saveUninitialized: false,
-    // store: سيستخدم MemoryStore الافتراضي (مؤقت للاختبار)
+    store: MongoStore.create({
+        mongoUrl: MONGO_URI || 'mongodb://localhost:27017/zizo-bilal',
+        touchAfter: 24 * 3600 // lazy session update (seconds)
+    }),
     cookie: {
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        maxAge: 7 * 24 * 60 * 60 * 1000, // أسبوع
         httpOnly: true,
-        secure: false
+        secure: false // true في production
     }
 }));
 
 
+// ============ Auth Middleware ============
+const { requireAuth } = require('./middleware/requireAuth');
+
 // ============ API Routes ============
-app.use('/api/lessons', require('./routes/lessons'));
-app.use('/api/admin', require('./routes/admin')); // Admin v4.0 API
-app.use('/api/sections', require('./routes/sections')); // Section Registry API
-app.use('/api/sheikhs', require('./routes/sheikhs')); // Sheikhs API
-app.use('/api/categories', require('./routes/categories')); // Categories API (هرمي)
+// Auth routes (مفتوحة - مفيش حماية)
+app.use('/api/admin', require('./routes/auth'));
+
+// Protected API routes (محمية)
+app.use('/api/lessons', requireAuth, require('./routes/lessons'));
+app.use('/api/sections', requireAuth, require('./routes/sections')); // Section Registry API
+app.use('/api/sheikhs', requireAuth, require('./routes/sheikhs')); // Sheikhs API
+app.use('/api/categories', requireAuth, require('./routes/categories')); // Categories API (هرمي)
 
 // ============ Page Routes ============
 app.get('/', (req, res) => {
@@ -56,12 +65,8 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin_v4.html')); // صفحة Login
 });
 
-app.get('/admin/panel', (req, res) => {
-    // لو مش مسجل دخول، حوّله للـ login
-    if (!req.session.adminId) {
-        return res.redirect('/admin');
-    }
-    // النسخة المدمجة: localStorage UI + MongoDB Backend
+// Admin Panel (محمي)
+app.get('/admin/panel', requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'admin_panel_v4_merged.html'));
 });
 
