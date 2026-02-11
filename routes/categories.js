@@ -35,6 +35,19 @@ router.get('/children/:parentId', async (req, res) => {
     }
 });
 
+// ============ الحصول على قسم بالـ ID ============
+router.get('/single/:id', async (req, res) => {
+    try {
+        const category = await Category.findById(req.params.id);
+        if (!category) {
+            return res.status(404).json({ error: 'القسم غير موجود' });
+        }
+        res.json(category);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ============ الحصول على الشجرة الكاملة (nested) ============
 router.get('/tree', async (req, res) => {
     try {
