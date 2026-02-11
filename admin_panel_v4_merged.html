@@ -714,10 +714,9 @@
     <!-- Header -->
     <div class="header">
         <div class="logo">
-            <span style="font-size: 2rem;">🌙</span>
             <div>
-                <h1>لوحة الأدمن v4.0 (Merged)</h1>
-                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">MongoDB + Authentication + All Features
+                <h1>عِلْمٌ يُنْتَفَعُ بِهِ</h1>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">لوحة التحكم
                 </div>
             </div>
         </div>
@@ -768,13 +767,13 @@
                 style="min-height: 250px;"></textarea>
             <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
                 <button class="btn btn-primary" onclick="analyzeWithAI()">
-                    ✨ تحليل بالذكاء الاصطناعي
+                    <i class="fa-solid fa-sparkles"></i> تحليل بالذكاء الاصطناعي
                 </button>
                 <button class="btn" onclick="saveDraft()">
                     <i class="fa-solid fa-floppy-disk"></i> حفظ كمسودة
                 </button>
                 <button class="btn" onclick="clearInput()">
-                    🗑️ مسح
+                    <i class="fa-solid fa-trash-can"></i> مسح
                 </button>
             </div>
 
@@ -873,7 +872,8 @@
             <div class="alert">
                 <i class="fa-solid fa-circle-info"></i> الأقسام ديناميكية - يمكنك إضافة أو حذف أي قسم من MongoDB
             </div>
-            <button class="btn btn-primary" onclick="seedSections()">🌱 ملء الأقسام الافتراضية (15 قسم)</button>
+            <button class="btn btn-primary" onclick="seedSections()"><i class="fa-solid fa-seedling"></i> ملء الأقسام
+                الافتراضية (15 قسم)</button>
             <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
 
             <div class="form-group">
@@ -951,10 +951,13 @@
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <button class="btn btn-primary" id="saveDraftBtn" onclick="saveLesson(false)"><i
                         class="fa-solid fa-floppy-disk"></i> حفظ كمسودة</button>
-                <button class="btn btn-success" id="savePublishBtn" onclick="saveLesson(true)">🚀 نشر مباشرة</button>
-                <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()">📋 استيراد
+                <button class="btn btn-success" id="savePublishBtn" onclick="saveLesson(true)"><i
+                        class="fa-solid fa-rocket"></i> نشر مباشرة</button>
+                <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()"><i
+                        class="fa-solid fa-file-import"></i> استيراد
                     JSON/نص</button>
-                <button class="btn btn-danger" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;">❌ إلغاء
+                <button class="btn btn-danger" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;"><i
+                        class="fa-solid fa-xmark"></i> إلغاء
                     التعديل</button>
             </div>
         </div>
@@ -974,7 +977,7 @@
     <div class="modal-overlay" id="importModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📋 استيراد محتوى خارجي</h2>
+                <h2><i class="fa-solid fa-file-import"></i> استيراد محتوى خارجي</h2>
                 <button class="close-btn" onclick="closeImportModal()">×</button>
             </div>
 
@@ -1253,9 +1256,9 @@
                                 </span>
                             </div>
                             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                <button class="btn" style="background:#3498db;color:white;" onclick="editLesson('${l._id}')">✏️ تعديل</button>
-                                <button class="btn btn-success" onclick="togglePublish('${l._id}', ${isPublished})">${isPublished ? '📤 إلغاء النشر' : '🚀 نشر'}</button>
-                                <button class="btn btn-danger" onclick="deleteLesson('${l._id}')">🗑️ حذف</button>
+                                <button class="btn" style="background:#3498db;color:white;" onclick="editLesson('${l._id}')"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
+                                <button class="btn btn-success" onclick="togglePublish('${l._id}', ${isPublished})">${isPublished ? '<i class="fa-solid fa-upload"></i> إلغاء النشر' : '<i class="fa-solid fa-rocket"></i> نشر'}</button>
+                                <button class="btn btn-danger" onclick="deleteLesson('${l._id}')"><i class="fa-solid fa-trash-can"></i> حذف</button>
                             </div>
                         </div>
                     `;
@@ -1355,7 +1358,7 @@
                 }
 
                 // تغيير UI لوضع التعديل
-                document.getElementById('formTitle').innerHTML = '✏️ تعديل الدرس: <span style="color:#3498db">' + lesson.title + '</span>';
+                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> تعديل الدرس: <span style="color:#3498db">' + lesson.title + '</span>';
                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
                 document.getElementById('saveDraftBtn').textContent = '✅ حفظ التعديل';
                 document.getElementById('savePublishBtn').textContent = '🚀 حفظ ونشر';
@@ -1402,7 +1405,7 @@
 
                 if (res.ok) {
                     loadLessons();
-                    alert(isCurrentlyPublished ? '📤 تم إلغاء النشر' : '🚀 تم النشر بنجاح');
+                    alert(isCurrentlyPublished ? '✅ تم إلغاء النشر' : '🚀 تم النشر بنجاح');
                 } else {
                     alert('❌ فشل تحديث الحالة');
                 }
