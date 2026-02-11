@@ -373,7 +373,157 @@
             max-height: 300px;
             overflow-y: auto;
         }
+
+        /* ========================================
+           🌳 Tree View Styles (SaaS-style)
+           ======================================== */
+        .tree-view-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            margin-top: 1rem;
+        }
+
+        .tree-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-tree-action {
+            padding: 0.4rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 150ms;
+        }
+
+        .btn-tree-action:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold);
+        }
+
+        .tree-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .tree-children {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            margin-right: 24px;
+            border-right: 1px solid rgba(212, 175, 55, 0.2);
+            padding-top: 0.25rem;
+        }
+
+        .tree-item {
+            margin: 0;
+            padding: 0;
+        }
+
+        .tree-item-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            margin-bottom: 2px;
+            transition: all 150ms;
+        }
+
+        .tree-item-content:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.2);
+        }
+
+        .tree-item-content:hover .tree-actions {
+            opacity: 1;
+        }
+
+        .tree-toggle {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 150ms;
+        }
+
+        .tree-toggle i {
+            font-size: 12px;
+        }
+
+        .tree-toggle.expanded i {
+            transform: rotate(-90deg);
+        }
+
+        .tree-spacer {
+            width: 20px;
+        }
+
+        .tree-icon {
+            font-size: 16px;
+            min-width: 20px;
+        }
+
+        .tree-label {
+            flex: 1;
+            font-size: 0.875rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .tree-actions {
+            display: flex;
+            gap: 0.25rem;
+            opacity: 0;
+            transition: opacity 150ms;
+        }
+
+        .btn-tree-icon {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 150ms;
+        }
+
+        .btn-tree-icon:hover {
+            background: var(--gold);
+            color: var(--dark);
+        }
+
+        .btn-tree-icon i {
+            font-size: 12px;
+        }
+
+        .tree-item.active>.tree-item-content {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+        }
     </style>
+
 </head>
 
 <body>
@@ -510,8 +660,24 @@
                 </div>
             </div>
 
-            <!-- Categories Tree -->
-            <div id="categoriesList" style="min-height:100px;"></div>
+            <!-- Categories Tree View -->
+            <div class="tree-view-container">
+                <div class="tree-controls">
+                    <button class="btn-tree-action" onclick="expandAllTree()">
+                        <i class="fa-solid fa-angles-down"></i> Expand All
+                    </button>
+                    <button class="btn-tree-action" onclick="collapseAllTree()">
+                        <i class="fa-solid fa-angles-up"></i> Collapse All
+                    </button>
+                    <button class="btn-tree-action" onclick="reloadCategoryTree()">
+                        <i class="fa-solid fa-rotate"></i> Reload
+                    </button>
+                </div>
+
+                <ul class="tree-list" id="categoryTreeRoot">
+                    <!-- Tree will be rendered here by JS -->
+                </ul>
+            </div>
         </div>
 
         <!-- Sections Panel -->
@@ -1264,7 +1430,198 @@
             document.getElementById('catIconPreview').innerHTML = `<i class="${iconClass}"></i>`;
         }
 
+        // ============ Tree View Functions ============
+
+        /**
+         * Toggle expand/collapse for a tree node
+         */
+        function toggleTreeNode(button) {
+            const item = button.closest('.tree-item');
+            const children = item.querySelector('.tree-children');
+
+            if (!children) return;
+
+            const isExpanded = children.style.display !== 'none';
+
+            if (isExpanded) {
+                children.style.display = 'none';
+                button.classList.remove('expanded');
+            } else {
+                children.style.display = 'block';
+                button.classList.add('expanded');
+            }
+        }
+
+        /**
+         * Expand all tree nodes
+         */
+        function expandAllTree() {
+            document.querySelectorAll('.tree-children').forEach(children => {
+                children.style.display = 'block';
+            });
+            document.querySelectorAll('.tree-toggle').forEach(toggle => {
+                toggle.classList.add('expanded');
+            });
+        }
+
+        /**
+         * Collapse all tree nodes
+         */
+        function collapseAllTree() {
+            document.querySelectorAll('.tree-children').forEach(children => {
+                children.style.display = 'none';
+            });
+            document.querySelectorAll('.tree-toggle').forEach(toggle => {
+                toggle.classList.remove('expanded');
+            });
+        }
+
+        /**
+         * Reload the category tree
+         */
+        async function reloadCategoryTree() {
+            await loadCategoryTree();
+        }
+
+        /**
+         * Render tree view recursively
+         */
+        function renderTreeView(categories, level = 0) {
+            if (!categories || categories.length === 0) return '';
+
+            let html = '';
+
+            categories.forEach(cat => {
+                const hasChildren = cat.children && cat.children.length > 0;
+                const iconColor = cat.color || '#D4AF37';
+                const icon = cat.icon || 'fa-solid fa-folder';
+
+                html += `
+                    <li class="tree-item" data-id="${cat._id}" data-level="${level}">
+                        <div class="tree-item-content">
+                            ${hasChildren
+                        ? `<button class="tree-toggle" onclick="toggleTreeNode(this)"><i class="fa-solid fa-chevron-left"></i></button>`
+                        : '<span class="tree-spacer"></span>'
+                    }
+                            <i class="tree-icon ${icon}" style="color: ${iconColor}"></i>
+                            <span class="tree-label">${cat.name}</span>
+                            <div class="tree-actions">
+                                <button class="btn-tree-icon" onclick="addChildCategory('${cat._id}')" title="إضافة قسم فرعي">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                                <button class="btn-tree-icon" onclick="editCategoryFromTree('${cat._id}')" title="تعديل">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button class="btn-tree-icon" onclick="deleteCategoryFromTree('${cat._id}', '${cat.name}')" title="حذف">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                `;
+
+                if (hasChildren) {
+                    html += `<ul class="tree-children" style="display: none;">`;
+                    html += renderTreeView(cat.children, level + 1);
+                    html += `</ul>`;
+                }
+
+                html += `</li>`;
+            });
+
+            return html;
+        }
+
+        /**
+         * Load category tree from API
+         */
+        async function loadCategoryTree() {
+            try {
+                const res = await fetch('/api/categories/tree');
+                const tree = await res.json();
+
+                const container = document.getElementById('categoryTreeRoot');
+
+                if (tree.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:40px; color:rgba(255,255,255,0.4);">
+                            <i class="fa-solid fa-folder-open" style="font-size:3rem; margin-bottom:1rem;"></i>
+                            <p>لا توجد أقسام حتى الآن</p>
+                            <p style="font-size:0.9rem;">أضف قسم جديد من الأعلى</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = renderTreeView(tree, 0);
+                }
+
+                // Update stat
+                const allRes = await fetch('/api/categories/all');
+                const allCats = await allRes.json();
+                const catCountEl = document.getElementById('categoriesCount');
+                if (catCountEl) catCountEl.textContent = allCats.length;
+
+            } catch (error) {
+                console.error('Load tree error:', error);
+                const container = document.getElementById('categoryTreeRoot');
+                container.innerHTML = `
+                    <div class="alert" style="background:rgba(231,76,60,0.2); border-color:#e74c3c;">
+                        ❌ فشل تحميل الأقسام
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * Add child category
+         */
+        function addChildCategory(parentId) {
+            currentParentId = parentId;
+            document.getElementById('catName').focus();
+        }
+
+        /**
+         * Edit category from tree
+         */
+        async function editCategoryFromTree(id) {
+            try {
+                const res = await fetch(`/api/categories/${id}`);
+                const cat = await res.json();
+
+                document.getElementById('catName').value = cat.name;
+                document.getElementById('catDesc').value = cat.description || '';
+                document.getElementById('catIcon').value = cat.icon || 'fa-solid fa-folder';
+                document.getElementById('catColor').value = cat.color || '#DAA520';
+                previewIcon();
+
+                // Store edit mode
+                window.editingCategoryId = id;
+
+                alert('جاهز للتعديل - اضغط "إضافة" للحفظ');
+            } catch (error) {
+                console.error('Edit error:', error);
+                alert('فشل تحميل بيانات القسم');
+            }
+        }
+
+        /**
+         * Delete category from tree
+         */
+        async function deleteCategoryFromTree(id, name) {
+            if (!confirm(`هل تريد حذف "${name}"؟\n\nتحذير: سيتم حذف جميع الأقسام الفرعية!`)) return;
+
+            try {
+                const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Delete failed');
+
+                alert('✅ تم الحذف بنجاح');
+                await loadCategoryTree();
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('❌ فشل الحذف');
+            }
+        }
+
         async function loadCategories(parentId) {
+
             currentParentId = parentId;
 
             try {
@@ -1314,7 +1671,9 @@
 
         function navigateToRoot() {
             breadcrumbPath = [];
-            loadCategories(null);
+            // Load category tree view
+            loadCategoryTree();
+
         }
 
         function navigateToBreadcrumb(index) {
@@ -1405,7 +1764,10 @@
                 if (res.ok) {
                     document.getElementById('catName').value = '';
                     document.getElementById('catDesc').value = '';
-                    loadCategories(currentParentId);
+
+                    // Reload tree view instead of old list
+                    await loadCategoryTree();
+
                     alert('✅ تم إضافة القسم!');
                 } else {
                     const err = await res.json();
@@ -1416,6 +1778,7 @@
                 alert('❌ خطأ في الاتصال');
             }
         }
+
 
         async function editCategory(id) {
             try {
