@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>زيزو وبلال - المنصة الدعوية</title>
+    <title>عِلمٌ يُنتَفَعُ بِه - المنصة الدعوية</title>
     <meta name="description" content="منصة دعوية تعليمية لنشر العلم الشرعي">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="v3_enhancements.css">
@@ -439,7 +439,7 @@
     <header class="main-header">
         <div class="container">
             <div class="header-icon">🕌</div>
-            <h1 id="lessonTitle">منصة زيزو وبلال</h1>
+            <h1 id="lessonTitle">عِلمٌ يُنتَفَعُ بِه</h1>
             <p class="subtitle" id="lessonSubtitle">منصة دعوية تعليمية</p>
             <div class="tags" id="lessonTags"></div>
         </div>
@@ -472,7 +472,7 @@
 
     <!-- Footer -->
     <footer class="main-footer">
-        <p>© 2024 زيزو وبلال - جميع الحقوق محفوظة</p>
+        <p>© 2024 عِلمٌ يُنتَفَعُ بِه - جميع الحقوق محفوظة</p>
         <p class="footer-dua">اللهم علمنا ما ينفعنا وانفعنا بما علمتنا</p>
     </footer>
 
@@ -1827,7 +1827,7 @@
             const text = section.innerText.replace(/مشاركة|حفظ|نسخ/g, '').trim();
 
             if (navigator.share) {
-                navigator.share({ title: 'زيزو وبلال', text: text.substring(0, 300) })
+                navigator.share({ title: 'عِلمٌ يُنتَفَعُ بِه', text: text.substring(0, 300) })
                     .catch(() => { });
             } else {
                 navigator.clipboard.writeText(text.substring(0, 500))

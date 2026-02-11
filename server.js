@@ -81,7 +81,7 @@ app.get('/health', (req, res) => {
 // ============ API Status ============
 app.get('/api/status', (req, res) => {
     res.json({
-        api: 'Zizo & Bilal API v2.0',
+        api: 'عِلمٌ يُنتَفَعُ بِه API v2.0',
         mongodb: mongoose.connection.readyState === 1,
         endpoints: ['/api/lessons', '/api/lessons/published']
     });

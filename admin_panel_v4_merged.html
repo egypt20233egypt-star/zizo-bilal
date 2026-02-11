@@ -522,6 +522,100 @@
             background: rgba(212, 175, 55, 0.15);
             border-color: var(--gold);
         }
+
+        /* ========================================
+           📂 Category Picker (Cascading)
+           ======================================== */
+        .category-picker {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .category-picker.error {
+            border-color: #e74c3c;
+            animation: catShake 0.3s;
+        }
+
+        @keyframes catShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .category-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+            min-height: 32px;
+            padding: 0.4rem 0.75rem;
+            background: rgba(212, 175, 55, 0.08);
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .crumb-item {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .crumb-sep {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+        }
+
+        .crumb-placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+        }
+
+        .category-levels {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .category-level-wrap {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .category-level-wrap label {
+            display: block;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 4px;
+        }
+
+        .category-level-wrap select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .category-level-wrap select:focus {
+            border-color: var(--gold);
+            outline: none;
+        }
     </style>
 
 </head>
@@ -732,6 +826,19 @@
             <div class="form-group">
                 <label>الشيخ</label>
                 <select id="lessonSheikh"></select>
+            </div>
+            <!-- 📂 Category Picker (Cascading) -->
+            <div class="form-group" id="categoryPickerContainer">
+                <label>📂 تصنيف الدرس <span style="color:#e74c3c">*</span></label>
+                <div class="category-picker" id="categoryPicker">
+                    <div class="category-breadcrumb" id="categoryBreadcrumb">
+                        <span class="crumb-placeholder">اختر التصنيف...</span>
+                    </div>
+                    <div class="category-levels" id="categoryLevels">
+                        <!-- Cascading dropdowns generated dynamically -->
+                    </div>
+                </div>
+                <input type="hidden" id="selectedCategoryId" value="">
             </div>
             <div class="form-group">
                 <label>المحتوى الخام (التفريغ)</label>
@@ -1067,14 +1174,23 @@
         async function saveLesson(publish = false) {
             const title = document.getElementById('lessonTitle').value.trim();
             const sheikhId = document.getElementById('lessonSheikh').value;
+            const categoryId = getSelectedCategoryId();
             const rawContent = document.getElementById('lessonContent').value.trim();
             const rawSource = document.getElementById('lessonRawSource').value.trim();
 
             if (!title) return alert('أدخل عنوان الدرس');
 
+            // Validate category selection (required)
+            if (!categoryId) {
+                document.getElementById('categoryPicker').classList.add('error');
+                document.getElementById('categoryPicker').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return alert('📂 اختر تصنيف الدرس أولاً');
+            }
+
             const lessonData = {
                 title,
                 sheikhId,
+                categoryId,
                 rawContent,
                 rawSource,
                 status: publish ? 'published' : 'draft'
@@ -1138,6 +1254,11 @@
                     sheikhSelect.value = lesson.sheikhId;
                 }
 
+                // اختيار التصنيف
+                if (lesson.categoryId) {
+                    setCategoryPickerValue(lesson.categoryId);
+                }
+
                 // تغيير UI لوضع التعديل
                 document.getElementById('formTitle').innerHTML = '✏️ تعديل الدرس: <span style="color:#3498db">' + lesson.title + '</span>';
                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
@@ -1165,6 +1286,7 @@
             document.getElementById('lessonContent').value = '';
             document.getElementById('lessonRawSource').value = '';
             document.getElementById('lessonSheikh').selectedIndex = 0;
+            resetCategoryPicker();
             document.getElementById('formTitle').textContent = '➕ إضافة درس جديد';
             document.getElementById('cancelEditBtn').style.display = 'none';
             document.getElementById('saveDraftBtn').textContent = '💾 حفظ كمسودة';
@@ -1570,6 +1692,183 @@
             }
         }
 
+        // ========================================
+        // 📂 Category Picker (Cascading) Logic
+        // ========================================
+        let categoryPickerTree = []; // Full tree cache
+        let categorySelectedPath = []; // [{id, name, icon}, ...]
+
+        async function loadCategoryPickerTree() {
+            try {
+                const res = await fetch('/api/categories/tree');
+                categoryPickerTree = await res.json();
+                renderCategoryLevel(0, categoryPickerTree);
+            } catch (error) {
+                console.error('Load category picker error:', error);
+            }
+        }
+
+        function renderCategoryLevel(levelIndex, nodes) {
+            const container = document.getElementById('categoryLevels');
+            // Remove all dropdowns from this level onwards
+            const existingWraps = container.querySelectorAll('.category-level-wrap');
+            for (let i = existingWraps.length - 1; i >= levelIndex; i--) {
+                existingWraps[i].remove();
+            }
+            // Trim path to current level
+            categorySelectedPath = categorySelectedPath.slice(0, levelIndex);
+
+            if (!nodes || nodes.length === 0) {
+                updateCategoryBreadcrumb();
+                return;
+            }
+
+            const levelNames = ['القسم الرئيسي', 'الفرعي', 'المستوى ' + (levelIndex + 1)];
+            const labelText = levelIndex < 2 ? levelNames[levelIndex] : levelNames[2];
+
+            const wrap = document.createElement('div');
+            wrap.className = 'category-level-wrap';
+            wrap.innerHTML = `
+                <label>${labelText}</label>
+                <select onchange="onCategoryLevelSelect(${levelIndex}, this.value)">
+                    <option value="">-- اختر --</option>
+                    ${nodes.map(n => `<option value="${n._id}" data-name="${n.name}" data-icon="${n.icon || 'fa-solid fa-folder'}">${n.icon ? '' : '📁'} ${n.name} ${n.children && n.children.length > 0 ? '(' + n.children.length + ')' : ''}</option>`).join('')}
+                </select>
+            `;
+            container.appendChild(wrap);
+            updateCategoryBreadcrumb();
+        }
+
+        function onCategoryLevelSelect(levelIndex, selectedId) {
+            if (!selectedId) {
+                // Reset from this level
+                categorySelectedPath = categorySelectedPath.slice(0, levelIndex);
+                const container = document.getElementById('categoryLevels');
+                const wraps = container.querySelectorAll('.category-level-wrap');
+                for (let i = wraps.length - 1; i > levelIndex; i--) {
+                    wraps[i].remove();
+                }
+                document.getElementById('selectedCategoryId').value = categorySelectedPath.length > 0 ? categorySelectedPath[categorySelectedPath.length - 1].id : '';
+                updateCategoryBreadcrumb();
+                return;
+            }
+
+            // Find selected node in tree (recursive search)
+            const node = findNodeInTree(categoryPickerTree, selectedId);
+            if (!node) return;
+
+            // Update path
+            categorySelectedPath = categorySelectedPath.slice(0, levelIndex);
+            categorySelectedPath.push({ id: node._id, name: node.name, icon: node.icon });
+
+            // Set hidden input
+            document.getElementById('selectedCategoryId').value = node._id;
+
+            // Remove error state
+            document.getElementById('categoryPicker').classList.remove('error');
+
+            // If has children, show next level
+            if (node.children && node.children.length > 0) {
+                renderCategoryLevel(levelIndex + 1, node.children);
+            } else {
+                // Remove dropdowns after this level
+                const container = document.getElementById('categoryLevels');
+                const wraps = container.querySelectorAll('.category-level-wrap');
+                for (let i = wraps.length - 1; i > levelIndex; i--) {
+                    wraps[i].remove();
+                }
+                updateCategoryBreadcrumb();
+            }
+        }
+
+        function findNodeInTree(nodes, id) {
+            for (const node of nodes) {
+                if (node._id === id) return node;
+                if (node.children && node.children.length > 0) {
+                    const found = findNodeInTree(node.children, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function updateCategoryBreadcrumb() {
+            const breadcrumb = document.getElementById('categoryBreadcrumb');
+            if (categorySelectedPath.length === 0) {
+                breadcrumb.innerHTML = '<span class="crumb-placeholder">اختر التصنيف...</span>';
+                return;
+            }
+            breadcrumb.innerHTML = categorySelectedPath.map((item, i) => {
+                const sep = i < categorySelectedPath.length - 1 ? ' <span class="crumb-sep">◂</span> ' : '';
+                return `<span class="crumb-item">${item.name}</span>${sep}`;
+            }).join('');
+        }
+
+        function resetCategoryPicker() {
+            categorySelectedPath = [];
+            document.getElementById('selectedCategoryId').value = '';
+            document.getElementById('categoryBreadcrumb').innerHTML = '<span class="crumb-placeholder">اختر التصنيف...</span>';
+            const container = document.getElementById('categoryLevels');
+            container.innerHTML = '';
+            // Re-render first level
+            if (categoryPickerTree.length > 0) {
+                renderCategoryLevel(0, categoryPickerTree);
+            }
+        }
+
+        function getSelectedCategoryId() {
+            return document.getElementById('selectedCategoryId').value || null;
+        }
+
+        // Set category picker to a specific categoryId (for edit mode)
+        function setCategoryPickerValue(categoryId) {
+            if (!categoryId || categoryPickerTree.length === 0) return;
+            // Find path from root to this category
+            const path = findPathInTree(categoryPickerTree, categoryId);
+            if (!path) return;
+
+            // Reset picker
+            categorySelectedPath = [];
+            const container = document.getElementById('categoryLevels');
+            container.innerHTML = '';
+
+            // Re-render each level and select
+            let currentNodes = categoryPickerTree;
+            path.forEach((nodeId, levelIndex) => {
+                renderCategoryLevel(levelIndex, currentNodes);
+                const selects = container.querySelectorAll('select');
+                if (selects[levelIndex]) {
+                    selects[levelIndex].value = nodeId;
+                }
+                const node = findNodeInTree(currentNodes, nodeId);
+                if (node) {
+                    categorySelectedPath.push({ id: node._id, name: node.name, icon: node.icon });
+                    currentNodes = node.children || [];
+                }
+            });
+
+            document.getElementById('selectedCategoryId').value = categoryId;
+            updateCategoryBreadcrumb();
+
+            // Show children if last selected has children
+            const lastNode = findNodeInTree(categoryPickerTree, categoryId);
+            if (lastNode && lastNode.children && lastNode.children.length > 0) {
+                renderCategoryLevel(path.length, lastNode.children);
+            }
+        }
+
+        function findPathInTree(nodes, targetId, currentPath = []) {
+            for (const node of nodes) {
+                const newPath = [...currentPath, node._id];
+                if (node._id === targetId) return newPath;
+                if (node.children && node.children.length > 0) {
+                    const found = findPathInTree(node.children, targetId, newPath);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
         /**
          * Add child category
          */
@@ -1843,6 +2142,7 @@
             await loadSections();
             await loadSheikhs();
             await loadLessons();
+            await loadCategoryPickerTree(); // Load category picker for add lesson form
         });
     </script>
 </body>

@@ -8,6 +8,7 @@ const LessonSchema = new mongoose.Schema({
     title: { type: String, required: true },
     subtitle: String,
     sheikhId: String,
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
     status: { type: String, default: 'draft' },
     aiAnalyzed: { type: Boolean, default: false },
     rawContent: String,
