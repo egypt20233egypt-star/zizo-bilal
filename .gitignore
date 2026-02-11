@@ -1,13 +1,10 @@
 # Dependencies
 node_modules/
  
-# Automation
-upload.bat
-upload.py
-Start_Server.bat
-start_server.py
-GEMINI.md
-README.md
+# Local Scripts & Docs (NEVER upload)
+*.bat
+*.py
+*.md
 
 # Environment
 .env
@@ -23,3 +20,7 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Gemini/Agent
+.gemini/
+.agent/
