@@ -1701,8 +1701,15 @@
         async function loadCategoryPickerTree() {
             try {
                 const res = await fetch('/api/categories/tree');
-                categoryPickerTree = await res.json();
-                renderCategoryLevel(0, categoryPickerTree);
+                const data = await res.json();
+                console.log('📂 Category Picker - API response:', data);
+                categoryPickerTree = Array.isArray(data) ? data : [];
+                console.log('📂 Category Picker - tree length:', categoryPickerTree.length);
+                if (categoryPickerTree.length > 0) {
+                    renderCategoryLevel(0, categoryPickerTree);
+                } else {
+                    console.warn('📂 Category Picker - No categories found!');
+                }
             } catch (error) {
                 console.error('Load category picker error:', error);
             }
@@ -2139,6 +2146,7 @@
             restoreDraft();
             renderQuickIcons();
             await loadCategories(null);
+            await loadCategoryTree(); // Load tree view for categories tab
             await loadSections();
             await loadSheikhs();
             await loadLessons();
