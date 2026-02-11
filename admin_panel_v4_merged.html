@@ -723,7 +723,7 @@
         </div>
         <div class="user-info">
             <span id="username" style="color: var(--gold); font-weight: 600;"></span>
-            <a href="/api/admin/logout" class="btn">🚪 تسجيل الخروج</a>
+            <a href="/api/admin/logout" class="btn"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</a>
         </div>
     </div>
 
@@ -740,26 +740,27 @@
             </div>
             <div class="stat-card">
                 <h3 id="lessonsCount">0</h3>
-                <p>📖 الدروس</p>
+                <p><i class="fa-solid fa-book-quran"></i> الدروس</p>
             </div>
         </div>
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab active" onclick="showTab('aiInput')">🤖 AI Master Input</button>
+            <button class="tab active" onclick="showTab('aiInput')"><i class="fa-solid fa-wand-magic-sparkles"></i> AI
+                Master Input</button>
             <button class="tab" onclick="showTab('categories')"><i class="fa-solid fa-sitemap"></i> الأقسام
                 الرئيسية</button>
             <button class="tab" onclick="showTab('sections')"><i class="fa-solid fa-book-open"></i> أقسام
                 الدروس</button>
             <button class="tab" onclick="showTab('sheikhs')"><i class="fa-solid fa-user"></i> الشيوخ</button>
-            <button class="tab" onclick="showTab('lessons')">📖 الدروس</button>
-            <button class="tab" onclick="showTab('addLesson')">➕ إضافة درس</button>
-            <button class="tab" onclick="showTab('preview')">👁️ معاينة</button>
+            <button class="tab" onclick="showTab('lessons')"><i class="fa-solid fa-book-quran"></i> الدروس</button>
+            <button class="tab" onclick="showTab('addLesson')"><i class="fa-solid fa-plus"></i> إضافة درس</button>
+            <button class="tab" onclick="showTab('preview')"><i class="fa-solid fa-eye"></i> معاينة</button>
         </div>
 
         <!-- AI Input Panel -->
         <div id="aiInput" class="panel active">
-            <h2>🤖 حقل الذكاء الاصطناعي (Master Input)</h2>
+            <h2><i class="fa-solid fa-wand-magic-sparkles"></i> حقل الذكاء الاصطناعي (Master Input)</h2>
             <p style="color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
                 اكتب المحتوى الخام هنا، والذكاء الاصطناعي هيوزعه تلقائياً على الأقسام المتاحة.
             </p>
@@ -770,7 +771,7 @@
                     ✨ تحليل بالذكاء الاصطناعي
                 </button>
                 <button class="btn" onclick="saveDraft()">
-                    💾 حفظ كمسودة
+                    <i class="fa-solid fa-floppy-disk"></i> حفظ كمسودة
                 </button>
                 <button class="btn" onclick="clearInput()">
                     🗑️ مسح
@@ -870,7 +871,7 @@
         <div id="sections" class="panel">
             <h2><i class="fa-solid fa-book-open"></i> إدارة الأقسام (ديناميكية)</h2>
             <div class="alert">
-                ℹ️ الأقسام ديناميكية - يمكنك إضافة أو حذف أي قسم من MongoDB
+                <i class="fa-solid fa-circle-info"></i> الأقسام ديناميكية - يمكنك إضافة أو حذف أي قسم من MongoDB
             </div>
             <button class="btn btn-primary" onclick="seedSections()">🌱 ملء الأقسام الافتراضية (15 قسم)</button>
             <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
@@ -880,7 +881,7 @@
                 <div style="display:flex; gap:10px; flex-wrap:wrap">
                     <input type="text" id="newSectionKey" placeholder="sectionKey (انجليزي)" style="flex:1">
                     <input type="text" id="newSectionLabel" placeholder="الاسم بالعربي" style="flex:1">
-                    <input type="text" id="newSectionIcon" placeholder="📖" style="width:80px">
+                    <input type="text" id="newSectionIcon" placeholder="fa-book-quran" style="width:80px">
                     <button class="btn btn-primary" onclick="addSection()">إضافة</button>
                 </div>
             </div>
@@ -895,7 +896,8 @@
                 <label>اسم الشيخ</label>
                 <div style="display:flex; gap:10px">
                     <input type="text" id="sheikhName" placeholder="مثال: الشيخ الشعراوي" style="flex:1">
-                    <button class="btn btn-primary" onclick="addSheikh()">➕ إضافة</button>
+                    <button class="btn btn-primary" onclick="addSheikh()"><i class="fa-solid fa-plus"></i>
+                        إضافة</button>
                 </div>
             </div>
             <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
@@ -904,13 +906,13 @@
 
         <!-- Lessons Panel -->
         <div id="lessons" class="panel">
-            <h2>📖 الدروس المضافة</h2>
+            <h2><i class="fa-solid fa-book-quran"></i> الدروس المضافة</h2>
             <div id="lessonsList"></div>
         </div>
 
         <!-- Add Lesson Panel -->
         <div id="addLesson" class="panel">
-            <h2 id="formTitle">➕ إضافة درس جديد</h2>
+            <h2 id="formTitle"><i class="fa-solid fa-plus"></i> إضافة درس جديد</h2>
             <div class="form-group">
                 <label>عنوان الدرس</label>
                 <input type="text" id="lessonTitle" placeholder="مثال: درس عن مصعب بن عمير">
@@ -947,7 +949,8 @@
                     التحليل - للحفظ الداخلي فقط</small>
             </div>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-primary" id="saveDraftBtn" onclick="saveLesson(false)">💾 حفظ كمسودة</button>
+                <button class="btn btn-primary" id="saveDraftBtn" onclick="saveLesson(false)"><i
+                        class="fa-solid fa-floppy-disk"></i> حفظ كمسودة</button>
                 <button class="btn btn-success" id="savePublishBtn" onclick="saveLesson(true)">🚀 نشر مباشرة</button>
                 <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()">📋 استيراد
                     JSON/نص</button>
@@ -958,7 +961,7 @@
 
         <!-- Preview Panel -->
         <div id="preview" class="panel">
-            <h2>👁️ معاينة الموقع</h2>
+            <h2><i class="fa-solid fa-eye"></i> معاينة الموقع</h2>
             <div class="form-group">
                 <label>اختر درس للمعاينة</label>
                 <select id="previewLesson" onchange="showPreview()"></select>
@@ -1243,7 +1246,7 @@
                     return `
                         <div class="list-item">
                             <div>
-                                <strong>📖 ${l.title}</strong>
+                                <strong><i class="fa-solid fa-book-quran"></i> ${l.title}</strong>
                                 <small style="color:#999"> - ${sheikhName}</small>
                                 <span class="badge badge-${isPublished ? 'success' : 'draft'}">
                                     ${isPublished ? 'منشور' : 'مسودة'}
@@ -1310,7 +1313,7 @@
                     const wasEditing = !!currentEditId;
                     cancelEdit();
                     loadLessons();
-                    alert(wasEditing ? '✅ تم تحديث الدرس بنجاح' : (publish ? '🚀 تم نشر الدرس' : '💾 تم حفظ الدرس كمسودة'));
+                    alert(wasEditing ? '✅ تم تحديث الدرس بنجاح' : (publish ? '🚀 تم نشر الدرس' : '✅ تم حفظ الدرس كمسودة'));
                     showTab('lessons');
                     // click the lessons tab to make it active
                     document.querySelectorAll('.tab')[3]?.click();
@@ -1354,7 +1357,7 @@
                 // تغيير UI لوضع التعديل
                 document.getElementById('formTitle').innerHTML = '✏️ تعديل الدرس: <span style="color:#3498db">' + lesson.title + '</span>';
                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
-                document.getElementById('saveDraftBtn').textContent = '💾 حفظ التعديل';
+                document.getElementById('saveDraftBtn').textContent = '✅ حفظ التعديل';
                 document.getElementById('savePublishBtn').textContent = '🚀 حفظ ونشر';
 
                 // الانتقال لتاب الإضافة
@@ -1381,7 +1384,7 @@
             resetCategoryPicker();
             document.getElementById('formTitle').textContent = '➕ إضافة درس جديد';
             document.getElementById('cancelEditBtn').style.display = 'none';
-            document.getElementById('saveDraftBtn').textContent = '💾 حفظ كمسودة';
+            document.getElementById('saveDraftBtn').textContent = '✅ حفظ كمسودة';
             document.getElementById('savePublishBtn').textContent = '🚀 نشر مباشرة';
         }
 
@@ -1436,7 +1439,7 @@
                 return alert('❌ الرجاء كتابة محتوى أولاً!');
             }
 
-            alert('🤖 تحليل الذكاء الاصطناعي قادم في Phase 4!\n\nحالياً: الأقسام متوفرة والنظام جاهز للتوزيع الديناميكي.');
+            alert('✨ تحليل الذكاء الاصطناعي قادم في Phase 4!\n\nحالياً: الأقسام متوفرة والنظام جاهز للتوزيع الديناميكي.');
         }
 
         function saveDraft() {
