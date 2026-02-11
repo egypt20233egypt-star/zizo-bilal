@@ -1561,8 +1561,8 @@
             let currentSection = 'general';
 
             lines.forEach(line => {
-                if (line.startsWith('##') || line.match(/^[📖🕌👤⚖️💡📝❓🎙️🤖📚✨🔒📋🌟]/)) {
-                    currentSection = line.replace(/^##\s*/, '').replace(/^[📖🕌👤⚖️💡📝❓🎙️🤖📚✨🔒📋🌟]\s*/, '').trim();
+                if (line.startsWith('##')) {
+                    currentSection = line.replace(/^##\s*/, '').trim();
                     sections[currentSection] = [];
                 } else if (line.trim()) {
                     if (!sections[currentSection]) sections[currentSection] = [];
