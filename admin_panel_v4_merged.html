@@ -1104,6 +1104,30 @@
             }
         }
 
+        // ============ Auth Check ============
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/check');
+                const data = await res.json();
+
+                if (!data.authenticated) {
+                    // غير مسجل - حوّله للـ login
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                // مسجل دخول - عرض اسم المستخدم
+                const usernameEl = document.getElementById('username');
+                if (usernameEl) {
+                    usernameEl.textContent = data.username || 'Admin';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                // في حالة الخطأ - حوّله للـ login للأمان
+                window.location.href = '/admin';
+            }
+        }
+
         async function seedSections() {
             if (!confirm('هل تريد ملء الأقسام الافتراضية (15 قسم)؟')) return;
 
