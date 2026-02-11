@@ -48,11 +48,37 @@
             box-sizing: border-box;
         }
 
+
         body {
             font-family: 'Cairo', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
+        }
+
+        /* ========================================
+           Icon Styling (Font Awesome)
+           ======================================== */
+        .stat-card i,
+        .tab i,
+        .panel h2 i,
+        label i {
+            margin-left: 8px;
+            opacity: 0.9;
+            vertical-align: middle;
+        }
+
+        .stat-card i {
+            font-size: 1.1em;
+            color: var(--accent);
+        }
+
+        .tab i {
+            font-size: 0.9em;
+        }
+
+        .panel h2 i {
+            font-size: 0.95em;
         }
 
         /* Header */
@@ -588,7 +614,7 @@
         }
 
         /* ========================================
-           📂 Category Picker (Modern)
+           🎯 Category Picker (Modern)
            ======================================== */
         .category-picker {
             background: var(--bg-elevated);
@@ -706,11 +732,11 @@
         <div class="stats">
             <div class="stat-card">
                 <h3 id="sectionsCount">0</h3>
-                <p>📚 الأقسام</p>
+                <p><i class="fa-solid fa-book-open"></i> الأقسام</p>
             </div>
             <div class="stat-card">
                 <h3 id="sheikhsCount">0</h3>
-                <p>👤 الشيوخ</p>
+                <p><i class="fa-solid fa-user"></i> الشيوخ</p>
             </div>
             <div class="stat-card">
                 <h3 id="lessonsCount">0</h3>
@@ -723,8 +749,9 @@
             <button class="tab active" onclick="showTab('aiInput')">🤖 AI Master Input</button>
             <button class="tab" onclick="showTab('categories')"><i class="fa-solid fa-sitemap"></i> الأقسام
                 الرئيسية</button>
-            <button class="tab" onclick="showTab('sections')">📚 أقسام الدروس</button>
-            <button class="tab" onclick="showTab('sheikhs')">👤 الشيوخ</button>
+            <button class="tab" onclick="showTab('sections')"><i class="fa-solid fa-book-open"></i> أقسام
+                الدروس</button>
+            <button class="tab" onclick="showTab('sheikhs')"><i class="fa-solid fa-user"></i> الشيوخ</button>
             <button class="tab" onclick="showTab('lessons')">📖 الدروس</button>
             <button class="tab" onclick="showTab('addLesson')">➕ إضافة درس</button>
             <button class="tab" onclick="showTab('preview')">👁️ معاينة</button>
@@ -751,7 +778,8 @@
             </div>
 
             <h3 style="color: var(--gold); margin: 2rem 0 1rem;">
-                📂 الأقسام المتاحة <span style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">(سيتم توزيع المحتوى
+                <i class="fa-solid fa-folder-tree"></i> الأقسام المتاحة <span
+                    style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">(سيتم توزيع المحتوى
                     عليها)</span>
             </h3>
             <div id="availableSections"
@@ -840,7 +868,7 @@
 
         <!-- Sections Panel -->
         <div id="sections" class="panel">
-            <h2>📚 إدارة الأقسام (ديناميكية)</h2>
+            <h2><i class="fa-solid fa-book-open"></i> إدارة الأقسام (ديناميكية)</h2>
             <div class="alert">
                 ℹ️ الأقسام ديناميكية - يمكنك إضافة أو حذف أي قسم من MongoDB
             </div>
@@ -862,7 +890,7 @@
 
         <!-- Sheikhs Panel -->
         <div id="sheikhs" class="panel">
-            <h2>👤 إدارة الشيوخ</h2>
+            <h2><i class="fa-solid fa-user"></i> إدارة الشيوخ</h2>
             <div class="form-group">
                 <label>اسم الشيخ</label>
                 <div style="display:flex; gap:10px">
@@ -891,9 +919,9 @@
                 <label>الشيخ</label>
                 <select id="lessonSheikh"></select>
             </div>
-            <!-- 📂 Category Picker (Cascading) -->
+            <!-- 🎯 Category Picker (Cascading) -->
             <div class="form-group" id="categoryPickerContainer">
-                <label>📂 تصنيف الدرس <span style="color:#e74c3c">*</span></label>
+                <label><i class="fa-solid fa-folder-tree"></i> تصنيف الدرس <span style="color:#e74c3c">*</span></label>
                 <div class="category-picker" id="categoryPicker">
                     <div class="category-breadcrumb" id="categoryBreadcrumb">
                         <span class="crumb-placeholder">اختر التصنيف...</span>
@@ -995,7 +1023,7 @@
                     return;
                 }
 
-                document.getElementById('username').textContent = `👤 ${data.username || 'Admin'}`;
+                document.getElementById('username').textContent = `<i class="fa-solid fa-user"></i> ${data.username || 'Admin'}`;
             } catch (error) {
                 console.error('Auth check error:', error);
                 window.location.href = '/admin';
@@ -1089,7 +1117,7 @@
         async function addSection() {
             const key = document.getElementById('newSectionKey').value.trim();
             const labelAr = document.getElementById('newSectionLabel').value.trim();
-            const icon = document.getElementById('newSectionIcon').value.trim() || '📚';
+            const icon = document.getElementById('newSectionIcon').value.trim() || '<i class="fa-solid fa-book-open"></i>';
 
             if (!key || !labelAr) return alert('أدخل البيانات كاملة');
 
@@ -1147,7 +1175,7 @@
 
                 document.getElementById('sheikhsList').innerHTML = sheikhsList.map(s => `
                     <div class="list-item">
-                        <span>👤 ${s.name}</span>
+                        <span><i class="fa-solid fa-user"></i> ${s.name}</span>
                         <button class="btn btn-danger" onclick="deleteSheikh('${s._id}')">حذف</button>
                     </div>
                 `).join('') || '<p>لا يوجد شيوخ</p>';
@@ -1248,7 +1276,7 @@
             if (!categoryId) {
                 document.getElementById('categoryPicker').classList.add('error');
                 document.getElementById('categoryPicker').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return alert('📂 اختر تصنيف الدرس أولاً');
+                return alert('⚠️ اختر تصنيف الدرس أولاً');
             }
 
             const lessonData = {
@@ -1757,7 +1785,7 @@
         }
 
         // ========================================
-        // 📂 Category Picker (Cascading) Logic
+        // 🎯 Category Picker (Cascading) Logic
         // ========================================
         let categoryPickerTree = []; // Full tree cache
         let categorySelectedPath = []; // [{id, name, icon}, ...]
@@ -1766,13 +1794,13 @@
             try {
                 const res = await fetch('/api/categories/tree');
                 const data = await res.json();
-                console.log('📂 Category Picker - API response:', data);
+                console.log('🎯 Category Picker - API response:', data);
                 categoryPickerTree = Array.isArray(data) ? data : [];
-                console.log('📂 Category Picker - tree length:', categoryPickerTree.length);
+                console.log('🎯 Category Picker - tree length:', categoryPickerTree.length);
                 if (categoryPickerTree.length > 0) {
                     renderCategoryLevel(0, categoryPickerTree);
                 } else {
-                    console.warn('📂 Category Picker - No categories found!');
+                    console.warn('🎯 Category Picker - No categories found!');
                 }
             } catch (error) {
                 console.error('Load category picker error:', error);
