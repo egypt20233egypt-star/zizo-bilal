@@ -1029,7 +1029,7 @@
                     return;
                 }
 
-                document.getElementById('username').textContent = `<i class="fa-solid fa-user"></i> ${data.username || 'Admin'}`;
+                document.getElementById('username').textContent = data.username || 'Admin';
             } catch (error) {
                 console.error('Auth check error:', error);
                 window.location.href = '/admin';
