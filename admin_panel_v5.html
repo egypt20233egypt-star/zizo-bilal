@@ -941,7 +941,7 @@
             try {
                 const res = await fetch('/api/admin/check');
                 const data = await res.json();
-                if (!data.loggedIn) { window.location.href = '/admin'; return; }
+                if (!data.authenticated) { window.location.href = '/admin'; return; }
                 document.getElementById('sidebarUsername').textContent = data.username || 'Admin';
             } catch (e) { window.location.href = '/admin'; }
         }
