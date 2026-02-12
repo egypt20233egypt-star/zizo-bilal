@@ -74,12 +74,17 @@ router.get('/logout', (req, res) => {
  * فحص الجلسة
  */
 router.get('/check', (req, res) => {
+    console.log('🔍 [SERVER /check] Session ID:', req.sessionID);
+    console.log('🔍 [SERVER /check] adminId:', req.session?.adminId);
+    console.log('🔍 [SERVER /check] username:', req.session?.username);
+
     if (req.session && req.session.adminId) {
         res.json({
             authenticated: true,
             username: req.session.username
         });
     } else {
+        console.warn('❌ [SERVER /check] NOT authenticated!');
         res.json({ authenticated: false });
     }
 });
