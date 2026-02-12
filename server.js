@@ -71,6 +71,11 @@ app.get('/admin/panel', requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'admin_panel_v4_merged.html'));
 });
 
+// Admin Panel v5 (Modern UI)
+app.get('/admin/v5', requireAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin_panel_v5.html'));
+});
+
 app.get('/website', (req, res) => {
     res.sendFile(path.join(__dirname, 'website.html'));
 });

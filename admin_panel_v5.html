@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عِلمٌ يُنتَفَعُ بِه - لوحة التحكم v5</title>
+    <!-- Bootstrap 5.3 RTL -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.5 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Cairo Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-w: 260px;
+            --topbar-h: 64px;
+            --accent: #6366f1;
+            --accent2: #8b5cf6;
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --bg-body: #0c0c1d;
+            --bg-sidebar: #0f0f23;
+            --bg-topbar: rgba(15, 15, 35, 0.85);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-body);
+            color: #e2e2e8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        /* ===== LOADER ===== */
+        #loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: var(--bg-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity .5s;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--glass-border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-left: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            z-index: 1050;
+            transition: transform .3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .sidebar-brand {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+        }
+
+        .sidebar-brand i {
+            color: var(--accent);
+            font-size: 1.3rem;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: .75rem 0;
+        }
+
+        .sidebar-nav .nav-link {
+            color: rgba(255, 255, 255, .6);
+            padding: .75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            font-size: .9rem;
+            font-weight: 500;
+            border-right: 3px solid transparent;
+            transition: all .2s;
+        }
+
+        .sidebar-nav .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .sidebar-nav .nav-link:hover {
+            color: var(--accent);
+            background: rgba(99, 102, 241, .08);
+            border-right-color: var(--accent);
+        }
+
+        .sidebar-nav .nav-link.active {
+            color: var(--accent);
+            background: rgba(99, 102, 241, .12);
+            border-right-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-nav .nav-link .badge {
+            font-size: .65rem;
+            padding: .2em .5em;
+            margin-right: auto;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--glass-border);
+            margin: .5rem 1rem;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .6rem;
+            background: var(--glass);
+            border-radius: 10px;
+            margin-bottom: .5rem;
+        }
+
+        .sidebar-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: .9rem;
+        }
+
+        .sidebar-user-info h6 {
+            font-size: .8rem;
+            margin: 0;
+            color: #fff;
+        }
+
+        .sidebar-user-info small {
+            font-size: .7rem;
+            color: rgba(255, 255, 255, .5);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-wrap {
+            margin-right: var(--sidebar-w);
+            min-height: 100vh;
+            transition: margin .3s;
+        }
+
+        /* ===== TOPBAR ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1040;
+            height: var(--topbar-h);
+            background: var(--bg-topbar);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+        }
+
+        .topbar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: .5rem;
+        }
+
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: rgba(255, 255, 255, .6);
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+        }
+
+        .btn-icon:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, .1);
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, .6);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: .25rem;
+            display: none;
+        }
+
+        /* ===== CONTENT ===== */
+        .content-area {
+            padding: 1.5rem;
+        }
+
+        /* ===== GLASS CARD ===== */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            transition: all .3s;
+        }
+
+        .glass:hover {
+            background: var(--glass-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+        }
+
+        /* ===== STAT CARDS ===== */
+        .stat-card {
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.purple {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+
+        .stat-icon.green {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .stat-icon.blue {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .stat-icon.amber {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .stat-num {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: .85rem;
+            color: rgba(255, 255, 255, .5);
+            margin-top: .15rem;
+        }
+
+        /* ===== TABS ===== */
+        .admin-tabs {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            padding: .75rem;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-bottom: 1.25rem;
+        }
+
+        .admin-tab {
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, .6);
+            font-family: 'Cairo';
+            font-size: .85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .admin-tab:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .admin-tab.active {
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            box-shadow: 0 4px 12px rgba(99, 102, 241, .3);
+        }
+
+        /* ===== PANEL ===== */
+        .admin-panel {
+            display: none;
+            animation: panelIn .4s ease;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        @keyframes panelIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== LIST ITEMS ===== */
+        .item-card {
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .75rem;
+            border-bottom: 1px solid var(--glass-border);
+            transition: background .2s;
+        }
+
+        .item-card:hover {
+            background: rgba(99, 102, 241, .05);
+        }
+
+        .item-card:last-child {
+            border-bottom: none;
+        }
+
+        /* ===== FORMS ===== */
+        .form-control,
+        .form-select {
+            background: rgba(255, 255, 255, .03) !important;
+            border-color: var(--glass-border) !important;
+            color: #e2e2e8 !important;
+            font-family: 'Cairo';
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 .2rem rgba(99, 102, 241, .2) !important;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, .3) !important;
+        }
+
+        .form-label {
+            font-size: .85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .7);
+        }
+
+        /* ===== FAB (Material v3) ===== */
+        .fab-wrap {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            z-index: 1060;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fab-main {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, .4);
+            transition: all .3s cubic-bezier(.4, 0, .2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab-main:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 28px rgba(99, 102, 241, .55);
+        }
+
+        .fab-main.open {
+            border-radius: 50%;
+        }
+
+        .fab-main.open i {
+            transform: rotate(45deg);
+        }
+
+        .fab-main i {
+            transition: transform .3s;
+        }
+
+        .fab-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all .25s;
+        }
+
+        .fab-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .fab-item {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            color: #fff;
+            font-size: .95rem;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .3);
+            transition: transform .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .fab-item:hover {
+            transform: scale(1.12);
+        }
+
+        .fab-item .tip {
+            position: absolute;
+            right: 56px;
+            background: var(--bg-sidebar);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: .75rem;
+            white-space: nowrap;
+            border: 1px solid var(--glass-border);
+            opacity: 0;
+            transition: opacity .2s;
+            pointer-events: none;
+        }
+
+        .fab-item:hover .tip {
+            opacity: 1;
+        }
+
+        .fab-green {
+            background: linear-gradient(135deg, var(--success), #059669);
+        }
+
+        .fab-purple {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+
+        .fab-orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .fab-gray {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:991px) {
+            .sidebar {
+                transform: translateX(110%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-wrap {
+                margin-right: 0;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+
+        @media(max-width:575px) {
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .admin-tabs {
+                justify-content: center;
+            }
+        }
+
+        /* ===== OVERLAY ===== */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1049;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(3px);
+            display: none;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-moon"></i>
+                عِلمٌ يُنتَفَعُ بِه
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul class="nav flex-column" id="sidebarNav">
+                <li><a class="nav-link active" href="#" data-panel="dashboard">
+                        <i class="fa-solid fa-chart-pie"></i> لوحة التحكم
+                    </a></li>
+                <li><a class="nav-link" href="#" data-panel="lessons">
+                        <i class="fa-solid fa-book-open"></i> الدروس
+                        <span class="badge bg-primary" id="navLessonsCount">0</span>
+                    </a></li>
+                <li><a class="nav-link" href="#" data-panel="addLesson">
+                        <i class="fa-solid fa-plus-circle"></i> إضافة درس
+                    </a></li>
+                <div class="sidebar-divider"></div>
+                <li><a class="nav-link" href="#" data-panel="sheikhs">
+                        <i class="fa-solid fa-user-tie"></i> الشيوخ
+                        <span class="badge bg-success" id="navSheikhsCount">0</span>
+                    </a></li>
+                <li><a class="nav-link" href="#" data-panel="categories">
+                        <i class="fa-solid fa-folder-tree"></i> الأقسام
+                    </a></li>
+                <li><a class="nav-link" href="#" data-panel="sections">
+                        <i class="fa-solid fa-puzzle-piece"></i> Section Registry
+                    </a></li>
+                <div class="sidebar-divider"></div>
+                <li><a class="nav-link" href="#" data-panel="aiInput">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI Input
+                    </a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="sidebar-user-info">
+                    <h6 id="sidebarUsername">Admin</h6>
+                    <small>Super Admin</small>
+                </div>
+            </div>
+            <button class="btn btn-outline-danger btn-sm w-100" onclick="logoutAdmin()">
+                <i class="fa-solid fa-right-from-bracket"></i> خروج
+            </button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <div class="main-wrap">
+        <!-- Topbar -->
+        <header class="topbar">
+            <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+            <span class="topbar-title" id="topbarTitle">لوحة التحكم</span>
+            <div class="topbar-actions">
+                <button class="btn-icon" title="تحديث"><i class="fa-solid fa-arrows-rotate"></i></button>
+                <a href="/website" target="_blank" class="btn-icon" title="الموقع"><i class="fa-solid fa-globe"></i></a>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content-area">
+
+            <!-- ===== Dashboard Panel ===== -->
+            <div class="admin-panel active" id="panel-dashboard">
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6 col-xl-3" data-aos="fade-up" data-aos-delay="100">
+                        <div class="glass stat-card">
+                            <div class="stat-icon purple"><i class="fa-solid fa-book-open"></i></div>
+                            <div>
+                                <div class="stat-num" id="statLessons">0</div>
+                                <div class="stat-label">الدروس</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3" data-aos="fade-up" data-aos-delay="200">
+                        <div class="glass stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-user-tie"></i></div>
+                            <div>
+                                <div class="stat-num" id="statSheikhs">0</div>
+                                <div class="stat-label">الشيوخ</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3" data-aos="fade-up" data-aos-delay="300">
+                        <div class="glass stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-folder-tree"></i></div>
+                            <div>
+                                <div class="stat-num" id="statCategories">0</div>
+                                <div class="stat-label">الأقسام</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3" data-aos="fade-up" data-aos-delay="400">
+                        <div class="glass stat-card">
+                            <div class="stat-icon amber"><i class="fa-solid fa-puzzle-piece"></i></div>
+                            <div>
+                                <div class="stat-num" id="statSections">0</div>
+                                <div class="stat-label">الأقسام الذكية</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass p-4" data-aos="fade-up" data-aos-delay="500">
+                    <h5 class="mb-3"><i class="fa-solid fa-rocket text-warning"></i> مرحباً بك!</h5>
+                    <p style="color:rgba(255,255,255,.6)">هذه لوحة التحكم الحديثة v5. استخدم القائمة الجانبية أو الأزرار
+                        العائمة للتنقل.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-sm btn-outline-light" onclick="navTo('lessons')"><i
+                                class="fa-solid fa-book-open"></i> عرض الدروس</button>
+                        <button class="btn btn-sm btn-outline-light" onclick="navTo('addLesson')"><i
+                                class="fa-solid fa-plus"></i> درس جديد</button>
+                        <button class="btn btn-sm btn-outline-light" onclick="navTo('aiInput')"><i
+                                class="fa-solid fa-wand-magic-sparkles"></i> AI Input</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Lessons Panel ===== -->
+            <div class="admin-panel" id="panel-lessons">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fa-solid fa-book-open text-primary"></i> الدروس</h5>
+                    <button class="btn btn-sm btn-primary" onclick="navTo('addLesson')"><i class="fa-solid fa-plus"></i>
+                        درس جديد</button>
+                </div>
+                <div class="glass" id="lessonsListV5">
+                    <div class="p-4 text-center" style="color:rgba(255,255,255,.4)">جاري التحميل...</div>
+                </div>
+            </div>
+
+            <!-- ===== Add Lesson Panel ===== -->
+            <div class="admin-panel" id="panel-addLesson">
+                <h5 class="mb-3"><i class="fa-solid fa-plus-circle text-primary"></i> إضافة درس جديد</h5>
+                <div class="glass p-4">
+                    <div class="mb-3">
+                        <label class="form-label">عنوان الدرس</label>
+                        <input type="text" class="form-control" id="v5LessonTitle"
+                            placeholder="مثال: درس عن مصعب بن عمير">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الشيخ</label>
+                        <select class="form-select" id="v5LessonSheikh"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المحتوى الخام</label>
+                        <textarea class="form-control" id="v5LessonContent" rows="6"
+                            placeholder="ألصق تفريغ الدرس هنا..."></textarea>
+                    </div>
+                    <div id="v5DynamicSections"><!-- Dynamic sections load here --></div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-primary" onclick="v5SaveLesson(false)"><i
+                                class="fa-solid fa-floppy-disk"></i> حفظ كمسودة</button>
+                        <button class="btn btn-success" onclick="v5SaveLesson(true)"><i class="fa-solid fa-rocket"></i>
+                            نشر</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Sheikhs Panel ===== -->
+            <div class="admin-panel" id="panel-sheikhs">
+                <h5 class="mb-3"><i class="fa-solid fa-user-tie text-success"></i> الشيوخ</h5>
+                <div class="glass" id="sheikhsListV5">
+                    <div class="p-4 text-center" style="color:rgba(255,255,255,.4)">جاري التحميل...</div>
+                </div>
+            </div>
+
+            <!-- ===== Categories Panel ===== -->
+            <div class="admin-panel" id="panel-categories">
+                <h5 class="mb-3"><i class="fa-solid fa-folder-tree text-info"></i> الأقسام</h5>
+                <div class="glass p-4" id="categoriesTreeV5">
+                    <div class="text-center" style="color:rgba(255,255,255,.4)">جاري التحميل...</div>
+                </div>
+            </div>
+
+            <!-- ===== Sections Panel ===== -->
+            <div class="admin-panel" id="panel-sections">
+                <h5 class="mb-3"><i class="fa-solid fa-puzzle-piece text-warning"></i> Section Registry</h5>
+                <div class="glass" id="sectionsListV5">
+                    <div class="p-4 text-center" style="color:rgba(255,255,255,.4)">جاري التحميل...</div>
+                </div>
+            </div>
+
+            <!-- ===== AI Input Panel ===== -->
+            <div class="admin-panel" id="panel-aiInput">
+                <h5 class="mb-3"><i class="fa-solid fa-wand-magic-sparkles text-warning"></i> التحليل الذكي</h5>
+                <div class="glass p-4">
+                    <div class="mb-3">
+                        <label class="form-label">ألصق تفريغ الدرس أو النص الخام</label>
+                        <textarea class="form-control" id="v5RawInput" rows="8" placeholder="ألصق هنا..."></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-warning"><i class="fa-solid fa-microchip"></i> تحليل بالـ AI</button>
+                        <button class="btn btn-outline-light"><i class="fa-solid fa-copy"></i> نسخ البرومبت</button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content-area -->
+    </div><!-- /main-wrap -->
+
+    <!-- ===== FAB ===== -->
+    <div class="fab-wrap" id="fabWrap">
+        <button class="fab-main" id="fabBtn"><i class="fa-solid fa-plus"></i></button>
+        <div class="fab-menu" id="fabMenu">
+            <button class="fab-item fab-green" onclick="fabGo('addLesson')"><i class="fa-solid fa-book-quran"></i><span
+                    class="tip">درس جديد</span></button>
+            <button class="fab-item fab-purple" onclick="fabGo('aiInput')"><i
+                    class="fa-solid fa-wand-magic-sparkles"></i><span class="tip">AI Input</span></button>
+            <button class="fab-item fab-orange" onclick="fabGo('categories')"><i
+                    class="fa-solid fa-folder-plus"></i><span class="tip">الأقسام</span></button>
+            <button class="fab-item fab-gray" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i
+                    class="fa-solid fa-arrow-up"></i><span class="tip">أعلى</span></button>
+        </div>
+    </div>
+
+    <!-- ===== Toast Container ===== -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999" id="toastBox"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // ===== Init AOS =====
+        AOS.init({ duration: 700, once: true });
+
+        // ===== Hide Loader =====
+        window.addEventListener('load', () => {
+            const l = document.getElementById('loader');
+            l.style.opacity = '0';
+            setTimeout(() => l.style.display = 'none', 500);
+        });
+
+        // ===== Sidebar Navigation =====
+        function navTo(panel) {
+            // Update sidebar active
+            document.querySelectorAll('.sidebar-nav .nav-link').forEach(a => {
+                a.classList.toggle('active', a.dataset.panel === panel);
+            });
+            // Show panel
+            document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('panel-' + panel);
+            if (target) target.classList.add('active');
+            // Update topbar title
+            const titles = {
+                dashboard: 'لوحة التحكم', lessons: 'الدروس', addLesson: 'إضافة درس',
+                sheikhs: 'الشيوخ', categories: 'الأقسام', sections: 'Section Registry', aiInput: 'AI Input'
+            };
+            document.getElementById('topbarTitle').textContent = titles[panel] || panel;
+            // Close sidebar on mobile
+            closeSidebar();
+            AOS.refresh();
+        }
+
+        // Sidebar click handlers
+        document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                navTo(link.dataset.panel);
+            });
+        });
+
+        // ===== Sidebar Toggle (Mobile) =====
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        });
+        overlay.addEventListener('click', closeSidebar);
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+
+        // ===== FAB =====
+        document.getElementById('fabBtn').addEventListener('click', () => {
+            document.getElementById('fabBtn').classList.toggle('open');
+            document.getElementById('fabMenu').classList.toggle('show');
+        });
+        function fabGo(panel) {
+            document.getElementById('fabBtn').classList.remove('open');
+            document.getElementById('fabMenu').classList.remove('show');
+            navTo(panel);
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.fab-wrap')) {
+                document.getElementById('fabBtn').classList.remove('open');
+                document.getElementById('fabMenu').classList.remove('show');
+            }
+        });
+
+        // ===== Toast =====
+        function showToast(msg, type = 'info') {
+            const colors = { success: 'bg-success', error: 'bg-danger', warning: 'bg-warning text-dark', info: 'bg-primary' };
+            const box = document.getElementById('toastBox');
+            const id = 'toast-' + Date.now();
+            box.innerHTML += `<div id="${id}" class="toast show align-items-center text-white ${colors[type] || colors.info} border-0 mb-2" role="alert">
+        <div class="d-flex"><div class="toast-body">${msg}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`;
+            setTimeout(() => document.getElementById(id)?.remove(), 4000);
+        }
+
+        // ===== Auth Check =====
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/check');
+                const data = await res.json();
+                if (!data.loggedIn) { window.location.href = '/admin'; return; }
+                document.getElementById('sidebarUsername').textContent = data.username || 'Admin';
+            } catch (e) { window.location.href = '/admin'; }
+        }
+
+        function logoutAdmin() {
+            if (confirm('هل أنت متأكد من الخروج؟')) {
+                fetch('/api/admin/logout').then(() => window.location.href = '/admin');
+            }
+        }
+
+        // ===== Load Data =====
+        async function loadAllData() {
+            try {
+                const [lessons, sheikhs, sections] = await Promise.all([
+                    fetch('/api/lessons').then(r => r.json()).catch(() => []),
+                    fetch('/api/sheikhs').then(r => r.json()).catch(() => []),
+                    fetch('/api/sections/all').then(r => r.json()).catch(() => [])
+                ]);
+                // Stats
+                document.getElementById('statLessons').textContent = lessons.length;
+                document.getElementById('statSheikhs').textContent = sheikhs.length;
+                document.getElementById('statSections').textContent = sections.length;
+                document.getElementById('navLessonsCount').textContent = lessons.length;
+                document.getElementById('navSheikhsCount').textContent = sheikhs.length;
+                // Lessons list
+                renderLessons(lessons);
+                // Sheikhs list
+                renderSheikhs(sheikhs);
+                // Sections list
+                renderSections(sections);
+                // Sheikh dropdown
+                const sel = document.getElementById('v5LessonSheikh');
+                sel.innerHTML = '<option value="">اختر الشيخ</option>' +
+                    sheikhs.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        function renderLessons(lessons) {
+            const el = document.getElementById('lessonsListV5');
+            if (!lessons.length) { el.innerHTML = '<div class="p-4 text-center" style="color:rgba(255,255,255,.4)">لا توجد دروس بعد</div>'; return; }
+            el.innerHTML = lessons.map(l => `
+        <div class="item-card">
+            <div>
+                <strong>${l.title}</strong>
+                <small class="d-block" style="color:rgba(255,255,255,.4)">${l.sheikhName || 'غير محدد'}</small>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <span class="badge ${l.status === 'published' ? 'bg-success' : 'bg-secondary'}">${l.status === 'published' ? 'منشور' : 'مسودة'}</span>
+                <button class="btn btn-sm btn-outline-primary" onclick="v5EditLesson('${l._id}')"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="v5DeleteLesson('${l._id}')"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>`).join('');
+        }
+
+        function renderSheikhs(sheikhs) {
+            const el = document.getElementById('sheikhsListV5');
+            if (!sheikhs.length) { el.innerHTML = '<div class="p-4 text-center" style="color:rgba(255,255,255,.4)">لا يوجد شيوخ</div>'; return; }
+            el.innerHTML = sheikhs.map(s => `
+        <div class="item-card">
+            <div><strong>${s.name}</strong><small class="d-block" style="color:rgba(255,255,255,.4)">${s.bio || ''}</small></div>
+        </div>`).join('');
+        }
+
+        function renderSections(sections) {
+            const el = document.getElementById('sectionsListV5');
+            if (!sections.length) { el.innerHTML = '<div class="p-4 text-center" style="color:rgba(255,255,255,.4)">لا توجد أقسام</div>'; return; }
+            el.innerHTML = sections.map(s => `
+        <div class="item-card">
+            <div><span style="font-size:1.2em">${s.icon || '📄'}</span> <strong>${s.labelAr}</strong>
+            <span class="badge bg-secondary ms-2">${s.schemaHint}</span></div>
+            <span class="badge ${s.isActive ? 'bg-success' : 'bg-danger'}">${s.isActive ? 'نشط' : 'معطل'}</span>
+        </div>`).join('');
+        }
+
+        // ===== Save / Edit / Delete (Bridge) =====
+        async function v5SaveLesson(publish) {
+            const title = document.getElementById('v5LessonTitle').value.trim();
+            if (!title) { showToast('⚠️ أدخل عنوان الدرس', 'warning'); return; }
+            const data = {
+                title,
+                sheikhId: document.getElementById('v5LessonSheikh').value,
+                rawContent: document.getElementById('v5LessonContent').value.trim(),
+                status: publish ? 'published' : 'draft'
+            };
+            try {
+                const res = await fetch('/api/lessons', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    showToast(publish ? '🚀 تم النشر!' : '✅ تم الحفظ!', 'success');
+                    document.getElementById('v5LessonTitle').value = '';
+                    document.getElementById('v5LessonContent').value = '';
+                    loadAllData();
+                    navTo('lessons');
+                } else { showToast('❌ فشل الحفظ', 'error'); }
+            } catch (e) { showToast('❌ خطأ في الاتصال', 'error'); }
+        }
+
+        async function v5EditLesson(id) {
+            try {
+                const res = await fetch(`/api/lessons/${id}`);
+                const l = await res.json();
+                document.getElementById('v5LessonTitle').value = l.title || '';
+                document.getElementById('v5LessonContent').value = l.rawContent || '';
+                if (l.sheikhId) document.getElementById('v5LessonSheikh').value = l.sheikhId;
+                navTo('addLesson');
+                showToast('📝 تم تحميل الدرس للتعديل', 'info');
+            } catch (e) { showToast('❌ فشل التحميل', 'error'); }
+        }
+
+        async function v5DeleteLesson(id) {
+            if (!confirm('هل تريد حذف هذا الدرس؟')) return;
+            try {
+                const res = await fetch(`/api/lessons/${id}`, { method: 'DELETE' });
+                if (res.ok) { showToast('🗑️ تم الحذف', 'success'); loadAllData(); }
+                else { showToast('❌ فشل الحذف', 'error'); }
+            } catch (e) { showToast('❌ خطأ', 'error'); }
+        }
+
+        // ===== Init =====
+        window.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadAllData();
+        });
+    </script>
+
+</body>
+
+</html>
