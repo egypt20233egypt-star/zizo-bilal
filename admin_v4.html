@@ -255,13 +255,16 @@
                 });
 
                 const data = await response.json();
+                console.log('📝 Login response:', data);
 
                 if (response.ok && data.success) {
                     // نجح! توجيه للوحة التحكم
+                    console.log('✅ Login successful! Redirecting to /admin/panel...');
                     loginBtn.textContent = '✅ نجح!';
                     loginBtn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
 
                     setTimeout(() => {
+                        console.log('🔄 Redirecting now...');
                         window.location.href = '/admin/panel';
                     }, 500);
                 } else {

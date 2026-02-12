@@ -1106,24 +1106,34 @@
 
         // ============ Auth Check ============
         async function checkAuth() {
+            console.log('🔍 [checkAuth] Starting authentication check...');
             try {
                 const res = await fetch('/api/admin/check');
+                console.log('🔍 [checkAuth] Response status:', res.status);
+
                 const data = await res.json();
+                console.log('🔍 [checkAuth] Response data:', data);
 
                 if (!data.authenticated) {
                     // غير مسجل - حوّله للـ login
+                    console.warn('❌ [checkAuth] NOT authenticated - redirecting to /admin');
                     window.location.href = '/admin';
                     return;
                 }
 
                 // مسجل دخول - عرض اسم المستخدم
+                console.log('✅ [checkAuth] Authenticated as:', data.username);
                 const usernameEl = document.getElementById('username');
                 if (usernameEl) {
                     usernameEl.textContent = data.username || 'Admin';
+                    console.log('✅ [checkAuth] Username displayed:', usernameEl.textContent);
+                } else {
+                    console.warn('⚠️ [checkAuth] Username element not found!');
                 }
             } catch (error) {
-                console.error('Auth check failed:', error);
+                console.error('❌ [checkAuth] Error occurred:', error);
                 // في حالة الخطأ - حوّله للـ login للأمان
+                console.warn('❌ [checkAuth] Redirecting to /admin due to error');
                 window.location.href = '/admin';
             }
         }

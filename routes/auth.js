@@ -34,10 +34,19 @@ router.post('/login', async (req, res) => {
         admin.lastLogin = new Date();
         await admin.save();
 
-        res.json({
-            success: true,
-            message: 'تم تسجيل الدخول بنجاح',
-            username: admin.username
+        // ⚠️ CRITICAL: حفظ الـ session قبل الرد
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ error: 'خطأ في حفظ الجلسة' });
+            }
+
+            console.log('✅ Session saved successfully for:', admin.username);
+            res.json({
+                success: true,
+                message: 'تم تسجيل الدخول بنجاح',
+                username: admin.username
+            });
         });
 
     } catch (error) {
