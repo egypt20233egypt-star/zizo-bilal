@@ -706,6 +706,271 @@
             border-color: var(--gold);
             outline: none;
         }
+
+        /* ============ Phase 4: Dynamic Section Editor ============ */
+        .section-editor {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .section-editor:hover {
+            border-color: var(--accent);
+        }
+
+        .section-editor-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .section-editor-header:hover {
+            background: var(--bg-hover);
+        }
+
+        .section-icon {
+            font-size: 1.2em;
+        }
+
+        .section-label {
+            flex: 1;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .section-hint {
+            font-size: 0.75em;
+            padding: 2px 8px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-radius: 12px;
+        }
+
+        .section-toggle {
+            transition: transform 0.3s;
+            color: var(--text-secondary);
+        }
+
+        .section-editor.open .section-toggle {
+            transform: rotate(180deg);
+        }
+
+        .section-editor-body {
+            padding: 0 16px 16px;
+        }
+
+        .section-input {
+            width: 100%;
+            box-sizing: border-box;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            direction: rtl;
+        }
+
+        .section-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+
+        .json-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .json-toolbar button {
+            padding: 4px 10px;
+            background: var(--accent-soft);
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .json-toolbar button:hover {
+            filter: brightness(1.2);
+        }
+
+        .json-status {
+            margin-right: auto;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .dynamic-list-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .dynamic-list-item {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .dynamic-list-item input {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .btn-add-item {
+            padding: 6px 14px;
+            background: transparent;
+            border: 1px dashed var(--accent);
+            border-radius: 6px;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-add-item:hover {
+            background: var(--accent-soft);
+        }
+
+        .btn-remove-item {
+            padding: 4px 8px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            border-radius: 6px;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .basic-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .loading-sections {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .sections-container-label {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ============ Phase 4: Toast Notifications ============ */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            pointer-events: auto;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            min-width: 280px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .toast-warning {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            opacity: 0.7;
+            margin-right: auto;
+            font-size: 16px;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        /* ============ Phase 4: Auto-Save Indicator ============ */
+        #autosave-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            z-index: 999;
+        }
     </style>
 
 </head>
@@ -907,33 +1172,59 @@
         <!-- Lessons Panel -->
         <div id="lessons" class="panel">
             <h2><i class="fa-solid fa-book-quran"></i> الدروس المضافة</h2>
+            <div style="margin-bottom: 1rem;">
+                <button class="btn btn-primary" onclick="openNewLessonEditor()">
+                    <i class="fa-solid fa-plus"></i> إضافة درس جديد
+                </button>
+            </div>
             <div id="lessonsList"></div>
         </div>
 
-        <!-- Add Lesson Panel -->
+        <!-- Add Lesson Panel (Dynamic) -->
         <div id="addLesson" class="panel">
-            <h2 id="formTitle"><i class="fa-solid fa-plus"></i> إضافة درس جديد</h2>
-            <div class="form-group">
-                <label>عنوان الدرس</label>
-                <input type="text" id="lessonTitle" placeholder="مثال: درس عن مصعب بن عمير">
+            <div class="editor-header">
+                <h2 id="formTitle"><i class="fa-solid fa-plus"></i> إضافة درس جديد</h2>
+                <button class="btn" onclick="cancelEdit()" id="cancelEditBtn" style="display:none;">
+                    <i class="fa-solid fa-arrow-right"></i> إلغاء التعديل
+                </button>
             </div>
-            <div class="form-group">
-                <label>الشيخ</label>
-                <select id="lessonSheikh"></select>
-            </div>
-            <!-- 🎯 Category Picker (Cascading) -->
-            <div class="form-group" id="categoryPickerContainer">
-                <label><i class="fa-solid fa-folder-tree"></i> تصنيف الدرس <span style="color:#e74c3c">*</span></label>
-                <div class="category-picker" id="categoryPicker">
-                    <div class="category-breadcrumb" id="categoryBreadcrumb">
-                        <span class="crumb-placeholder">اختر التصنيف...</span>
-                    </div>
-                    <div class="category-levels" id="categoryLevels">
-                        <!-- Cascading dropdowns generated dynamically -->
-                    </div>
+
+            <!-- الحقول الأساسية (ثابتة) -->
+            <div class="basic-fields">
+                <div class="form-group">
+                    <label>عنوان الدرس <span style="color:#e74c3c">*</span></label>
+                    <input type="text" id="lessonTitle" placeholder="مثال: درس عن مصعب بن عمير">
                 </div>
-                <input type="hidden" id="selectedCategoryId" value="">
+                <div class="form-group">
+                    <label>عنوان فرعي</label>
+                    <input type="text" id="lessonSubtitle" placeholder="عنوان فرعي (اختياري)">
+                </div>
+                <div class="form-group">
+                    <label>الشيخ</label>
+                    <select id="lessonSheikh"></select>
+                </div>
+                <!-- 🎯 Category Picker (Cascading) -->
+                <div class="form-group" id="categoryPickerContainer">
+                    <label><i class="fa-solid fa-folder-tree"></i> تصنيف الدرس <span
+                            style="color:#e74c3c">*</span></label>
+                    <div class="category-picker" id="categoryPicker">
+                        <div class="category-breadcrumb" id="categoryBreadcrumb">
+                            <span class="crumb-placeholder">اختر التصنيف...</span>
+                        </div>
+                        <div class="category-levels" id="categoryLevels"></div>
+                    </div>
+                    <input type="hidden" id="selectedCategoryId" value="">
+                </div>
+                <div class="form-group">
+                    <label>الحالة</label>
+                    <select id="lessonStatus">
+                        <option value="draft">📝 مسودة</option>
+                        <option value="published">✅ منشور</option>
+                    </select>
+                </div>
             </div>
+
+            <!-- المحتوى الخام -->
             <div class="form-group">
                 <label>المحتوى الخام (التفريغ)</label>
                 <textarea id="lessonContent" placeholder="ألصق هنا تفريغ الدرس..."></textarea>
@@ -948,17 +1239,30 @@
                 <small style="color:#888; display:block; margin-top:5px;">⚠️ هذا الحقل لا يظهر للمستخدمين ولا يدخل في
                     التحليل - للحفظ الداخلي فقط</small>
             </div>
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-primary" id="saveDraftBtn" onclick="saveLesson(false)"><i
-                        class="fa-solid fa-floppy-disk"></i> حفظ كمسودة</button>
-                <button class="btn btn-success" id="savePublishBtn" onclick="saveLesson(true)"><i
-                        class="fa-solid fa-rocket"></i> نشر مباشرة</button>
-                <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()"><i
-                        class="fa-solid fa-file-import"></i> استيراد
-                    JSON/نص</button>
-                <button class="btn btn-danger" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;"><i
-                        class="fa-solid fa-xmark"></i> إلغاء
-                    التعديل</button>
+
+            <!-- ⭐ الأقسام الديناميكية (تتبنى من SectionRegistry!) -->
+            <div class="sections-container-label">
+                <i class="fa-solid fa-puzzle-piece"></i> أقسام المحتوى الديناميكية
+                <small style="color: var(--text-secondary); font-weight: 400;">(تتحمل تلقائياً من قاعدة
+                    البيانات)</small>
+            </div>
+            <div id="lesson-sections-container">
+                <div class="loading-sections">
+                    <i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأقسام...
+                </div>
+            </div>
+
+            <!-- أزرار الحفظ -->
+            <div class="editor-actions">
+                <button class="btn btn-primary" id="saveDraftBtn" onclick="saveLessonDynamic(false)">
+                    <i class="fa-solid fa-floppy-disk"></i> حفظ كمسودة
+                </button>
+                <button class="btn btn-success" id="savePublishBtn" onclick="saveLessonDynamic(true)">
+                    <i class="fa-solid fa-rocket"></i> نشر مباشرة
+                </button>
+                <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()">
+                    <i class="fa-solid fa-file-import"></i> استيراد JSON/نص
+                </button>
             </div>
         </div>
 
@@ -1267,7 +1571,7 @@
             }
         }
 
-        // ============ Lessons (MongoDB) ============
+        // ============ Lessons (MongoDB) - Dynamic System ============
         let currentEditId = null;
 
         async function loadLessons() {
@@ -1303,126 +1607,422 @@
             }
         }
 
-        async function saveLesson(publish = false) {
-            const title = document.getElementById('lessonTitle').value.trim();
-            const sheikhId = document.getElementById('lessonSheikh').value;
-            const categoryId = getSelectedCategoryId();
-            const rawContent = document.getElementById('lessonContent').value.trim();
-            const rawSource = document.getElementById('lessonRawSource').value.trim();
+        // ============ ⭐ Dynamic Lesson Editor (Phase 4) ============
 
-            if (!title) return alert('أدخل عنوان الدرس');
+        /**
+         * بناء فورم الدرس ديناميكياً من SectionRegistry
+         * ⭐ القلب النابض - كل حاجة ديناميكية
+         */
+        async function buildDynamicLessonForm(lessonData = null) {
+            try {
+                const res = await fetch('/api/sections/all', { credentials: 'include' });
+                const allSections = await res.json();
+                const container = document.getElementById('lesson-sections-container');
+                container.innerHTML = '';
 
-            // Validate category selection (required)
-            if (!categoryId) {
-                document.getElementById('categoryPicker').classList.add('error');
-                document.getElementById('categoryPicker').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return alert('⚠️ اختر تصنيف الدرس أولاً');
+                const activeSections = allSections.filter(s => s.isActive);
+                if (activeSections.length === 0) {
+                    container.innerHTML = '<div class="loading-sections">⚠️ لا توجد أقسام نشطة. أضف أقسام من تاب "أقسام الدروس"</div>';
+                    return;
+                }
+
+                activeSections.forEach(section => {
+                    container.appendChild(createSectionEditor(section, lessonData));
+                });
+
+                console.log(`✅ تم بناء ${activeSections.length} قسم ديناميكي`);
+            } catch (error) {
+                console.error('buildDynamicLessonForm error:', error);
+                document.getElementById('lesson-sections-container').innerHTML =
+                    '<div class="loading-sections" style="color:var(--danger);">❌ فشل تحميل الأقسام</div>';
+            }
+        }
+
+        /**
+         * إنشاء محرر مخصص لكل قسم حسب نوعه
+         */
+        function createSectionEditor(section, lessonData) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'section-editor';
+            wrapper.dataset.key = section.sectionKey;
+
+            const hasData = lessonData && lessonData[section.sectionKey];
+            if (hasData) wrapper.classList.add('open');
+
+            wrapper.innerHTML = `
+                <div class="section-editor-header" onclick="toggleSectionEditor(this)">
+                    <span class="section-icon">${section.icon || '<i class="fa-solid fa-book-open"></i>'}</span>
+                    <span class="section-label">${section.labelAr}</span>
+                    <span class="section-hint">${section.schemaHint || 'mixed'}</span>
+                    <i class="fa-solid fa-chevron-down section-toggle"></i>
+                </div>
+                <div class="section-editor-body" style="display: ${hasData ? 'block' : 'none'};">
+                    ${getEditorByHint(section, lessonData)}
+                </div>
+            `;
+            return wrapper;
+        }
+
+        /**
+         * ⭐ المرونة - كل نوع بيانات ليه محرر مختلف
+         */
+        function getEditorByHint(section, lessonData) {
+            const key = section.sectionKey;
+            const value = lessonData ? lessonData[key] : null;
+            const jsonValue = value ? JSON.stringify(value, null, 2) : '';
+
+            switch (section.schemaHint) {
+                case 'text':
+                    return `<textarea class="section-input text-editor" data-key="${key}"
+                             placeholder="اكتب ${section.labelAr}..." rows="4">${value || ''}</textarea>`;
+
+                case 'list':
+                    return `<div class="dynamic-list-editor" data-key="${key}">
+                        <div class="dynamic-list-items">${renderDynamicListItems(value)}</div>
+                        <button class="btn-add-item" onclick="addDynamicListItem(this)">
+                            <i class="fa-solid fa-plus"></i> إضافة عنصر
+                        </button></div>`;
+
+                case 'cards':
+                case 'object':
+                case 'mixed':
+                default:
+                    return `<div class="json-editor-wrapper" data-key="${key}">
+                        <div class="json-toolbar">
+                            <button onclick="formatJSON(this)" title="تنسيق"><i class="fa-solid fa-align-left"></i> تنسيق</button>
+                            <button onclick="validateJSON(this)" title="تحقق"><i class="fa-solid fa-check"></i> تحقق</button>
+                            <span class="json-status"></span>
+                        </div>
+                        <textarea class="section-input json-editor" data-key="${key}"
+                            placeholder='{"key": "value"}' rows="6">${jsonValue}</textarea>
+                    </div>`;
+            }
+        }
+
+        function toggleSectionEditor(header) {
+            const editor = header.closest('.section-editor');
+            const body = editor.querySelector('.section-editor-body');
+            editor.classList.toggle('open');
+            body.style.display = editor.classList.contains('open') ? 'block' : 'none';
+        }
+
+        function renderDynamicListItems(items) {
+            if (!items || !Array.isArray(items)) return '';
+            return items.map((item, i) => `
+                <div class="dynamic-list-item">
+                    <input type="text" value="${typeof item === 'string' ? item.replace(/"/g, '&quot;') : JSON.stringify(item)}" placeholder="عنصر ${i + 1}">
+                    <button class="btn-remove-item" onclick="this.parentElement.remove()">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addDynamicListItem(btn) {
+            const container = btn.previousElementSibling;
+            const div = document.createElement('div');
+            div.className = 'dynamic-list-item';
+            div.innerHTML = `
+                <input type="text" placeholder="عنصر جديد">
+                <button class="btn-remove-item" onclick="this.parentElement.remove()">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(div);
+            div.querySelector('input').focus();
+        }
+
+        function collectDynamicListItems(editor) {
+            const items = [];
+            editor.querySelectorAll('.dynamic-list-item input').forEach(input => {
+                if (input.value.trim()) items.push(input.value.trim());
+            });
+            return items;
+        }
+
+        /**
+         * جمع كل بيانات الدرس (ثابتة + ديناميكية)
+         */
+        function collectLessonData(publish = false) {
+            const data = {
+                title: document.getElementById('lessonTitle').value.trim(),
+                subtitle: document.getElementById('lessonSubtitle')?.value?.trim() || '',
+                sheikhId: document.getElementById('lessonSheikh').value,
+                categoryId: getSelectedCategoryId(),
+                rawContent: document.getElementById('lessonContent').value.trim(),
+                rawSource: document.getElementById('lessonRawSource').value.trim(),
+                status: publish ? 'published' : (document.getElementById('lessonStatus')?.value || 'draft'),
+            };
+
+            // ⭐ جمع الأقسام الديناميكية
+            document.querySelectorAll('.section-editor').forEach(editor => {
+                const key = editor.dataset.key;
+                const jsonInput = editor.querySelector('.json-editor');
+                const textInput = editor.querySelector('.text-editor');
+                const listEditor = editor.querySelector('.dynamic-list-editor');
+
+                if (jsonInput && jsonInput.value.trim()) {
+                    try { data[key] = JSON.parse(jsonInput.value); }
+                    catch (e) { data[key] = jsonInput.value; }
+                } else if (textInput && textInput.value.trim()) {
+                    data[key] = textInput.value;
+                } else if (listEditor) {
+                    const items = collectDynamicListItems(editor);
+                    if (items.length > 0) data[key] = items;
+                }
+            });
+
+            return data;
+        }
+
+        /**
+         * ⭐ حفظ الدرس (الجديد الديناميكي)
+         */
+        async function saveLessonDynamic(publish = false) {
+            const data = collectLessonData(publish);
+
+            if (!data.title) {
+                showToast('⚠️ عنوان الدرس مطلوب!', 'error');
+                return;
             }
 
-            const lessonData = {
-                title,
-                sheikhId,
-                categoryId,
-                rawContent,
-                rawSource,
-                status: publish ? 'published' : 'draft'
-            };
+            if (!data.categoryId) {
+                const picker = document.getElementById('categoryPicker');
+                if (picker) {
+                    picker.classList.add('error');
+                    picker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                showToast('⚠️ اختر تصنيف الدرس أولاً!', 'error');
+                return;
+            }
 
             try {
                 let res;
                 if (currentEditId) {
-                    // ✏️ تحديث درس موجود
                     res = await fetch(`/api/lessons/${currentEditId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(lessonData)
+                        body: JSON.stringify(data)
                     });
                 } else {
-                    // ➕ إضافة درس جديد
                     res = await fetch('/api/lessons', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(lessonData)
+                        body: JSON.stringify(data)
                     });
                 }
 
                 if (res.ok) {
                     const wasEditing = !!currentEditId;
+                    clearAutoSave();
                     cancelEdit();
-                    loadLessons();
-                    alert(wasEditing ? '✅ تم تحديث الدرس بنجاح' : (publish ? '🚀 تم نشر الدرس' : '✅ تم حفظ الدرس كمسودة'));
+                    await loadLessons();
+                    showToast(
+                        wasEditing ? '✅ تم تحديث الدرس بنجاح' :
+                            (publish ? '🚀 تم نشر الدرس' : '✅ تم حفظ الدرس كمسودة'),
+                        'success'
+                    );
                     showTab('lessons');
-                    // click the lessons tab to make it active
-                    document.querySelectorAll('.tab')[3]?.click();
+                    document.querySelectorAll('.tab')[4]?.click();
                 } else {
                     const err = await res.json();
-                    alert('❌ فشل: ' + (err.error || 'خطأ غير معروف'));
+                    showToast('❌ فشل: ' + (err.error || 'خطأ غير معروف'), 'error');
                 }
             } catch (error) {
                 console.error('Save lesson error:', error);
-                alert('❌ خطأ في الاتصال');
+                showToast('❌ خطأ في الاتصال', 'error');
             }
         }
 
+        // Backward compat wrapper
+        async function saveLesson(publish = false) {
+            return saveLessonDynamic(publish);
+        }
+
+        /**
+         * ⭐ فتح درس للتعديل (مع ملء الأقسام الديناميكية)
+         */
         async function editLesson(id) {
             try {
                 const res = await fetch(`/api/lessons/${id}`);
                 const lesson = await res.json();
 
                 if (!lesson || lesson.error) {
-                    return alert('❌ فشل تحميل الدرس');
+                    return showToast('❌ فشل تحميل الدرس', 'error');
                 }
 
                 currentEditId = id;
 
-                // ملء الفورم
+                // ملء الحقول الأساسية
                 document.getElementById('lessonTitle').value = lesson.title || '';
-                document.getElementById('lessonContent').value = lesson.rawContent || (typeof lesson.overview === 'string' ? lesson.overview : JSON.stringify(lesson, null, 2));
+                if (document.getElementById('lessonSubtitle'))
+                    document.getElementById('lessonSubtitle').value = lesson.subtitle || '';
+                document.getElementById('lessonContent').value = lesson.rawContent || '';
                 document.getElementById('lessonRawSource').value = lesson.rawSource || '';
+                if (document.getElementById('lessonStatus'))
+                    document.getElementById('lessonStatus').value = lesson.status || 'draft';
 
                 // اختيار الشيخ
                 const sheikhSelect = document.getElementById('lessonSheikh');
-                if (lesson.sheikhId) {
-                    sheikhSelect.value = lesson.sheikhId;
-                }
+                if (lesson.sheikhId) sheikhSelect.value = lesson.sheikhId;
 
                 // اختيار التصنيف
-                if (lesson.categoryId) {
-                    setCategoryPickerValue(lesson.categoryId);
-                }
+                if (lesson.categoryId) setCategoryPickerValue(lesson.categoryId);
+
+                // ⭐ بناء الفورم الديناميكي مع البيانات
+                await buildDynamicLessonForm(lesson);
 
                 // تغيير UI لوضع التعديل
-                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> تعديل الدرس: <span style="color:#3498db">' + lesson.title + '</span>';
+                document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> تعديل: <span style="color:var(--accent)">' + lesson.title + '</span>';
                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
-                document.getElementById('saveDraftBtn').textContent = '✅ حفظ التعديل';
-                document.getElementById('savePublishBtn').textContent = '🚀 حفظ ونشر';
+                document.getElementById('saveDraftBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ التعديل';
+                document.getElementById('savePublishBtn').innerHTML = '<i class="fa-solid fa-rocket"></i> حفظ ونشر';
 
                 // الانتقال لتاب الإضافة
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-                document.querySelectorAll('.tab')[4].classList.add('active');
+                document.querySelectorAll('.tab')[5].classList.add('active');
                 document.getElementById('addLesson').classList.add('active');
 
-                // Scroll للأعلى
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast('📝 جاري تعديل: ' + lesson.title, 'info');
 
             } catch (error) {
                 console.error('Edit lesson error:', error);
-                alert('❌ خطأ في تحميل الدرس');
+                showToast('❌ خطأ في تحميل الدرس', 'error');
             }
+        }
+
+        /**
+         * فتح فورم درس جديد (مع بناء الأقسام الديناميكية)
+         */
+        async function openNewLessonEditor() {
+            cancelEdit();
+            await buildDynamicLessonForm(null);
+            startAutoSave();
+
+            // الانتقال لتاب الإضافة
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab')[5].classList.add('active');
+            document.getElementById('addLesson').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function cancelEdit() {
             currentEditId = null;
             document.getElementById('lessonTitle').value = '';
+            if (document.getElementById('lessonSubtitle'))
+                document.getElementById('lessonSubtitle').value = '';
             document.getElementById('lessonContent').value = '';
             document.getElementById('lessonRawSource').value = '';
             document.getElementById('lessonSheikh').selectedIndex = 0;
+            if (document.getElementById('lessonStatus'))
+                document.getElementById('lessonStatus').value = 'draft';
             resetCategoryPicker();
-            document.getElementById('formTitle').textContent = '➕ إضافة درس جديد';
+            document.getElementById('lesson-sections-container').innerHTML = '';
+            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-plus"></i> إضافة درس جديد';
             document.getElementById('cancelEditBtn').style.display = 'none';
-            document.getElementById('saveDraftBtn').textContent = '✅ حفظ كمسودة';
-            document.getElementById('savePublishBtn').textContent = '🚀 نشر مباشرة';
+            document.getElementById('saveDraftBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ كمسودة';
+            document.getElementById('savePublishBtn').innerHTML = '<i class="fa-solid fa-rocket"></i> نشر مباشرة';
+            clearAutoSave();
+        }
+
+        // ============ JSON Editor Helpers ============
+        function formatJSON(btn) {
+            const textarea = btn.closest('.json-editor-wrapper').querySelector('.json-editor');
+            const status = btn.closest('.json-toolbar').querySelector('.json-status');
+            try {
+                const obj = JSON.parse(textarea.value);
+                textarea.value = JSON.stringify(obj, null, 2);
+                status.textContent = '✅ تم التنسيق';
+                status.style.color = '#10b981';
+            } catch (e) {
+                status.textContent = '❌ JSON غير صالح';
+                status.style.color = '#ef4444';
+            }
+        }
+
+        function validateJSON(btn) {
+            const textarea = btn.closest('.json-editor-wrapper').querySelector('.json-editor');
+            const status = btn.closest('.json-toolbar').querySelector('.json-status');
+            try {
+                JSON.parse(textarea.value);
+                status.textContent = '✅ JSON صالح';
+                status.style.color = '#10b981';
+            } catch (e) {
+                status.textContent = '❌ ' + e.message;
+                status.style.color = '#ef4444';
+            }
+        }
+
+        // ============ Toast Notifications (Phase 4) ============
+        function showToast(message, type = 'info') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                document.body.appendChild(container);
+            }
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+            `;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ============ Auto-Save System (Phase 4) ============
+        let autoSaveInterval = null;
+        const AUTO_SAVE_KEY = 'zizo-bilal-lesson-autosave';
+
+        function startAutoSave() {
+            clearAutoSave();
+            autoSaveInterval = setInterval(() => {
+                const title = document.getElementById('lessonTitle')?.value;
+                const content = document.getElementById('lessonContent')?.value;
+                if (title || content) {
+                    const data = collectLessonData(false);
+                    data._savedAt = Date.now();
+                    localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(data));
+                    const indicator = document.getElementById('autosave-indicator');
+                    if (indicator) indicator.textContent = '💾 تم الحفظ التلقائي';
+                }
+            }, 30000);
+        }
+
+        function restoreAutoSave() {
+            const saved = localStorage.getItem(AUTO_SAVE_KEY);
+            if (!saved) return false;
+            try {
+                const data = JSON.parse(saved);
+                const age = Date.now() - (data._savedAt || 0);
+                if (age < 3600000 && data.title) {
+                    if (confirm('🔄 لقينا مسودة محفوظة ("' + data.title + '"). تحب نسترجعها؟')) {
+                        document.getElementById('lessonTitle').value = data.title || '';
+                        if (document.getElementById('lessonSubtitle'))
+                            document.getElementById('lessonSubtitle').value = data.subtitle || '';
+                        document.getElementById('lessonContent').value = data.rawContent || '';
+                        document.getElementById('lessonRawSource').value = data.rawSource || '';
+                        showToast('♻️ تم استرجاع المسودة المحفوظة', 'info');
+                        return true;
+                    }
+                }
+            } catch (e) { console.error('restoreAutoSave error:', e); }
+            return false;
+        }
+
+        function clearAutoSave() {
+            localStorage.removeItem(AUTO_SAVE_KEY);
+            if (autoSaveInterval) { clearInterval(autoSaveInterval); autoSaveInterval = null; }
+            const indicator = document.getElementById('autosave-indicator');
+            if (indicator) indicator.textContent = '';
         }
 
         async function togglePublish(id, isCurrentlyPublished) {
@@ -2282,15 +2882,18 @@
         window.addEventListener('DOMContentLoaded', async () => {
             await checkAuth();
             restoreDraft();
+            restoreAutoSave();
             renderQuickIcons();
             await loadCategories(null);
-            await loadCategoryTree(); // Load tree view for categories tab
+            await loadCategoryTree();
             await loadSections();
             await loadSheikhs();
             await loadLessons();
-            await loadCategoryPickerTree(); // Load category picker for add lesson form
+            await loadCategoryPickerTree();
         });
     </script>
+    <!-- Phase 4: Auto-Save Indicator -->
+    <div id="autosave-indicator"></div>
 </body>
 
 </html>
