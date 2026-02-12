@@ -259,14 +259,34 @@
 
                 if (response.ok && data.success) {
                     // نجح! توجيه للوحة التحكم
-                    console.log('✅ Login successful! Redirecting to /admin/panel...');
+                    console.log('✅ Login successful! Checking redirect target...');
                     loginBtn.textContent = '✅ نجح!';
                     loginBtn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
 
+                    // تحديد وجهة الـ redirect
+                    // أولوية 1: لو في returnUrl في query string
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let redirectTo = urlParams.get('returnUrl');
+
+                    // أولوية 2: لو المستخدم جاي من /admin/v5 أو /admin/panel (من الـ referrer)
+                    if (!redirectTo && document.referrer) {
+                        if (document.referrer.includes('/admin/v5')) {
+                            redirectTo = '/admin/v5';
+                        } else if (document.referrer.includes('/admin/panel')) {
+                            redirectTo = '/admin/panel';
+                        }
+                    }
+
+                    // Default: اللوحة الجديدة v5
+                    if (!redirectTo) {
+                        redirectTo = '/admin/v5';
+                    }
+
                     setTimeout(() => {
-                        console.log('🔄 Redirecting now...');
-                        window.location.href = '/admin/panel';
+                        console.log('🔄 Redirecting to:', redirectTo);
+                        window.location.href = redirectTo;
                     }, 500);
+
                 } else {
                     // فشل
                     showError(data.error || '❌ فشل تسجيل الدخول');
