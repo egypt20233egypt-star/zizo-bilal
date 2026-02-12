@@ -24,7 +24,8 @@ if (MONGO_URI) {
 
 // ============ Session (Admin v4.0) ============
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const connectMongo = require('connect-mongo');
+const MongoStore = connectMongo.default || connectMongo;
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'علم ينتفع به-secret-2025',
