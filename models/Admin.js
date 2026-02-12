@@ -16,7 +16,21 @@ const AdminSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    } // الباسورد هيتحفظ encrypted بالـ bcryptjs
+    },
+    email: {
+        type: String,
+        trim: true
+    },
+
+    // Security & tracking
+    lastLogin: {
+        type: Date
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    }
+
 }, {
     timestamps: true // بيضيف createdAt و updatedAt أوتوماتيك
 });
