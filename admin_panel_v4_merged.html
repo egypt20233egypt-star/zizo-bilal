@@ -488,26 +488,32 @@
         }
 
         .tab {
-            padding: 0.8rem 1.5rem;
+            padding: 0.65rem 1.25rem;
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text-secondary);
             cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(.4, 0, .2, 1);
             font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .tab:hover {
-            background: var(--bg-elevated);
-            border-color: var(--border-hover);
-            color: var(--text-primary);
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.05));
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+            transform: translateY(-1px);
         }
 
         .tab.active {
-            background: var(--accent-soft);
-            border-color: var(--accent);
-            color: var(--accent);
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.2), rgba(16, 185, 129, 0.1));
+            border-color: rgba(139, 92, 246, 0.4);
+            color: #a78bfa;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.15);
         }
 
         /* Panels */
@@ -515,12 +521,25 @@
             display: none;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 2rem;
         }
 
         .panel.active {
             display: block;
+            animation: panelFadeIn 0.4s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes panelFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .panel h2 {
@@ -573,19 +592,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             background: var(--bg-elevated);
-            border-radius: 8px;
-            margin-bottom: 0.8rem;
+            border-radius: 12px;
+            margin-bottom: 0.6rem;
             border: 1px solid var(--border);
             flex-wrap: wrap;
             gap: 1rem;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(.4, 0, .2, 1);
         }
 
         .list-item:hover {
-            border-color: var(--border-hover);
-            background: var(--bg-hover);
+            border-color: rgba(139, 92, 246, 0.3);
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.06), transparent);
+            transform: translateX(-3px);
+            border-right: 3px solid #8b5cf6;
         }
 
         .badge {
@@ -764,19 +785,25 @@
         }
 
         .btn-tree-action {
-            padding: 0.4rem 1rem;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text-primary);
+            padding: 0.45rem 1.1rem;
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 10px;
+            color: #a78bfa;
             font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 150ms;
+            transition: all 0.3s cubic-bezier(.4, 0, .2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
         }
 
         .btn-tree-action:hover {
-            background: var(--bg-hover);
-            border-color: var(--border-hover);
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.2), rgba(16, 185, 129, 0.1));
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
         }
 
         .tree-list {
@@ -803,17 +830,20 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
+            padding: 0.6rem 0.85rem;
             background: transparent;
             border: 1px solid transparent;
-            border-radius: 6px;
-            margin-bottom: 2px;
-            transition: all 150ms;
+            border-radius: 10px;
+            margin-bottom: 3px;
+            transition: all 0.25s cubic-bezier(.4, 0, .2, 1);
+            cursor: pointer;
         }
 
         .tree-item-content:hover {
-            background: var(--bg-elevated);
-            border-color: var(--border);
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.08), transparent);
+            border-color: transparent;
+            border-right: 3px solid #8b5cf6;
+            transform: translateX(-3px);
         }
 
         .tree-item-content:hover .tree-actions {
@@ -854,8 +884,13 @@
         .tree-label {
             flex: 1;
             font-size: 0.875rem;
-            color: var(--text-primary);
+            color: #e5e7eb;
             font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .tree-item-content:hover .tree-label {
+            color: #a78bfa;
         }
 
         .tree-actions {
@@ -866,23 +901,25 @@
         }
 
         .btn-tree-icon {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             padding: 0;
             background: transparent;
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 150ms;
+            transition: all 0.25s cubic-bezier(.4, 0, .2, 1);
         }
 
         .btn-tree-icon:hover {
-            background: var(--accent);
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
             color: white;
+            transform: scale(1.15);
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3);
         }
 
         .btn-tree-icon i {
@@ -890,8 +927,9 @@
         }
 
         .tree-item.active>.tree-item-content {
-            background: var(--accent-soft);
-            border-color: var(--accent);
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.15), rgba(16, 185, 129, 0.05));
+            border-color: transparent;
+            border-right: 3px solid #8b5cf6;
         }
 
         /* ========================================
