@@ -485,6 +485,12 @@
             gap: 1rem;
             margin-bottom: 2rem;
             flex-wrap: wrap;
+            position: sticky;
+            top: 70px;
+            z-index: 50;
+            background: var(--bg-primary);
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
         }
 
         .tab {
@@ -516,18 +522,19 @@
             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.15);
         }
 
-        /* Panels */
+        /* Panels - ALL VISIBLE (single page layout) */
         .panel {
-            display: none;
+            display: block;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 2rem;
+            margin-bottom: 2rem;
+            scroll-margin-top: 140px;
         }
 
         .panel.active {
             display: block;
-            animation: panelFadeIn 0.4s cubic-bezier(.4, 0, .2, 1);
         }
 
         @keyframes panelFadeIn {
@@ -1290,6 +1297,482 @@
             opacity: 0.6;
             z-index: 999;
         }
+
+        /* ========================================
+           🎨 MODERN OVERRIDE v2 - Violet/Emerald Theme
+           (inspired by arena.site reference design)
+           ======================================== */
+
+        /* === TABS: Modern Gradient Pill Buttons === */
+        .tabs {
+            gap: 0.6rem;
+            padding: 0.75rem;
+            background: rgba(17, 17, 22, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.12);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .tab {
+            padding: 0.6rem 1.2rem !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            background: transparent !important;
+            color: rgba(255, 255, 255, 0.55) !important;
+            font-size: 0.88rem !important;
+            font-weight: 600 !important;
+            transition: all 0.3s cubic-bezier(.4, 0, .2, 1) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab::before {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            background: none !important;
+            border-radius: 12px !important;
+            opacity: 0 !important;
+            transition: opacity 0.3s !important;
+        }
+
+        .tab:hover {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(16, 185, 129, 0.06)) !important;
+            border-color: rgba(139, 92, 246, 0.25) !important;
+            color: #c4b5fd !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(16, 185, 129, 0.08)) !important;
+            border-color: rgba(139, 92, 246, 0.45) !important;
+            color: #c4b5fd !important;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .tab i {
+            color: inherit !important;
+            transition: transform 0.3s !important;
+        }
+
+        .tab:hover i,
+        .tab.active i {
+            transform: scale(1.15) !important;
+        }
+
+        /* === PANEL: Smooth Entrance === */
+        .panel {
+            border-radius: 16px !important;
+            border-color: rgba(139, 92, 246, 0.1) !important;
+        }
+
+        .panel.active {
+            animation: modernPanelIn 0.5s cubic-bezier(.4, 0, .2, 1) !important;
+        }
+
+        @keyframes modernPanelIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.99);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* === CATEGORIES PANEL TITLE === */
+        #categories h2 {
+            background: linear-gradient(135deg, #10b981, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        /* === TREE VIEW: Modern Dark Design === */
+        .tree-view-container {
+            background: rgba(10, 10, 15, 0.5) !important;
+            border: 1px solid rgba(139, 92, 246, 0.12) !important;
+            border-radius: 16px !important;
+            padding: 1.25rem !important;
+            backdrop-filter: blur(6px);
+        }
+
+        .tree-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+        }
+
+        /* === TREE BUTTONS: Gradient Pill === */
+        .btn-tree-action {
+            padding: 0.5rem 1.2rem !important;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(16, 185, 129, 0.06)) !important;
+            border: 1px solid rgba(139, 92, 246, 0.25) !important;
+            border-radius: 12px !important;
+            color: #c4b5fd !important;
+            font-weight: 600 !important;
+            font-size: 0.82rem !important;
+            transition: all 0.3s cubic-bezier(.4, 0, .2, 1) !important;
+        }
+
+        .btn-tree-action:hover {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(16, 185, 129, 0.12)) !important;
+            border-color: rgba(139, 92, 246, 0.5) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.2) !important;
+            color: #ddd6fe !important;
+        }
+
+        /* === TREE ITEMS: Hover with violet accent === */
+        .tree-children {
+            border-right: 1px solid rgba(139, 92, 246, 0.12) !important;
+        }
+
+        .tree-item-content {
+            padding: 0.6rem 0.85rem !important;
+            border-radius: 10px !important;
+            border: 1px solid transparent !important;
+            transition: all 0.25s cubic-bezier(.4, 0, .2, 1) !important;
+            cursor: pointer;
+        }
+
+        .tree-item-content:hover {
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.03)) !important;
+            border-color: transparent !important;
+            border-right: 3px solid #8b5cf6 !important;
+            transform: translateX(-4px) !important;
+        }
+
+        .tree-item-content:hover .tree-label {
+            color: #c4b5fd !important;
+        }
+
+        .tree-item-content:hover .tree-icon {
+            transform: scale(1.2) !important;
+        }
+
+        .tree-item.active>.tree-item-content {
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.18), rgba(16, 185, 129, 0.06)) !important;
+            border-right: 3px solid #8b5cf6 !important;
+        }
+
+        /* === TREE LABELS === */
+        .tree-label {
+            color: #e5e7eb !important;
+            font-size: 0.9rem !important;
+            font-weight: 500 !important;
+            transition: color 0.2s !important;
+        }
+
+        /* === TREE ICONS === */
+        .tree-icon {
+            font-size: 1.1rem !important;
+            min-width: 22px !important;
+            transition: transform 0.25s !important;
+        }
+
+        /* === TREE TOGGLE (chevron) === */
+        .tree-toggle {
+            width: 22px !important;
+            height: 22px !important;
+            border-radius: 6px !important;
+            color: rgba(139, 92, 246, 0.7) !important;
+            transition: all 0.25s !important;
+        }
+
+        .tree-toggle:hover {
+            background: rgba(139, 92, 246, 0.15) !important;
+            color: #c4b5fd !important;
+        }
+
+        /* === TREE ACTION ICONS (edit/delete) === */
+        .btn-tree-icon {
+            width: 28px !important;
+            height: 28px !important;
+            border-radius: 8px !important;
+            transition: all 0.25s cubic-bezier(.4, 0, .2, 1) !important;
+        }
+
+        .btn-tree-icon:hover {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+            color: #fff !important;
+            transform: scale(1.18) !important;
+            box-shadow: 0 3px 12px rgba(139, 92, 246, 0.35) !important;
+        }
+
+        /* === LIST ITEMS: Modern hover === */
+        .list-item {
+            border-radius: 12px !important;
+            transition: all 0.25s cubic-bezier(.4, 0, .2, 1) !important;
+        }
+
+        .list-item:hover {
+            background: linear-gradient(to left, rgba(139, 92, 246, 0.06), transparent) !important;
+            border-color: rgba(139, 92, 246, 0.2) !important;
+            border-right: 3px solid #8b5cf6 !important;
+            transform: translateX(-3px) !important;
+        }
+
+        /* === STAT CARDS: Glow Effect === */
+        .stat-card {
+            border-radius: 14px !important;
+            transition: all 0.3s cubic-bezier(.4, 0, .2, 1) !important;
+            border: 1px solid rgba(139, 92, 246, 0.1) !important;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(139, 92, 246, 0.3) !important;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.12) !important;
+            transform: translateY(-3px) !important;
+        }
+
+        /* === CATEGORY ADD FORM: Modern Border === */
+        #categories .form-group input,
+        #categories .form-group select {
+            border-radius: 10px !important;
+            border-color: rgba(139, 92, 246, 0.2) !important;
+        }
+
+        #categories .form-group input:focus,
+        #categories .form-group select:focus {
+            border-color: rgba(139, 92, 246, 0.5) !important;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+        }
+
+        /* === MODERN TREE: Chevron SVG Arrow === */
+        .tree-chevron {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+            color: rgba(139, 92, 246, 0.6);
+            flex-shrink: 0;
+        }
+
+        .tree-chevron .chevron-svg {
+            transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .tree-chevron.expanded .chevron-svg {
+            transform: rotate(90deg);
+        }
+
+        .tree-chevron:hover {
+            color: #c4b5fd;
+        }
+
+        /* === MODERN TREE: Icon Wrapper === */
+        .tree-icon-modern {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+            transition: transform 0.25s, color 0.25s;
+        }
+
+        .tree-item-content:hover .tree-icon-modern {
+            transform: scale(1.15);
+        }
+
+        /* === Folder items (parents) === */
+        .tree-folder>.tree-item-content {
+            padding-top: 0.65rem !important;
+            padding-bottom: 0.65rem !important;
+        }
+
+        .tree-folder>.tree-item-content .tree-label {
+            font-weight: 600 !important;
+            font-size: 0.92rem !important;
+        }
+
+        .tree-folder>.tree-item-content .tree-icon-modern {
+            color: #a78bfa !important;
+        }
+
+        /* === Leaf items (children without sub-items) === */
+        .tree-leaf>.tree-item-content {
+            padding-top: 0.5rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+
+        .tree-leaf>.tree-item-content .tree-label {
+            font-weight: 400 !important;
+            font-size: 0.87rem !important;
+            color: #9ca3af !important;
+        }
+
+        .tree-leaf>.tree-item-content .tree-icon-modern {
+            color: #7c7ca0 !important;
+            font-size: 0.95rem !important;
+        }
+
+        .tree-leaf>.tree-item-content:hover .tree-label {
+            color: #c4b5fd !important;
+        }
+
+        /* === Spacer for leaf alignment === */
+        .tree-spacer-modern {
+            width: 22px;
+            flex-shrink: 0;
+        }
+
+        /* === Tree children indentation line === */
+        .tree-children {
+            border-right: 1px solid rgba(139, 92, 246, 0.1) !important;
+            margin-right: 18px !important;
+            padding-right: 4px !important;
+        }
+
+        /* === BREADCRUMB: Modern style === */
+        #catBreadcrumb span {
+            transition: all 0.2s !important;
+        }
+
+        #catBreadcrumb span:hover {
+            color: #c4b5fd !important;
+        }
+
+        /* === PAGE WRAPPER: 2-Column Layout === */
+        .page-wrapper {
+            display: flex;
+            min-height: calc(100vh - 70px);
+            direction: rtl;
+        }
+
+        /* === CATEGORIES TREE SIDEBAR: Full Column === */
+        .categories-layout {
+            display: block;
+            margin-top: 1rem;
+        }
+
+        .categories-tree-sidebar {
+            width: 340px;
+            min-width: 300px;
+            flex-shrink: 0;
+            background: rgba(8, 8, 16, 0.95);
+            border-left: 1px solid rgba(139, 92, 246, 0.12);
+            padding: 1.25rem;
+            overflow-y: auto;
+            height: calc(100vh - 70px);
+            position: sticky;
+            top: 70px;
+        }
+
+        .categories-tree-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .categories-tree-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+        }
+
+        /* === SIDEBAR TABS === */
+        .sidebar-tabs {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.12);
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 0.55rem 0.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            background: rgba(139, 92, 246, 0.05);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .sidebar-tab:hover {
+            background: rgba(139, 92, 246, 0.12);
+            color: #c4b5fd;
+        }
+
+        .sidebar-tab.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(16, 185, 129, 0.15));
+            color: #c4b5fd;
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .sidebar-tab i {
+            margin-left: 0.3rem;
+        }
+
+        .tree-sidebar-header h3 {
+            background: linear-gradient(135deg, #10b981, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+        }
+
+        .tree-sidebar-header h3 i {
+            -webkit-text-fill-color: #10b981;
+            margin-left: 0.4rem;
+        }
+
+        .categories-tree-sidebar .tree-view-container {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+
+        /* Container takes remaining space */
+        .page-wrapper .container {
+            flex: 1;
+            min-width: 0;
+            max-width: unset;
+        }
+
+        .categories-form-area {
+            width: 100%;
+        }
+
+        /* Responsive: On smaller screens, stack vertically */
+        @media (max-width: 900px) {
+            .page-wrapper {
+                flex-direction: column-reverse;
+            }
+
+            .categories-tree-sidebar {
+                width: 100%;
+                min-width: unset;
+                height: auto;
+                max-height: 400px;
+                position: static;
+                border-left: none;
+                border-top: 1px solid rgba(139, 92, 246, 0.12);
+            }
+        }
+
+        /* === ALERT BOX: Dark refined === */
+        .alert {
+            border-radius: 12px !important;
+            border-color: rgba(139, 92, 246, 0.15) !important;
+        }
     </style>
 
 </head>
@@ -1310,127 +1793,25 @@
         </div>
     </div>
 
-    <div class="container">
-        <!-- Stats -->
-        <div class="stats">
-            <div class="stat-card">
-                <h3 id="sectionsCount">0</h3>
-                <p><i class="fa-solid fa-book-open"></i> الأقسام</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="sheikhsCount">0</h3>
-                <p><i class="fa-solid fa-user"></i> الشيوخ</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="lessonsCount">0</h3>
-                <p><i class="fa-solid fa-book-quran"></i> الدروس</p>
-            </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('aiInput')"><i class="fa-solid fa-wand-magic-sparkles"></i> AI
-                Master Input</button>
-            <button class="tab" onclick="showTab('categories')"><i class="fa-solid fa-sitemap"></i> الأقسام
-                الرئيسية</button>
-            <button class="tab" onclick="showTab('sections')"><i class="fa-solid fa-book-open"></i> أقسام
-                الدروس</button>
-            <button class="tab" onclick="showTab('sheikhs')"><i class="fa-solid fa-user"></i> الشيوخ</button>
-            <button class="tab" onclick="showTab('lessons')"><i class="fa-solid fa-book-quran"></i> الدروس</button>
-            <button class="tab" onclick="showTab('addLesson')"><i class="fa-solid fa-plus"></i> إضافة درس</button>
-            <button class="tab" onclick="showTab('preview')"><i class="fa-solid fa-eye"></i> معاينة</button>
-        </div>
-
-        <!-- AI Input Panel -->
-        <div id="aiInput" class="panel active">
-            <h2><i class="fa-solid fa-wand-magic-sparkles"></i> حقل الذكاء الاصطناعي (Master Input)</h2>
-            <p style="color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
-                اكتب المحتوى الخام هنا، والذكاء الاصطناعي هيوزعه تلقائياً على الأقسام المتاحة.
-            </p>
-            <textarea id="rawInput" placeholder="مثال: اكتب نص الدرس، أو رابط يوتيوب، أو أي محتوى نصي..."
-                style="min-height: 250px;"></textarea>
-            <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="analyzeWithAI()">
-                    <i class="fa-solid fa-sparkles"></i> تحليل بالذكاء الاصطناعي
+    <!-- ========= Page Wrapper: 2-Column Layout ========= -->
+    <div class="page-wrapper">
+        <!-- RIGHT COLUMN: Tree Sidebar (Always Visible, Full Height) -->
+        <aside class="categories-tree-sidebar" id="globalTreeSidebar">
+            <!-- Tabs above tree -->
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" onclick="showTab('categories')">
+                    <i class="fa-solid fa-sitemap"></i> الأقسام الرئيسية
                 </button>
-                <button class="btn" onclick="saveDraft()">
-                    <i class="fa-solid fa-floppy-disk"></i> حفظ كمسودة
-                </button>
-                <button class="btn" onclick="clearInput()">
-                    <i class="fa-solid fa-trash-can"></i> مسح
+                <button class="sidebar-tab" onclick="showTab('sections')">
+                    <i class="fa-solid fa-book-open"></i> أقسام الدروس
                 </button>
             </div>
 
-            <h3 style="color: var(--gold); margin: 2rem 0 1rem;">
-                <i class="fa-solid fa-folder-tree"></i> الأقسام المتاحة <span
-                    style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">(سيتم توزيع المحتوى
-                    عليها)</span>
-            </h3>
-            <div id="availableSections"
-                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
-                <div class="alert">جاري تحميل الأقسام...</div>
-            </div>
-        </div>
-
-        <!-- ============ Categories Panel (الأقسام الرئيسية الهرمية) ============ -->
-        <div id="categories" class="panel">
-            <h2><i class="fa-solid fa-sitemap" style="color: var(--gold)"></i> إدارة الأقسام الرئيسية</h2>
-            <div class="alert">
-                <i class="fa-solid fa-circle-info"></i> نظام هرمي مرن - أضف أيقونة جوا أيقونة براحتك بلا حدود!
+            <div class="tree-sidebar-header">
+                <h3><i class="fa-solid fa-folder-tree"></i> هيكل الأقسام</h3>
             </div>
 
-            <!-- Breadcrumb Navigation -->
-            <div id="catBreadcrumb"
-                style="display:flex; align-items:center; gap:8px; margin:15px 0; flex-wrap:wrap; font-size:0.95rem;">
-                <span onclick="loadCategories(null)" style="cursor:pointer; color:var(--gold); font-weight:700;"><i
-                        class="fa-solid fa-house"></i> الرئيسية</span>
-            </div>
-
-            <!-- Add Category Form -->
-            <div
-                style="background:rgba(218,165,32,0.08); border:1px solid rgba(218,165,32,0.25); border-radius:12px; padding:18px; margin-bottom:20px;">
-                <h4 style="color:var(--gold); margin-bottom:12px;"><i class="fa-solid fa-circle-plus"></i> إضافة قسم
-                    جديد</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    <div class="form-group" style="margin:0">
-                        <label>اسم القسم</label>
-                        <input type="text" id="catName" placeholder="مثال: القرآن الكريم">
-                    </div>
-                    <div class="form-group" style="margin:0">
-                        <label>الوصف (اختياري)</label>
-                        <input type="text" id="catDesc" placeholder="وصف مختصر">
-                    </div>
-                </div>
-                <div style="display:flex; gap:12px; margin-top:12px; align-items:flex-end; flex-wrap:wrap;">
-                    <div class="form-group" style="margin:0; flex:1">
-                        <label>الأيقونة (Font Awesome)</label>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <input type="text" id="catIcon" value="fa-solid fa-folder" style="flex:1"
-                                oninput="previewIcon()">
-                            <div id="catIconPreview"
-                                style="width:45px; height:45px; display:flex; align-items:center; justify-content:center; background:rgba(218,165,32,0.15); border-radius:10px; font-size:1.4rem; color:#DAA520;">
-                                <i class="fa-solid fa-folder"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin:0; width:120px;">
-                        <label>اللون</label>
-                        <input type="color" id="catColor" value="#DAA520"
-                            style="height:42px; width:100%; border:none; border-radius:8px; cursor:pointer;">
-                    </div>
-                    <button class="btn btn-primary" onclick="addCategory()" style="height:42px; white-space:nowrap;">
-                        <i class="fa-solid fa-plus"></i> إضافة
-                    </button>
-                </div>
-
-                <!-- Popular Icons Grid -->
-                <div style="margin-top:12px;">
-                    <small style="color:rgba(255,255,255,0.5);">أيقونات سريعة:</small>
-                    <div id="quickIcons" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
-                </div>
-            </div>
-
-            <!-- Categories Tree View -->
+            <!-- Tree Controls -->
             <div class="tree-view-container">
                 <div class="tree-controls">
                     <button class="btn-tree-action" onclick="expandAllTree()">
@@ -1448,197 +1829,337 @@
                     <!-- Tree will be rendered here by JS -->
                 </ul>
             </div>
-        </div>
+        </aside>
 
-        <!-- Sections Panel -->
-        <div id="sections" class="panel">
-            <h2><i class="fa-solid fa-book-open"></i> إدارة الأقسام (ديناميكية)</h2>
-            <div class="alert">
-                <i class="fa-solid fa-circle-info"></i> الأقسام ديناميكية - يمكنك إضافة أو حذف أي قسم من MongoDB
-            </div>
-            <button class="btn btn-primary" onclick="seedSections()"><i class="fa-solid fa-seedling"></i> ملء الأقسام
-                الافتراضية (15 قسم)</button>
-            <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
-
-            <div class="form-group">
-                <label>إضافة قسم جديد</label>
-                <div style="display:flex; gap:10px; flex-wrap:wrap">
-                    <input type="text" id="newSectionKey" placeholder="sectionKey (انجليزي)" style="flex:1">
-                    <input type="text" id="newSectionLabel" placeholder="الاسم بالعربي" style="flex:1">
-                    <input type="text" id="newSectionIcon" placeholder="fa-book-quran" style="width:80px">
-                    <button class="btn btn-primary" onclick="addSection()">إضافة</button>
+        <!-- LEFT COLUMN: Main Content -->
+        <div class="container">
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="sectionsCount">0</h3>
+                    <p><i class="fa-solid fa-book-open"></i> الأقسام</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="sheikhsCount">0</h3>
+                    <p><i class="fa-solid fa-user"></i> الشيوخ</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="lessonsCount">0</h3>
+                    <p><i class="fa-solid fa-book-quran"></i> الدروس</p>
                 </div>
             </div>
 
-            <div id="sectionsList"></div>
-        </div>
-
-        <!-- Sheikhs Panel -->
-        <div id="sheikhs" class="panel">
-            <h2><i class="fa-solid fa-user"></i> إدارة الشيوخ</h2>
-            <div class="form-group">
-                <label>اسم الشيخ</label>
-                <div style="display:flex; gap:10px">
-                    <input type="text" id="sheikhName" placeholder="مثال: الشيخ الشعراوي" style="flex:1">
-                    <button class="btn btn-primary" onclick="addSheikh()"><i class="fa-solid fa-plus"></i>
-                        إضافة</button>
-                </div>
-            </div>
-            <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
-            <div id="sheikhsList"></div>
-        </div>
-
-        <!-- Lessons Panel -->
-        <div id="lessons" class="panel">
-            <h2><i class="fa-solid fa-book-quran"></i> الدروس المضافة</h2>
-            <div style="margin-bottom: 1rem;">
-                <button class="btn btn-primary" onclick="openNewLessonEditor()">
-                    <i class="fa-solid fa-plus"></i> إضافة درس جديد
-                </button>
-            </div>
-            <div id="lessonsList"></div>
-        </div>
-
-        <!-- Add Lesson Panel (Dynamic) -->
-        <div id="addLesson" class="panel">
-            <div class="editor-header">
-                <h2 id="formTitle"><i class="fa-solid fa-plus"></i> إضافة درس جديد</h2>
-                <button class="btn" onclick="cancelEdit()" id="cancelEditBtn" style="display:none;">
-                    <i class="fa-solid fa-arrow-right"></i> إلغاء التعديل
-                </button>
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('categories')"><i class="fa-solid fa-sitemap"></i> الأقسام
+                    الرئيسية</button>
+                <button class="tab" onclick="showTab('aiInput')"><i class="fa-solid fa-wand-magic-sparkles"></i> AI
+                    Master Input</button>
+                <button class="tab" onclick="showTab('sections')"><i class="fa-solid fa-book-open"></i> أقسام
+                    الدروس</button>
+                <button class="tab" onclick="showTab('sheikhs')"><i class="fa-solid fa-user"></i> الشيوخ</button>
+                <button class="tab" onclick="showTab('lessons')"><i class="fa-solid fa-book-quran"></i> الدروس</button>
+                <button class="tab" onclick="showTab('addLesson')"><i class="fa-solid fa-plus"></i> إضافة درس</button>
+                <button class="tab" onclick="showTab('preview')"><i class="fa-solid fa-eye"></i> معاينة</button>
             </div>
 
-            <!-- الحقول الأساسية (ثابتة) -->
-            <div class="basic-fields">
-                <div class="form-group">
-                    <label>عنوان الدرس <span style="color:#e74c3c">*</span></label>
-                    <input type="text" id="lessonTitle" placeholder="مثال: درس عن مصعب بن عمير">
+            <!-- AI Input Panel -->
+            <div id="aiInput" class="panel">
+                <h2><i class="fa-solid fa-wand-magic-sparkles"></i> حقل الذكاء الاصطناعي (Master Input)</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
+                    اكتب المحتوى الخام هنا، والذكاء الاصطناعي هيوزعه تلقائياً على الأقسام المتاحة.
+                </p>
+                <textarea id="rawInput" placeholder="مثال: اكتب نص الدرس، أو رابط يوتيوب، أو أي محتوى نصي..."
+                    style="min-height: 250px;"></textarea>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="analyzeWithAI()">
+                        <i class="fa-solid fa-sparkles"></i> تحليل بالذكاء الاصطناعي
+                    </button>
+                    <button class="btn" onclick="saveDraft()">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ كمسودة
+                    </button>
+                    <button class="btn" onclick="clearInput()">
+                        <i class="fa-solid fa-trash-can"></i> مسح
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label>عنوان فرعي</label>
-                    <input type="text" id="lessonSubtitle" placeholder="عنوان فرعي (اختياري)">
+
+                <h3 style="color: var(--gold); margin: 2rem 0 1rem;">
+                    <i class="fa-solid fa-folder-tree"></i> الأقسام المتاحة <span
+                        style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">(سيتم توزيع المحتوى
+                        عليها)</span>
+                </h3>
+                <div id="availableSections"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="alert">جاري تحميل الأقسام...</div>
                 </div>
-                <div class="form-group">
-                    <label>الشيخ</label>
-                    <select id="lessonSheikh"></select>
+            </div>
+
+            <!-- ============ Categories Panel (الأقسام الرئيسية الهرمية) ============ -->
+            <div id="categories" class="panel active">
+                <h2><i class="fa-solid fa-sitemap" style="color: var(--gold)"></i> إدارة الأقسام الرئيسية</h2>
+                <div class="alert">
+                    <i class="fa-solid fa-circle-info"></i> نظام هرمي مرن - أضف أيقونة جوا أيقونة براحتك بلا حدود!
                 </div>
-                <!-- 🎯 Category Picker (Cascading) -->
-                <div class="form-group" id="categoryPickerContainer">
-                    <label><i class="fa-solid fa-folder-tree"></i> تصنيف الدرس <span
-                            style="color:#e74c3c">*</span></label>
-                    <div class="category-picker" id="categoryPicker">
-                        <div class="category-breadcrumb" id="categoryBreadcrumb">
-                            <span class="crumb-placeholder">اختر التصنيف...</span>
+
+                <!-- Categories Form Only -->
+                <div class="categories-layout">
+
+                    <!-- LEFT SIDE: Add Form -->
+                    <div class="categories-form-area">
+                        <!-- Breadcrumb Navigation -->
+                        <div id="catBreadcrumb"
+                            style="display:flex; align-items:center; gap:8px; margin:15px 0; flex-wrap:wrap; font-size:0.95rem;">
+                            <span onclick="loadCategories(null)"
+                                style="cursor:pointer; color:var(--gold); font-weight:700;"><i
+                                    class="fa-solid fa-house"></i> الرئيسية</span>
                         </div>
-                        <div class="category-levels" id="categoryLevels"></div>
+
+                        <!-- Add Category Form -->
+                        <div
+                            style="background:rgba(218,165,32,0.08); border:1px solid rgba(218,165,32,0.25); border-radius:12px; padding:18px; margin-bottom:20px;">
+                            <h4 style="color:var(--gold); margin-bottom:12px;"><i class="fa-solid fa-circle-plus"></i>
+                                إضافة
+                                قسم
+                                جديد</h4>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <div class="form-group" style="margin:0">
+                                    <label>اسم القسم</label>
+                                    <input type="text" id="catName" placeholder="مثال: القرآن الكريم">
+                                </div>
+                                <div class="form-group" style="margin:0">
+                                    <label>الوصف (اختياري)</label>
+                                    <input type="text" id="catDesc" placeholder="وصف مختصر">
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:12px; margin-top:12px; align-items:flex-end; flex-wrap:wrap;">
+                                <div class="form-group" style="margin:0; flex:1">
+                                    <label>الأيقونة (Font Awesome)</label>
+                                    <div style="display:flex; gap:8px; align-items:center;">
+                                        <input type="text" id="catIcon" value="fa-solid fa-folder" style="flex:1"
+                                            oninput="previewIcon()">
+                                        <div id="catIconPreview"
+                                            style="width:45px; height:45px; display:flex; align-items:center; justify-content:center; background:rgba(218,165,32,0.15); border-radius:10px; font-size:1.4rem; color:#DAA520;">
+                                            <i class="fa-solid fa-folder"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin:0; width:120px;">
+                                    <label>اللون</label>
+                                    <input type="color" id="catColor" value="#DAA520"
+                                        style="height:42px; width:100%; border:none; border-radius:8px; cursor:pointer;">
+                                </div>
+                                <button class="btn btn-primary" onclick="addCategory()"
+                                    style="height:42px; white-space:nowrap;">
+                                    <i class="fa-solid fa-plus"></i> إضافة
+                                </button>
+                            </div>
+
+                            <!-- Popular Icons Grid -->
+                            <div style="margin-top:12px;">
+                                <small style="color:rgba(255,255,255,0.5);">أيقونات سريعة:</small>
+                                <div id="quickIcons" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="hidden" id="selectedCategoryId" value="">
                 </div>
+            </div>
+
+
+            <!-- Sections Panel -->
+            <div id="sections" class="panel">
+                <h2><i class="fa-solid fa-book-open"></i> إدارة الأقسام (ديناميكية)</h2>
+                <div class="alert">
+                    <i class="fa-solid fa-circle-info"></i> الأقسام ديناميكية - يمكنك إضافة أو حذف أي قسم من MongoDB
+                </div>
+                <button class="btn btn-primary" onclick="seedSections()"><i class="fa-solid fa-seedling"></i> ملء
+                    الأقسام
+                    الافتراضية (15 قسم)</button>
+                <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
+
                 <div class="form-group">
-                    <label>الحالة</label>
-                    <select id="lessonStatus">
-                        <option value="draft">📝 مسودة</option>
-                        <option value="published">✅ منشور</option>
-                    </select>
+                    <label>إضافة قسم جديد</label>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap">
+                        <input type="text" id="newSectionKey" placeholder="sectionKey (انجليزي)" style="flex:1">
+                        <input type="text" id="newSectionLabel" placeholder="الاسم بالعربي" style="flex:1">
+                        <input type="text" id="newSectionIcon" placeholder="fa-book-quran" style="width:80px">
+                        <button class="btn btn-primary" onclick="addSection()">إضافة</button>
+                    </div>
+                </div>
+
+                <div id="sectionsList"></div>
+            </div>
+
+            <!-- Sheikhs Panel -->
+            <div id="sheikhs" class="panel">
+                <h2><i class="fa-solid fa-user"></i> إدارة الشيوخ</h2>
+                <div class="form-group">
+                    <label>اسم الشيخ</label>
+                    <div style="display:flex; gap:10px">
+                        <input type="text" id="sheikhName" placeholder="مثال: الشيخ الشعراوي" style="flex:1">
+                        <button class="btn btn-primary" onclick="addSheikh()"><i class="fa-solid fa-plus"></i>
+                            إضافة</button>
+                    </div>
+                </div>
+                <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
+                <div id="sheikhsList"></div>
+            </div>
+
+            <!-- Lessons Panel -->
+            <div id="lessons" class="panel">
+                <h2><i class="fa-solid fa-book-quran"></i> الدروس المضافة</h2>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary" onclick="openNewLessonEditor()">
+                        <i class="fa-solid fa-plus"></i> إضافة درس جديد
+                    </button>
+                </div>
+                <div id="lessonsList"></div>
+            </div>
+
+            <!-- Add Lesson Panel (Dynamic) -->
+            <div id="addLesson" class="panel">
+                <div class="editor-header">
+                    <h2 id="formTitle"><i class="fa-solid fa-plus"></i> إضافة درس جديد</h2>
+                    <button class="btn" onclick="cancelEdit()" id="cancelEditBtn" style="display:none;">
+                        <i class="fa-solid fa-arrow-right"></i> إلغاء التعديل
+                    </button>
+                </div>
+
+                <!-- الحقول الأساسية (ثابتة) -->
+                <div class="basic-fields">
+                    <div class="form-group">
+                        <label>عنوان الدرس <span style="color:#e74c3c">*</span></label>
+                        <input type="text" id="lessonTitle" placeholder="مثال: درس عن مصعب بن عمير">
+                    </div>
+                    <div class="form-group">
+                        <label>عنوان فرعي</label>
+                        <input type="text" id="lessonSubtitle" placeholder="عنوان فرعي (اختياري)">
+                    </div>
+                    <div class="form-group">
+                        <label>الشيخ</label>
+                        <select id="lessonSheikh"></select>
+                    </div>
+                    <!-- 🎯 Category Picker (Cascading) -->
+                    <div class="form-group" id="categoryPickerContainer">
+                        <label><i class="fa-solid fa-folder-tree"></i> تصنيف الدرس <span
+                                style="color:#e74c3c">*</span></label>
+                        <div class="category-picker" id="categoryPicker">
+                            <div class="category-breadcrumb" id="categoryBreadcrumb">
+                                <span class="crumb-placeholder">اختر التصنيف...</span>
+                            </div>
+                            <div class="category-levels" id="categoryLevels"></div>
+                        </div>
+                        <input type="hidden" id="selectedCategoryId" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>الحالة</label>
+                        <select id="lessonStatus">
+                            <option value="draft">📝 مسودة</option>
+                            <option value="published">✅ منشور</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- المحتوى الخام -->
+                <div class="form-group">
+                    <label>المحتوى الخام (التفريغ)</label>
+                    <textarea id="lessonContent" placeholder="ألصق هنا تفريغ الدرس..."></textarea>
+                </div>
+                <div class="form-group"
+                    style="border: 1px dashed var(--gold); padding: 15px; border-radius: 10px; background: rgba(212,175,55,0.05);">
+                    <label style="color: var(--gold);">🔒 المصدر المرجعي الداخلي <small style="color:#999;">(اختياري -
+                            للأدمن والـ AI فقط)</small></label>
+                    <textarea id="lessonRawSource"
+                        placeholder="ألصق هنا النص الأصلي للشيخ أو ملاحظات سرية... (لن يظهر في الموقع)"
+                        style="border-color: var(--gold); min-height: 100px;"></textarea>
+                    <small style="color:#888; display:block; margin-top:5px;">⚠️ هذا الحقل لا يظهر للمستخدمين ولا يدخل
+                        في
+                        التحليل - للحفظ الداخلي فقط</small>
+                </div>
+
+                <!-- ⭐ الأقسام الديناميكية (تتبنى من SectionRegistry!) -->
+                <div class="sections-container-label">
+                    <i class="fa-solid fa-puzzle-piece"></i> أقسام المحتوى الديناميكية
+                    <small style="color: var(--text-secondary); font-weight: 400;">(تتحمل تلقائياً من قاعدة
+                        البيانات)</small>
+                </div>
+                <div id="lesson-sections-container">
+                    <div class="loading-sections">
+                        <i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأقسام...
+                    </div>
+                </div>
+
+                <!-- أزرار الحفظ -->
+                <div class="editor-actions">
+                    <button class="btn btn-primary" id="saveDraftBtn" onclick="saveLessonDynamic(false)">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ كمسودة
+                    </button>
+                    <button class="btn btn-success" id="savePublishBtn" onclick="saveLessonDynamic(true)">
+                        <i class="fa-solid fa-rocket"></i> نشر مباشرة
+                    </button>
+                    <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()">
+                        <i class="fa-solid fa-file-import"></i> استيراد JSON/نص
+                    </button>
                 </div>
             </div>
 
-            <!-- المحتوى الخام -->
-            <div class="form-group">
-                <label>المحتوى الخام (التفريغ)</label>
-                <textarea id="lessonContent" placeholder="ألصق هنا تفريغ الدرس..."></textarea>
+            <!-- Preview Panel -->
+            <div id="preview" class="panel">
+                <h2><i class="fa-solid fa-eye"></i> معاينة الموقع</h2>
+                <div class="form-group">
+                    <label>اختر درس للمعاينة</label>
+                    <select id="previewLesson" onchange="showPreview()"></select>
+                </div>
+                <div id="previewContent"></div>
             </div>
-            <div class="form-group"
-                style="border: 1px dashed var(--gold); padding: 15px; border-radius: 10px; background: rgba(212,175,55,0.05);">
-                <label style="color: var(--gold);">🔒 المصدر المرجعي الداخلي <small style="color:#999;">(اختياري -
-                        للأدمن والـ AI فقط)</small></label>
-                <textarea id="lessonRawSource"
-                    placeholder="ألصق هنا النص الأصلي للشيخ أو ملاحظات سرية... (لن يظهر في الموقع)"
-                    style="border-color: var(--gold); min-height: 100px;"></textarea>
-                <small style="color:#888; display:block; margin-top:5px;">⚠️ هذا الحقل لا يظهر للمستخدمين ولا يدخل في
-                    التحليل - للحفظ الداخلي فقط</small>
-            </div>
+        </div>
 
-            <!-- ⭐ الأقسام الديناميكية (تتبنى من SectionRegistry!) -->
-            <div class="sections-container-label">
-                <i class="fa-solid fa-puzzle-piece"></i> أقسام المحتوى الديناميكية
-                <small style="color: var(--text-secondary); font-weight: 400;">(تتحمل تلقائياً من قاعدة
-                    البيانات)</small>
-            </div>
-            <div id="lesson-sections-container">
-                <div class="loading-sections">
-                    <i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأقسام...
+        <!-- Import Modal -->
+        <div class="modal-overlay" id="importModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fa-solid fa-file-import"></i> استيراد محتوى خارجي</h2>
+                    <button class="close-btn" onclick="closeImportModal()">×</button>
+                </div>
+
+                <!-- 🔒 المصدر المرجعي - تصميم بنفسجي -->
+                <div
+                    style="background: linear-gradient(135deg, rgba(142,68,173,0.15), rgba(155,89,182,0.08)); border: 2px solid rgba(155,89,182,0.5); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                    <label
+                        style="color: #9b59b6; font-weight: 700; font-size: 1rem; display: block; margin-bottom: 8px;">
+                        🔒 المصدر المرجعي الداخلي
+                        <span style="font-weight: 400; font-size: 0.8rem; color: #999;">(اختياري - للأدمن والـ AI
+                            فقط)</span>
+                    </label>
+                    <textarea id="importRawSource" placeholder="📝 ألصق هنا النص الأصلي للشيخ أو ملاحظاتك السرية..."
+                        style="border: 1px solid rgba(155,89,182,0.4); background: rgba(155,89,182,0.05); min-height: 80px; border-radius: 8px; width: 100%; box-sizing: border-box; padding: 10px; color: var(--text); font-family: inherit;"></textarea>
+                    <small style="color: #8e44ad; display: block; margin-top: 5px;">⚠️ يتحفظ في قاعدة البيانات فقط • لا
+                        يظهر
+                        في الموقع نهائياً • للـ AI مستقبلاً</small>
+                </div>
+
+                <div class="import-tabs">
+                    <button class="import-tab active" onclick="setImportType('json')">📦 JSON جاهز</button>
+                    <button class="import-tab" onclick="setImportType('text')">📝 نص عادي</button>
+                </div>
+
+                <div class="form-group">
+                    <label id="importLabel">الصق كود JSON هنا:</label>
+                    <textarea id="importContent" placeholder='{ "title": "...", "overview": {...} }'></textarea>
+                </div>
+
+                <div id="importResult"></div>
+                <div id="previewSections" class="preview-sections" style="display:none;"></div>
+
+                <div style="margin-top: 20px; display: flex; gap: 1rem;">
+                    <button class="btn" style="background: #3498db; color: white;" onclick="parseAndPreview()">🔍 معاينة
+                        وتحليل</button>
+                    <button class="btn btn-success" onclick="applyImport()" id="applyBtn" disabled>✅ تطبيق على
+                        الدرس</button>
                 </div>
             </div>
-
-            <!-- أزرار الحفظ -->
-            <div class="editor-actions">
-                <button class="btn btn-primary" id="saveDraftBtn" onclick="saveLessonDynamic(false)">
-                    <i class="fa-solid fa-floppy-disk"></i> حفظ كمسودة
-                </button>
-                <button class="btn btn-success" id="savePublishBtn" onclick="saveLessonDynamic(true)">
-                    <i class="fa-solid fa-rocket"></i> نشر مباشرة
-                </button>
-                <button class="btn" style="background: #9b59b6; color: white;" onclick="openImportModal()">
-                    <i class="fa-solid fa-file-import"></i> استيراد JSON/نص
-                </button>
-            </div>
         </div>
-
-        <!-- Preview Panel -->
-        <div id="preview" class="panel">
-            <h2><i class="fa-solid fa-eye"></i> معاينة الموقع</h2>
-            <div class="form-group">
-                <label>اختر درس للمعاينة</label>
-                <select id="previewLesson" onchange="showPreview()"></select>
-            </div>
-            <div id="previewContent"></div>
-        </div>
-    </div>
-
-    <!-- Import Modal -->
-    <div class="modal-overlay" id="importModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fa-solid fa-file-import"></i> استيراد محتوى خارجي</h2>
-                <button class="close-btn" onclick="closeImportModal()">×</button>
-            </div>
-
-            <!-- 🔒 المصدر المرجعي - تصميم بنفسجي -->
-            <div
-                style="background: linear-gradient(135deg, rgba(142,68,173,0.15), rgba(155,89,182,0.08)); border: 2px solid rgba(155,89,182,0.5); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-                <label style="color: #9b59b6; font-weight: 700; font-size: 1rem; display: block; margin-bottom: 8px;">
-                    🔒 المصدر المرجعي الداخلي
-                    <span style="font-weight: 400; font-size: 0.8rem; color: #999;">(اختياري - للأدمن والـ AI
-                        فقط)</span>
-                </label>
-                <textarea id="importRawSource" placeholder="📝 ألصق هنا النص الأصلي للشيخ أو ملاحظاتك السرية..."
-                    style="border: 1px solid rgba(155,89,182,0.4); background: rgba(155,89,182,0.05); min-height: 80px; border-radius: 8px; width: 100%; box-sizing: border-box; padding: 10px; color: var(--text); font-family: inherit;"></textarea>
-                <small style="color: #8e44ad; display: block; margin-top: 5px;">⚠️ يتحفظ في قاعدة البيانات فقط • لا يظهر
-                    في الموقع نهائياً • للـ AI مستقبلاً</small>
-            </div>
-
-            <div class="import-tabs">
-                <button class="import-tab active" onclick="setImportType('json')">📦 JSON جاهز</button>
-                <button class="import-tab" onclick="setImportType('text')">📝 نص عادي</button>
-            </div>
-
-            <div class="form-group">
-                <label id="importLabel">الصق كود JSON هنا:</label>
-                <textarea id="importContent" placeholder='{ "title": "...", "overview": {...} }'></textarea>
-            </div>
-
-            <div id="importResult"></div>
-            <div id="previewSections" class="preview-sections" style="display:none;"></div>
-
-            <div style="margin-top: 20px; display: flex; gap: 1rem;">
-                <button class="btn" style="background: #3498db; color: white;" onclick="parseAndPreview()">🔍 معاينة
-                    وتحليل</button>
-                <button class="btn btn-success" onclick="applyImport()" id="applyBtn" disabled>✅ تطبيق على
-                    الدرس</button>
-            </div>
-        </div>
-    </div>
+    </div> <!-- end page-wrapper -->
 
     <script>
         // ============ Auth Check ============
@@ -1660,23 +2181,24 @@
         }
 
         // ============ Tab Navigation ============
+        // showTab = scroll-to-section (كل الأقسام ظاهرة - الزرار بينقلك للقسم)
         function showTab(tabId) {
+            // 1. Active Tab highlight
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            // Find the clicked tab button
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(t => {
-                if (t.textContent.includes(tabId === 'categories' ? 'الأقسام الرئيسية' :
-                    tabId === 'sections' ? 'أقسام الدروس' :
-                        tabId === 'sheikhs' ? 'الشيوخ' :
-                            tabId === 'lessons' ? 'الدروس' :
-                                tabId === 'addLesson' ? 'إضافة درس' :
-                                    tabId === 'preview' ? 'معاينة' : 'AI')) {
+                if (t.getAttribute('onclick')?.includes(tabId)) {
                     t.classList.add('active');
                 }
             });
-            document.getElementById(tabId).classList.add('active');
 
+            // 2. Scroll to section (smooth = بسلاسة)
+            const target = document.getElementById(tabId);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // 3. Load data if needed
             if (tabId === 'preview') updatePreviewSelect();
             if (tabId === 'categories') loadCategories(currentParentId);
         }
@@ -2611,6 +3133,7 @@
         function toggleTreeNode(button) {
             const item = button.closest('.tree-item');
             const children = item.querySelector('.tree-children');
+            const chevron = item.querySelector(':scope > .tree-item-content .tree-chevron');
 
             if (!children) return;
 
@@ -2618,9 +3141,11 @@
 
             if (isExpanded) {
                 children.style.display = 'none';
+                if (chevron) chevron.classList.remove('expanded');
                 button.classList.remove('expanded');
             } else {
                 children.style.display = 'block';
+                if (chevron) chevron.classList.add('expanded');
                 button.classList.add('expanded');
             }
         }
@@ -2635,6 +3160,9 @@
             document.querySelectorAll('.tree-toggle').forEach(toggle => {
                 toggle.classList.add('expanded');
             });
+            document.querySelectorAll('.tree-chevron').forEach(ch => {
+                ch.classList.add('expanded');
+            });
         }
 
         /**
@@ -2647,6 +3175,9 @@
             document.querySelectorAll('.tree-toggle').forEach(toggle => {
                 toggle.classList.remove('expanded');
             });
+            document.querySelectorAll('.tree-chevron').forEach(ch => {
+                ch.classList.remove('expanded');
+            });
         }
 
         /**
@@ -2657,7 +3188,7 @@
         }
 
         /**
-         * Render tree view recursively
+         * Render tree view recursively (Modern Design - like arena.site)
          */
         function renderTreeView(categories, level = 0) {
             if (!categories || categories.length === 0) return '';
@@ -2666,17 +3197,31 @@
 
             categories.forEach(cat => {
                 const hasChildren = cat.children && cat.children.length > 0;
-                const iconColor = cat.color || '#D4AF37';
-                const icon = cat.icon || 'fa-solid fa-folder';
+                const iconColor = cat.color || '#a78bfa';
+                const userIcon = cat.icon || 'fa-solid fa-folder';
+
+                // Modern design: folders for parents, documents for leaves
+                const isFolder = hasChildren;
+                const displayIcon = isFolder ? 'fa-regular fa-folder' : 'fa-regular fa-file-lines';
+                const displayColor = isFolder ? '#a78bfa' : '#8b8baf';
+                const indent = level * 20;
 
                 html += `
-                    <li class="tree-item" data-id="${cat._id}" data-level="${level}">
-                        <div class="tree-item-content">
-                            ${hasChildren
-                        ? `<button class="tree-toggle" onclick="toggleTreeNode(this)"><i class="fa-solid fa-chevron-left"></i></button>`
-                        : '<span class="tree-spacer"></span>'
+                    <li class="tree-item ${isFolder ? 'tree-folder' : 'tree-leaf'}" data-id="${cat._id}" data-level="${level}">
+                        <div class="tree-item-content" style="padding-right: ${32 + indent}px;">
+                            ${isFolder
+                        ? `<span class="tree-chevron" onclick="toggleTreeNode(this.closest('.tree-item-content').querySelector('.tree-toggle') || this)">
+                                    <svg class="chevron-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg>
+                                </span>`
+                        : '<span class="tree-spacer-modern"></span>'
                     }
-                            <i class="tree-icon ${icon}" style="color: ${iconColor}"></i>
+                            ${hasChildren
+                        ? `<button class="tree-toggle" onclick="toggleTreeNode(this)" style="display:none;"><i class="fa-solid fa-chevron-left"></i></button>`
+                        : ''
+                    }
+                            <span class="tree-icon-modern" style="color: ${displayColor}">
+                                <i class="${displayIcon}"></i>
+                            </span>
                             <span class="tree-label">${cat.name}</span>
                             <div class="tree-actions">
                                 <button class="btn-tree-icon" onclick="addChildCategory('${cat._id}')" title="إضافة قسم فرعي">
