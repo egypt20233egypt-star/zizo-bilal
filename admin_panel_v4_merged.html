@@ -5395,13 +5395,11 @@
 
             categories.forEach(cat => {
                 const hasChildren = cat.children && cat.children.length > 0;
-                const iconColor = cat.color || '#a78bfa';
-                const userIcon = cat.icon || 'fa-solid fa-folder';
-
-                // Modern design: folders for parents, documents for leaves
                 const isFolder = hasChildren;
-                const displayIcon = isFolder ? 'fa-regular fa-folder' : 'fa-regular fa-file-lines';
-                const displayColor = isFolder ? '#a78bfa' : '#8b8baf';
+
+                // استخدم أيقونة ولون القسم الفعليين اللي المستخدم اختارهم
+                const displayIcon = cat.icon || (isFolder ? 'fa-solid fa-folder' : 'fa-solid fa-file-lines');
+                const displayColor = cat.color || (isFolder ? '#a78bfa' : '#8b8baf');
                 const indent = level * 20;
 
                 html += `
