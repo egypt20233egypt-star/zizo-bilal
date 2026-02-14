@@ -59,6 +59,83 @@ router.get('/:id/history/:version', async (req, res) => {
     }
 });
 
+// ============ Copy Lesson (MUST be before /:id routes) ============
+router.post('/:id/copy', async (req, res) => {
+    try {
+        const original = await Lesson.findById(req.params.id);
+        if (!original) {
+            return res.status(404).json({ error: 'الدرس غير موجود' });
+        }
+
+        const { sheikhId, categoryId } = req.body || {};
+
+        // تنظيف العنوان من (نسخة) المتكررة
+        const cleanTitle = original.title.replace(/^(\(نسخة\)\s*)+/g, '');
+
+        // نسخ كل الحقول ماعدا _id و timestamps
+        const lessonData = original.toObject();
+        delete lessonData._id;
+        delete lessonData.__v;
+        delete lessonData.createdAt;
+        delete lessonData.updatedAt;
+
+        // إنشاء نسخة جديدة
+        const newLesson = new Lesson({
+            ...lessonData,
+            title: '(نسخة) ' + cleanTitle,
+            status: 'draft',
+            sheikhId: sheikhId || original.sheikhId,
+            categoryId: categoryId || original.categoryId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+
+        await newLesson.save();
+
+        // حفظ initial version في History (non-blocking)
+        try {
+            await LessonHistory.saveVersion(newLesson._id, newLesson.toObject(), 'copy', 'نسخة من: ' + cleanTitle);
+        } catch (histErr) {
+            console.warn('History save warning (copy still succeeded):', histErr.message);
+        }
+
+        res.json({ message: 'تم نسخ الدرس بنجاح', lesson: newLesson });
+    } catch (err) {
+        console.error('Copy error:', err.message);
+        res.status(500).json({ error: 'خطأ في نسخ الدرس: ' + err.message });
+    }
+});
+
+// ============ Move Lesson (MUST be before /:id routes) ============
+router.put('/:id/move', async (req, res) => {
+    try {
+        const { sheikhId, categoryId } = req.body;
+
+        if (!sheikhId && !categoryId) {
+            return res.status(400).json({ error: 'يجب اختيار شيخ أو قسم على الأقل' });
+        }
+
+        const updateData = { updatedAt: new Date() };
+        if (sheikhId) updateData.sheikhId = sheikhId;
+        if (categoryId) updateData.categoryId = categoryId;
+
+        const lesson = await Lesson.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true }
+        );
+
+        if (!lesson) {
+            return res.status(404).json({ error: 'الدرس غير موجود' });
+        }
+
+        res.json({ message: 'تم نقل الدرس بنجاح', lesson });
+    } catch (err) {
+        console.error('Move error:', err);
+        res.status(500).json({ error: 'خطأ في نقل الدرس' });
+    }
+});
+
 // POST new lesson
 router.post('/', async (req, res) => {
     try {

@@ -2886,6 +2886,14 @@
                 <div class="form-group">
                     <label><i class="fa-solid fa-image"></i> رابط صورة الشيخ (اختياري)</label>
                     <input type="text" id="sheikhImage" placeholder="https://... أو /uploads/sheikh.jpg">
+                    <div class="avatar-upload-options" style="margin-top:6px">
+                        <span>أو</span>
+                        <label class="avatar-upload-btn">
+                            <i class="fa-solid fa-upload"></i> رفع صورة من جهازك
+                            <input type="file" id="addSheikhFile" accept="image/*"
+                                onchange="uploadAvatar(this, 'sheikhImage', null)" style="display:none">
+                        </label>
+                    </div>
                 </div>
                 <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
                 <div id="sheikhsList"></div>
@@ -3088,8 +3096,8 @@
                     <span>أو</span>
                     <label class="avatar-upload-btn">
                         <i class="fa-solid fa-upload"></i> رفع صورة
-                        <input type="file" id="editSheikhFile" accept="image/*" onchange="uploadSheikhAvatar(this)"
-                            style="display:none">
+                        <input type="file" id="editSheikhFile" accept="image/*"
+                            onchange="uploadAvatar(this, 'editSheikhImage', 'editAvatarPreview')" style="display:none">
                     </label>
                 </div>
                 <label class="edit-sheikh-toggle">
@@ -3102,6 +3110,86 @@
                     <i class="fa-solid fa-check"></i> حفظ
                 </button>
                 <button onclick="closeEditSheikhModal()" class="btn-cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Move Lesson Modal ============ -->
+    <div id="moveLessonModal" class="edit-sheikh-overlay" style="display:none"
+        onclick="if(event.target===this) closeMoveModal()">
+        <div class="edit-sheikh-modal" style="max-width:420px">
+            <div class="edit-sheikh-header" style="background: linear-gradient(135deg, #e67e22, #f39c12)">
+                <h3><i class="fa-solid fa-arrows-up-down-left-right"></i> نقل الدرس</h3>
+            </div>
+            <div class="edit-sheikh-body">
+                <p id="moveLessonTitle"
+                    style="background:#f8f9fa; padding:10px; border-radius:8px; font-weight:bold; margin-bottom:15px; text-align:center;">
+                </p>
+
+                <input type="hidden" id="moveLessonId">
+
+                <div class="form-group" style="margin-bottom:12px">
+                    <label><i class="fa-solid fa-user-tie"></i> نقل لشيخ (اختياري)</label>
+                    <select id="moveToSheikh"
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
+                        <option value="">-- الشيخ الحالي --</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px">
+                    <label><i class="fa-solid fa-folder-tree"></i> نقل لقسم (اختياري)</label>
+                    <select id="moveToCategory"
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
+                        <option value="">-- القسم الحالي --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="edit-sheikh-footer">
+                <button onclick="moveLesson()" class="btn-save" style="background:#e67e22">
+                    <i class="fa-solid fa-check"></i> نقل
+                </button>
+                <button onclick="closeMoveModal()" class="btn-cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Copy Lesson Modal ============ -->
+    <div id="copyLessonModal" class="edit-sheikh-overlay" style="display:none"
+        onclick="if(event.target===this) closeCopyModal()">
+        <div class="edit-sheikh-modal" style="max-width:420px">
+            <div class="edit-sheikh-header" style="background: linear-gradient(135deg, #9b59b6, #8e44ad)">
+                <h3><i class="fa-solid fa-copy"></i> نسخ الدرس</h3>
+            </div>
+            <div class="edit-sheikh-body">
+                <p id="copyLessonTitle"
+                    style="background:#f8f9fa; padding:10px; border-radius:8px; font-weight:bold; margin-bottom:10px; text-align:center;">
+                </p>
+                <p style="font-size:0.85rem; color:#6c757d; margin-bottom:15px; text-align:center;">💡 اترك الحقول فاضية
+                    للنسخ في نفس المكان</p>
+
+                <input type="hidden" id="copyLessonId">
+
+                <div class="form-group" style="margin-bottom:12px">
+                    <label><i class="fa-solid fa-user-tie"></i> نسخ لشيخ (اختياري)</label>
+                    <select id="copyToSheikh"
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
+                        <option value="">-- نفس الشيخ --</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px">
+                    <label><i class="fa-solid fa-folder-tree"></i> نسخ لقسم (اختياري)</label>
+                    <select id="copyToCategory"
+                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
+                        <option value="">-- نفس القسم --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="edit-sheikh-footer">
+                <button onclick="executeCopy()" class="btn-save" style="background:#9b59b6">
+                    <i class="fa-solid fa-check"></i> نسخ
+                </button>
+                <button onclick="closeCopyModal()" class="btn-cancel">إلغاء</button>
             </div>
         </div>
     </div>
@@ -3589,9 +3677,11 @@
             }
         }
 
-        async function uploadSheikhAvatar(input) {
+        // Generic Avatar Upload (يخدم Add + Edit)
+        async function uploadAvatar(input, targetInputId, previewId) {
             const file = input.files[0];
             if (!file) return;
+
             if (file.size > 2 * 1024 * 1024) {
                 alert('❌ الصورة أكبر من 2MB');
                 input.value = '';
@@ -3609,8 +3699,17 @@
 
                 if (res.ok) {
                     const { url } = await res.json();
-                    document.getElementById('editSheikhImage').value = url;
-                    document.getElementById('editAvatarPreview').innerHTML = `<img src="${url}?t=${Date.now()}">`;
+                    document.getElementById(targetInputId).value = url;
+
+                    // Update preview if provided
+                    if (previewId) {
+                        const preview = document.getElementById(previewId);
+                        if (preview) {
+                            preview.innerHTML = `<img src="${url}?t=${Date.now()}">`;
+                        }
+                    }
+
+                    alert('✅ تم رفع الصورة');
                 } else {
                     alert('❌ فشل رفع الصورة');
                 }
@@ -3654,6 +3753,8 @@
                                 <button class="btn" style="background:#3498db;color:white;" onclick="editLesson('${l._id}')"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
                                 <button class="btn btn-success" onclick="togglePublish('${l._id}', ${isPublished})">${isPublished ? '<i class="fa-solid fa-upload"></i> إلغاء النشر' : '<i class="fa-solid fa-rocket"></i> نشر'}</button>
                                 <button class="btn btn-danger" onclick="deleteLesson('${l._id}')"><i class="fa-solid fa-trash-can"></i> حذف</button>
+                                <button class="btn" style="background:#9b59b6;color:white;" onclick="openCopyModal('${l._id}', '${l.title}')"><i class="fa-solid fa-copy"></i> نسخ</button>
+                                <button class="btn" style="background:#e67e22;color:white;" onclick="openMoveModal('${l._id}', '${l.title}')"><i class="fa-solid fa-arrows-up-down-left-right"></i> نقل</button>
                             </div>
                         </div>
                     `;
@@ -4126,6 +4227,144 @@
                 console.error('Delete error:', error);
             }
         }
+
+        // ============ Copy & Move Lesson ============
+
+        // دالة مشتركة لملء selects الشيوخ والأقسام (DRY)
+        async function loadSelectsForModal(sheikhSelectId, catSelectId, sheikhDefault, catDefault) {
+            const sheikhSelect = document.getElementById(sheikhSelectId);
+            sheikhSelect.innerHTML = `<option value="">${sheikhDefault}</option>`;
+
+            try {
+                const res = await fetch('/api/sheikhs');
+                const sheikhs = await res.json();
+                sheikhs.forEach(s => {
+                    sheikhSelect.innerHTML += `<option value="${s._id}">${s.name}</option>`;
+                });
+            } catch (e) {
+                console.error('Error loading sheikhs:', e);
+            }
+
+            const catSelect = document.getElementById(catSelectId);
+            catSelect.innerHTML = `<option value="">${catDefault}</option>`;
+
+            try {
+                const res = await fetch('/api/categories/tree');
+                const tree = await res.json();
+
+                function flattenTree(items, prefix) {
+                    items.forEach(item => {
+                        catSelect.innerHTML += `<option value="${item._id}">${prefix}${item.name}</option>`;
+                        if (item.children && item.children.length > 0) {
+                            flattenTree(item.children, prefix + '— ');
+                        }
+                    });
+                }
+                flattenTree(tree, '');
+            } catch (e) {
+                console.error('Error loading categories:', e);
+            }
+        }
+
+        // ═══════════════ Copy Modal ═══════════════
+
+        async function openCopyModal(lessonId, lessonTitle) {
+            document.getElementById('copyLessonId').value = lessonId;
+            document.getElementById('copyLessonTitle').textContent = lessonTitle;
+            await loadSelectsForModal('copyToSheikh', 'copyToCategory', '-- نفس الشيخ --', '-- نفس القسم --');
+            document.getElementById('copyLessonModal').style.display = 'flex';
+        }
+
+        async function executeCopy() {
+            const lessonId = document.getElementById('copyLessonId').value;
+            const sheikhId = document.getElementById('copyToSheikh').value;
+            const categoryId = document.getElementById('copyToCategory').value;
+
+            try {
+                const body = {};
+                if (sheikhId) body.sheikhId = sheikhId;
+                if (categoryId) body.categoryId = categoryId;
+
+                const res = await fetch(`/api/lessons/${lessonId}/copy`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    alert('✅ تم نسخ الدرس بنجاح!\nالعنوان: ' + data.lesson.title);
+                    closeCopyModal();
+                    loadLessons();
+                } else {
+                    const err = await res.json();
+                    alert('❌ ' + (err.error || 'فشل نسخ الدرس'));
+                }
+            } catch (error) {
+                console.error('Copy error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
+        }
+
+        function closeCopyModal() {
+            document.getElementById('copyLessonModal').style.display = 'none';
+        }
+
+        // ═══════════════ Move Modal ═══════════════
+
+        async function openMoveModal(lessonId, lessonTitle) {
+            document.getElementById('moveLessonId').value = lessonId;
+            document.getElementById('moveLessonTitle').textContent = lessonTitle;
+            await loadSelectsForModal('moveToSheikh', 'moveToCategory', '-- الشيخ الحالي --', '-- القسم الحالي --');
+            document.getElementById('moveLessonModal').style.display = 'flex';
+        }
+
+        async function moveLesson() {
+            const lessonId = document.getElementById('moveLessonId').value;
+            const sheikhId = document.getElementById('moveToSheikh').value;
+            const categoryId = document.getElementById('moveToCategory').value;
+
+            if (!sheikhId && !categoryId) {
+                alert('⚠️ اختر شيخ أو قسم على الأقل!');
+                return;
+            }
+
+            try {
+                const body = {};
+                if (sheikhId) body.sheikhId = sheikhId;
+                if (categoryId) body.categoryId = categoryId;
+
+                const res = await fetch(`/api/lessons/${lessonId}/move`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    alert('✅ تم نقل الدرس بنجاح!');
+                    closeMoveModal();
+                    loadLessons();
+                } else {
+                    const err = await res.json();
+                    alert('❌ ' + (err.error || 'فشل نقل الدرس'));
+                }
+            } catch (error) {
+                console.error('Move error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
+        }
+
+        function closeMoveModal() {
+            document.getElementById('moveLessonModal').style.display = 'none';
+        }
+
+        // ESC key for both Modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (document.getElementById('moveLessonModal').style.display !== 'none') closeMoveModal();
+                if (document.getElementById('copyLessonModal').style.display !== 'none') closeCopyModal();
+            }
+        });
 
         // ============ AI Functions ============
         function analyzeWithAI() {

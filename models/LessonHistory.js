@@ -26,7 +26,7 @@ const LessonHistorySchema = new mongoose.Schema({
     // Import source that created this version
     source: {
         type: String,
-        enum: ['internal-ai', 'external-json', 'text-paste', 'manual', 'initial'],
+        enum: ['internal-ai', 'external-json', 'text-paste', 'manual', 'initial', 'copy'],
         default: 'manual'
     },
 
