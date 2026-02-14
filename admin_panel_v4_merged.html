@@ -442,12 +442,14 @@
 
         /* --- CSS Variables for button colors --- */
         :root {
-            --v3-edit-1: #667eea;
-            --v3-edit-2: #764ba2;
+            --v3-edit-1: #3b82f6;
+            /* أزرق بدل بنفسجي عشان يبعد عن Copy */
+            --v3-edit-2: #1d4ed8;
             --v3-publish-1: #11998e;
             --v3-publish-2: #38ef7d;
-            --v3-unpublish-1: #f7971e;
-            --v3-unpublish-2: #ffd200;
+            --v3-unpublish-1: #ec4899;
+            /* وردي/أحمر فاتح بدل برتقالي عشان يبعد عن Move */
+            --v3-unpublish-2: #be185d;
             --v3-copy-1: #a855f7;
             --v3-copy-2: #6366f1;
             --v3-move-1: #f59e0b;
@@ -510,11 +512,13 @@
         /* ─── Button specific gradients + glow shadows ─── */
         .action-btn.btn-edit {
             background: linear-gradient(135deg, var(--v3-edit-1), var(--v3-edit-2));
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            /* أزرق */
         }
 
         .action-btn.btn-edit:hover {
-            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+            /* أزرق */
         }
 
         .action-btn.btn-publish {
@@ -528,11 +532,13 @@
 
         .action-btn.btn-unpublish {
             background: linear-gradient(135deg, var(--v3-unpublish-1), var(--v3-unpublish-2));
-            box-shadow: 0 4px 15px rgba(247, 151, 30, 0.3);
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+            /* وردي */
         }
 
         .action-btn.btn-unpublish:hover {
-            box-shadow: 0 8px 30px rgba(255, 210, 0, 0.4);
+            box-shadow: 0 8px 30px rgba(236, 72, 153, 0.5);
+            /* وردي */
         }
 
         .action-btn.btn-copy {
@@ -3146,13 +3152,11 @@
             padding-bottom: 0.65rem !important;
         }
 
+        /* === Folder items (parents with children) === */
         .tree-folder>.tree-item-content .tree-label {
             font-weight: 600 !important;
             font-size: 0.92rem !important;
-        }
-
-        .tree-folder>.tree-item-content .tree-icon-modern {
-            color: #a78bfa !important;
+            /* color: use inline style from cat.color */
         }
 
         /* === Leaf items (children without sub-items) === */
@@ -3164,16 +3168,17 @@
         .tree-leaf>.tree-item-content .tree-label {
             font-weight: 400 !important;
             font-size: 0.87rem !important;
-            color: #9ca3af !important;
+            /* color: use inline style from cat.color */
         }
 
         .tree-leaf>.tree-item-content .tree-icon-modern {
-            color: #7c7ca0 !important;
             font-size: 0.95rem !important;
+            /* color: use inline style from cat.color */
         }
 
         .tree-leaf>.tree-item-content:hover .tree-label {
-            color: #c4b5fd !important;
+            opacity: 0.8;
+            /* lighter on hover */
         }
 
         /* === Spacer for leaf alignment === */
@@ -3514,7 +3519,8 @@
                                     </div>
                                     <div class="form-group" style="width:120px;">
                                         <label><i class="fa-solid fa-palette"></i> اللون</label>
-                                        <input type="color" id="catColor" value="#DAA520" class="cat-color-input">
+                                        <input type="color" id="catColor" value="#DAA520" class="cat-color-input"
+                                            oninput="document.getElementById('catIconPreview').style.color = this.value">
                                     </div>
                                     <button class="cat-add-btn" onclick="addCategory()">
                                         <i class="fa-solid fa-plus"></i> إضافة
@@ -5316,6 +5322,9 @@
             document.getElementById('catColor').value = hex;
             document.querySelectorAll('.preset-dot').forEach(d => d.classList.remove('active'));
             if (el) el.classList.add('active');
+            // Update icon preview color
+            const preview = document.getElementById('catIconPreview');
+            if (preview) preview.style.color = hex;
         }
 
         // render on load
@@ -5418,7 +5427,7 @@
                             <span class="tree-icon-modern" style="color: ${displayColor}">
                                 <i class="${displayIcon}"></i>
                             </span>
-                            <span class="tree-label">${cat.name}</span>
+                            <span class="tree-label" style="color: ${displayColor}">${cat.name}</span>
                             <div class="tree-actions">
                                 <button class="btn-tree-icon" onclick="addChildCategory('${cat._id}')" title="إضافة قسم فرعي">
                                     <i class="fa-solid fa-plus"></i>
