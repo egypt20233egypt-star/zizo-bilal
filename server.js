@@ -46,6 +46,41 @@ app.use(session({
 // ============ Auth Middleware ============
 const { requireAuth } = require('./middleware/requireAuth');
 
+// ============ Avatar Upload (Multer) ============
+const multer = require('multer');
+const fs = require('fs');
+
+// Auto-create uploads folder
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+const storage = multer.diskStorage({
+    destination: './uploads/',
+    filename: (req, file, cb) => {
+        cb(null, 'sheikh-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB max
+    fileFilter: (req, file, cb) => {
+        const allowed = /jpeg|jpg|png|webp|gif/;
+        const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+        const mime = allowed.test(file.mimetype);
+        cb(ext && mime ? null : new Error('نوع ملف غير مدعوم'), ext && mime);
+    }
+});
+
+// Serve uploads explicitly (أأمن من express.static(__dirname))
+app.use('/uploads', express.static(uploadsDir));
+
+// Upload endpoint (محمي)
+app.post('/api/upload/avatar', requireAuth, upload.single('avatar'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'مفيش ملف' });
+    res.json({ url: '/uploads/' + req.file.filename });
+});
+
 // ============ API Routes ============
 // Auth routes (مفتوحة - مفيش حماية)
 app.use('/api/admin', require('./routes/auth'));

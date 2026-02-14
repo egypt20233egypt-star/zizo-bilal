@@ -942,12 +942,15 @@
         /* ========================================
            🎯 Category Picker (Modern)
            ======================================== */
+        /* ============ Category Picker: Modern Cards UI ============ */
         .category-picker {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
+            background: linear-gradient(135deg, rgba(8, 8, 16, 0.95) 0%, rgba(16, 18, 27, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
             margin-top: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
         .category-picker.error {
@@ -971,66 +974,945 @@
             }
         }
 
+        /* Breadcrumb Pills */
         .category-breadcrumb {
             display: flex;
             align-items: center;
-            gap: 0.3rem;
-            flex-wrap: wrap;
-            min-height: 32px;
-            padding: 0.4rem 0.75rem;
-            background: var(--accent-soft);
-            border-radius: 6px;
-            margin-bottom: 0.75rem;
-            font-size: 0.85rem;
-        }
-
-        .crumb-item {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .crumb-sep {
-            color: var(--text-muted);
-            font-size: 0.7rem;
-        }
-
-        .crumb-placeholder {
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        .category-levels {
-            display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
-        }
-
-        .category-level-wrap {
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .category-level-wrap label {
-            display: block;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 4px;
-        }
-
-        .category-level-wrap select {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 6px;
-            color: var(--text);
+            min-height: 42px;
+            padding: 0.75rem 1rem;
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.12);
+            border-radius: 10px;
+            margin-bottom: 1rem;
             font-size: 0.875rem;
+        }
+
+        .crumb-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.25s;
+            animation: fadeInBreadcrumb 0.3s ease-out forwards;
+            opacity: 0;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        }
+
+        .crumb-pill:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+        }
+
+        .crumb-pill i {
+            font-size: 0.75rem;
+        }
+
+        .crumb-home {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.4rem 0.6rem;
             cursor: pointer;
         }
 
-        .category-level-wrap select:focus {
-            border-color: var(--gold);
+        .crumb-home:hover {
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        @keyframes fadeInBreadcrumb {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .crumb-sep {
+            color: rgba(139, 92, 246, 0.6);
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .crumb-placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        /* Category Cards Grid */
+        .category-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.875rem;
+            margin-top: 0.75rem;
+        }
+
+        .category-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 0.75rem;
+            background: linear-gradient(135deg, rgba(8, 8, 16, 0.6) 0%, rgba(16, 18, 27, 0.8) 100%);
+            border: 1.5px solid rgba(139, 92, 246, 0.25);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+            color: rgba(255, 255, 255, 0.85);
+            min-height: 95px;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .category-card:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .category-card:hover::before {
+            opacity: 1;
+        }
+
+        .category-card.selected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .category-card.selected::before {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+            opacity: 1;
+        }
+
+        .category-card i {
+            font-size: 1.75rem;
+            color: #a78bfa;
+            transition: all 0.25s;
+        }
+
+        .category-card.selected i {
+            color: #10b981;
+        }
+
+        .card-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .card-count {
+            position: absolute;
+            top: 0.4rem;
+            left: 0.4rem;
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.45rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Level Wrapper */
+        .category-level-wrap {
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .category-level-wrap .level-label {
+            display: block;
+            font-size: 0.8rem;
+            color: rgba(139, 92, 246, 0.9);
+            margin-bottom: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Legacy support - hide old selects if any remain */
+        .category-levels {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .category-level-wrap select {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .category-cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 0.65rem;
+            }
+
+            .category-card {
+                padding: 0.75rem 0.5rem;
+                min-height: 80px;
+            }
+
+            .category-card i {
+                font-size: 1.4rem;
+            }
+
+            .card-name {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* ========================================
+           👤 Sheikh Selector - Modern Cards
+           ======================================== */
+        .sheikh-picker {
+            background: linear-gradient(135deg, rgba(8, 8, 16, 0.95) 0%, rgba(16, 18, 27, 0.9) 100%);
+            border: 1.5px solid rgba(139, 92, 246, 0.2);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .sheikh-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .sheikh-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.8rem 0.5rem;
+            background: linear-gradient(135deg, rgba(8, 8, 16, 0.6) 0%, rgba(16, 18, 27, 0.8) 100%);
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+            color: rgba(255, 255, 255, 0.85);
+            overflow: hidden;
+            min-height: 80px;
+        }
+
+        .sheikh-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sheikh-card:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
+        }
+
+        .sheikh-card:hover::before {
+            opacity: 1;
+        }
+
+        .sheikh-card.selected {
+            border-color: #10b981;
+            border-width: 2.5px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 6px 20px rgba(16, 185, 129, 0.35);
+        }
+
+        .sheikh-card.selected::before {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.08));
+            opacity: 1;
+        }
+
+        /* === Sheikh Avatar === */
+        .sheikh-card-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .sheikh-card:hover .sheikh-card-avatar {
+            border-color: rgba(139, 92, 246, 0.6);
+            transform: scale(1.08);
+            box-shadow: 0 0 18px rgba(139, 92, 246, 0.4);
+        }
+
+        .sheikh-card.selected .sheikh-card-avatar {
+            border-color: #10b981;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.5);
+        }
+
+        .sheikh-card-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sheikh-card-avatar .fallback-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        }
+
+        .sheikh-card.selected .sheikh-card-avatar .fallback-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        /* === Status Badge === */
+        .sheikh-card-status {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            backdrop-filter: blur(8px);
+            z-index: 2;
+        }
+
+        .sheikh-card-status.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .sheikh-card-status.inactive {
+            background: rgba(107, 114, 128, 0.2);
+            color: #9ca3af;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        .sheikh-card-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .sheikh-card-status.active .sheikh-card-status-dot {
+            background: #10b981;
+            animation: statusPulse 2s infinite;
+        }
+
+        .sheikh-card-status.inactive .sheikh-card-status-dot {
+            background: #9ca3af;
+        }
+
+        @keyframes statusPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.4);
+            }
+        }
+
+        /* === Lesson Count Badge === */
+        .sheikh-card-lesson-count {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 7px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #c4b5fd;
+            transition: all 0.3s;
+            z-index: 1;
+        }
+
+        .sheikh-card:hover .sheikh-card-lesson-count {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(16, 185, 129, 0.15));
+            transform: scale(1.05);
+        }
+
+        .sheikh-card.selected .sheikh-card-lesson-count {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(139, 92, 246, 0.15));
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #10b981;
+        }
+
+        .sheikh-card-lesson-count.zero {
+            background: rgba(107, 114, 128, 0.12);
+            border-color: rgba(107, 114, 128, 0.2);
+            color: #9ca3af;
+        }
+
+        .sheikh-card-lesson-count i {
+            font-size: 0.7em;
+        }
+
+        .sheikh-card-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            z-index: 1;
+            margin-top: 0.15rem;
+        }
+
+        /* Inactive card opacity */
+        .sheikh-card.inactive-sheikh {
+            opacity: 0.55;
+        }
+
+        .sheikh-card.inactive-sheikh:hover {
+            opacity: 0.85;
+        }
+
+        .sheikh-card-checkmark {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.7rem;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5);
+            z-index: 2;
+        }
+
+        .sheikh-card.selected .sheikh-card-checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Staggered entrance animation */
+        @keyframes sheikhCardIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.92);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .sheikh-card {
+            animation: sheikhCardIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        .sheikh-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .sheikh-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .sheikh-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .sheikh-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .sheikh-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .sheikh-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        /* Error state */
+        #sheikhPickerContainer.error .sheikh-picker {
+            border-color: rgba(231, 76, 60, 0.6);
+            animation: sheikhShake 0.4s ease;
+        }
+
+        @keyframes sheikhShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-6px);
+            }
+
+            75% {
+                transform: translateX(6px);
+            }
+        }
+
+        .sheikh-cards-empty {
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+        }
+
+        .sheikh-cards-empty a {
+            color: #8b5cf6;
+            text-decoration: none;
+        }
+
+        .sheikh-cards-empty a:hover {
+            text-decoration: underline;
+        }
+
+        /* === Level 3: Featured Sheikh === */
+        .sheikh-card.featured-sheikh {
+            border: 2px solid transparent;
+            background-image: linear-gradient(rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.95)),
+                linear-gradient(135deg, #f59e0b, #10b981, #8b5cf6, #f59e0b);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            animation: featuredBorderGlow 3s linear infinite;
+        }
+
+        @keyframes featuredBorderGlow {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .sheikh-card-featured-badge {
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #f59e0b, #eab308);
+            color: #1a1a2e;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            z-index: 3;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+        }
+
+        .sheikh-card-featured-badge i {
+            font-size: 0.55rem;
+        }
+
+        /* === Level 3: Filter Bar === */
+        .sheikh-filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .sheikh-filter-bar input {
+            flex: 1;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            font-size: 0.85rem;
             outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .sheikh-filter-bar input:focus {
+            border-color: rgba(139, 92, 246, 0.6);
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .sheikh-filter-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .sheikh-filter-bar select {
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        /* === Level 3: Sort Toggle === */
+        .sheikh-sort-toggle {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .sheikh-sort-toggle button {
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            background: rgba(15, 23, 42, 0.5);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sheikh-sort-toggle button.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.5);
+            color: #c4b5fd;
+        }
+
+        .sheikh-sort-toggle button:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+
+
+        /* === Phase 2: Edit Sheikh Modal === */
+        .edit-sheikh-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .edit-sheikh-modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .edit-sheikh-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+        }
+
+        .edit-sheikh-header h3 {
+            margin: 0;
+            color: #c4b5fd;
+            font-size: 1rem;
+        }
+
+        .edit-sheikh-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .edit-sheikh-close:hover {
+            color: #f87171;
+        }
+
+        .edit-sheikh-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .edit-sheikh-body label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            margin-bottom: -8px;
+        }
+
+        .edit-sheikh-body input[type='text'],
+        .edit-sheikh-body textarea {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .edit-sheikh-body input:focus,
+        .edit-sheikh-body textarea:focus {
+            border-color: rgba(139, 92, 246, 0.6);
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.15);
+        }
+
+        .edit-sheikh-body textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .edit-sheikh-avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .edit-sheikh-avatar-preview i {
+            font-size: 2rem;
+            color: rgba(139, 92, 246, 0.5);
+        }
+
+        .edit-sheikh-avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .edit-sheikh-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+
+        .avatar-upload-options {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: -4px;
+        }
+
+        .avatar-upload-options span {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+        }
+
+        .avatar-upload-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px dashed rgba(139, 92, 246, 0.4);
+            background: transparent;
+            color: #c4b5fd;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .avatar-upload-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.6);
+        }
+
+        .edit-sheikh-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(139, 92, 246, 0.15);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .edit-sheikh-footer .btn-save {
+            padding: 8px 20px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .edit-sheikh-footer .btn-save:hover {
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .edit-sheikh-footer .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .edit-sheikh-footer .btn-cancel {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+        }
+
+        /* Sheikh Card Edit Button */
+        .sheikh-card-edit-btn {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: none;
+            background: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            font-size: 0.65rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sheikh-card:hover .sheikh-card-edit-btn {
+            opacity: 1;
+        }
+
+        .sheikh-card-edit-btn:hover {
+            background: rgba(139, 92, 246, 0.4);
+        }
+
+        /* Sheikh List Edit Button */
+        .sheikh-list-edit-btn {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: none;
+            background: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+
+        .sheikh-list-edit-btn:hover {
+            background: rgba(139, 92, 246, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sheikh-cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .sheikh-card {
+                padding: 1rem 0.5rem;
+                min-height: 95px;
+            }
+
+            .sheikh-card-avatar {
+                width: 44px;
+                height: 44px;
+            }
+
+            .sheikh-card-avatar .fallback-icon {
+                font-size: 1.2rem;
+            }
+
+            .sheikh-card-name {
+                font-size: 0.78rem;
+            }
+
+            .sheikh-card-lesson-count {
+                font-size: 0.65rem;
+                padding: 3px 7px;
+            }
+
+            .sheikh-card-status {
+                font-size: 0.55rem;
+                padding: 2px 6px;
+            }
         }
 
         /* ============ Phase 4: Dynamic Section Editor ============ */
@@ -2001,6 +2883,10 @@
                             إضافة</button>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-image"></i> رابط صورة الشيخ (اختياري)</label>
+                    <input type="text" id="sheikhImage" placeholder="https://... أو /uploads/sheikh.jpg">
+                </div>
                 <hr style="margin: 1.5rem 0; border-color: rgba(212,175,55,0.3)">
                 <div id="sheikhsList"></div>
             </div>
@@ -2035,9 +2921,29 @@
                         <label>عنوان فرعي</label>
                         <input type="text" id="lessonSubtitle" placeholder="عنوان فرعي (اختياري)">
                     </div>
-                    <div class="form-group">
-                        <label>الشيخ</label>
-                        <select id="lessonSheikh"></select>
+                    <div class="form-group" id="sheikhPickerContainer">
+                        <label><i class="fa-solid fa-user-tie"></i> الشيخ</label>
+                        <select id="lessonSheikh" style="display:none"></select>
+                        <div class="sheikh-picker">
+                            <!-- Level 3: Filter Bar -->
+                            <div class="sheikh-filter-bar">
+                                <input type="text" id="sheikhSearchInput" placeholder="🔍 ابحث عن شيخ..."
+                                    oninput="filterSheikhs()">
+                                <select id="sheikhStatusFilter" onchange="filterSheikhs()">
+                                    <option value="all">الكل</option>
+                                    <option value="active">النشطين</option>
+                                    <option value="featured">⭐ المميزين</option>
+                                </select>
+                            </div>
+                            <!-- Level 3: Sort Toggle -->
+                            <div class="sheikh-sort-toggle">
+                                <button class="active" onclick="setSortMode('lessons', this)">📊 الأكثر دروساً</button>
+                                <button onclick="setSortMode('name', this)">🔤 أبجدي</button>
+                            </div>
+                            <div class="sheikh-cards-grid" id="sheikhCardsGrid">
+                                <!-- Cards تتملأ ديناميكياً من renderSheikhCards() -->
+                            </div>
+                        </div>
                     </div>
                     <!-- 🎯 Category Picker (Cascading) -->
                     <div class="form-group" id="categoryPickerContainer">
@@ -2160,6 +3066,45 @@
             </div>
         </div>
     </div> <!-- end page-wrapper -->
+
+    <!-- Phase 2: Edit Sheikh Modal -->
+    <div id="editSheikhModal" class="edit-sheikh-overlay" style="display:none"
+        onclick="if(event.target===this) closeEditSheikhModal()">
+        <div class="edit-sheikh-modal">
+            <div class="edit-sheikh-header">
+                <h3><i class="fa-solid fa-user-pen"></i> تعديل بيانات الشيخ</h3>
+                <button onclick="closeEditSheikhModal()" class="edit-sheikh-close">&times;</button>
+            </div>
+            <div class="edit-sheikh-body">
+                <input type="hidden" id="editSheikhId">
+                <div class="edit-sheikh-avatar-preview" id="editAvatarPreview">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <label>اسم الشيخ</label>
+                <input type="text" id="editSheikhName" placeholder="اسم الشيخ">
+                <label>رابط الصورة</label>
+                <input type="text" id="editSheikhImage" placeholder="https://..." oninput="updateEditAvatarPreview()">
+                <div class="avatar-upload-options">
+                    <span>أو</span>
+                    <label class="avatar-upload-btn">
+                        <i class="fa-solid fa-upload"></i> رفع صورة
+                        <input type="file" id="editSheikhFile" accept="image/*" onchange="uploadSheikhAvatar(this)"
+                            style="display:none">
+                    </label>
+                </div>
+                <label class="edit-sheikh-toggle">
+                    <input type="checkbox" id="editSheikhActive">
+                    <span>الشيخ نشط</span>
+                </label>
+            </div>
+            <div class="edit-sheikh-footer">
+                <button onclick="saveSheikhEdit()" class="btn-save" id="saveSheikhBtn">
+                    <i class="fa-solid fa-check"></i> حفظ
+                </button>
+                <button onclick="closeEditSheikhModal()" class="btn-cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ============ Auth Check ============
@@ -2361,31 +3306,190 @@
                 document.getElementById('sheikhsList').innerHTML = sheikhsList.map(s => `
                     <div class="list-item">
                         <span><i class="fa-solid fa-user"></i> ${s.name}</span>
-                        <button class="btn btn-danger" onclick="deleteSheikh('${s._id}')">حذف</button>
+                        <div>
+                            <button class="sheikh-list-edit-btn" onclick="openEditSheikhModal('${s._id}')"><i class="fa-solid fa-pen"></i> تعديل</button>
+                            <button class="btn btn-danger" onclick="deleteSheikh('${s._id}')">حذف</button>
+                        </div>
                     </div>
                 `).join('') || '<p>لا يوجد شيوخ</p>';
 
-                // Update select
+                // Update select (hidden)
                 const select = document.getElementById('lessonSheikh');
                 select.innerHTML = '<option value="">اختر الشيخ</option>' +
                     sheikhsList.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+
+                // ✨ Render sheikh cards (NEW)
+                renderSheikhCards();
             } catch (error) {
                 console.error('Load sheikhs error:', error);
             }
         }
 
+        // ========================================
+        // 👤 Sheikh Selector - Interactive Cards
+        // ========================================
+
+        /**
+         * Render sheikh cards from sheikhsList
+         */
+        let currentSheikhSortMode = 'lessons';
+
+        function renderSheikhCards() {
+            const grid = document.getElementById('sheikhCardsGrid');
+            if (!grid) return;
+
+            if (!Array.isArray(sheikhsList) || sheikhsList.length === 0) {
+                grid.innerHTML = '<div class="sheikh-cards-empty"><i class="fa-solid fa-user-slash"></i> لا يوجد شيوخ. <a href="#sheikhs">أضف شيخاً</a></div>';
+                return;
+            }
+
+            const currentValue = document.getElementById('lessonSheikh').value;
+
+            // Level 3: Featured detection (max lessons, handles ties)
+            const maxLessons = Math.max(...sheikhsList.map(s => s.lessonCount || 0));
+
+            // Level 3: Sort
+            const sorted = [...sheikhsList].sort((a, b) => {
+                if (currentSheikhSortMode === 'lessons') {
+                    const diff = (b.lessonCount || 0) - (a.lessonCount || 0);
+                    if (diff !== 0) return diff;
+                    return a.name.localeCompare(b.name, 'ar');
+                } else {
+                    return a.name.localeCompare(b.name, 'ar');
+                }
+            });
+
+            grid.innerHTML = sorted.map(s => {
+                const isActive = s.isActive !== false;
+                const count = s.lessonCount || 0;
+                const hasImg = s.image && s.image.trim() !== '';
+                const isFeatured = count === maxLessons && maxLessons > 0;
+
+
+                return `
+                <button type="button" class="sheikh-card ${s._id === currentValue ? 'selected' : ''} ${!isActive ? 'inactive-sheikh' : ''} ${isFeatured ? 'featured-sheikh' : ''}"
+                        data-sheikh-id="${s._id}"
+                        data-lesson-count="${count}"
+                        onclick="selectSheikh('${s._id}', this)">
+
+                    ${isFeatured ? '<div class="sheikh-card-featured-badge"><i class="fa-solid fa-star"></i> مميز</div>' : ''}
+
+                    <!-- Edit Button (hover only) -->
+                    <span class="sheikh-card-edit-btn"
+                            onclick="event.stopPropagation(); openEditSheikhModal('${s._id}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </span>
+
+                    <!-- Status Badge -->
+                    <div class="sheikh-card-status ${isActive ? 'active' : 'inactive'}">
+                        <span class="sheikh-card-status-dot"></span>
+                        <span>${isActive ? 'نشط' : 'غير نشط'}</span>
+                    </div>
+
+                    <!-- Avatar -->
+                    <div class="sheikh-card-avatar">
+                        ${hasImg
+                        ? `<img src="${s.image}" alt="${s.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                               <div class="fallback-icon" style="display:none;"><i class="fa-solid fa-user-tie"></i></div>`
+                        : `<div class="fallback-icon"><i class="fa-solid fa-user-tie"></i></div>`
+                    }
+                    </div>
+
+                    <!-- Name -->
+                    <span class="sheikh-card-name">${s.name}</span>
+
+                    <!-- Lesson Count -->
+                    <div class="sheikh-card-lesson-count ${count === 0 ? 'zero' : ''}">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>${count} ${count === 1 ? 'درس' : 'دروس'}</span>
+                    </div>
+
+                    <!-- Checkmark -->
+                    <div class="sheikh-card-checkmark">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                </button>
+                `;
+            }).join('');
+        }
+
+        // Level 3: Sort Mode Toggle
+        function setSortMode(mode, btn) {
+            currentSheikhSortMode = mode;
+            renderSheikhCards();
+            const container = btn?.closest('.sheikh-sort-toggle');
+            if (container) {
+                container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+        }
+
+        // Level 3: Filter/Search
+        function filterSheikhs() {
+            const search = (document.getElementById('sheikhSearchInput')?.value || '').toLowerCase();
+            const status = document.getElementById('sheikhStatusFilter')?.value || 'all';
+
+            document.querySelectorAll('.sheikh-card').forEach(card => {
+                const name = card.querySelector('.sheikh-card-name')?.textContent.toLowerCase() || '';
+                const isActive = !card.classList.contains('inactive-sheikh');
+                const isFeatured = card.classList.contains('featured-sheikh');
+
+                const matchSearch = name.includes(search);
+                const matchStatus =
+                    status === 'all' ||
+                    (status === 'active' && isActive) ||
+                    (status === 'featured' && isFeatured);
+
+                card.style.display = (matchSearch && matchStatus) ? 'flex' : 'none';
+            });
+        }
+
+        /**
+         * Handle sheikh card selection
+         */
+        function selectSheikh(sheikhId, cardElement) {
+            const grid = document.getElementById('sheikhCardsGrid');
+            const hiddenSelect = document.getElementById('lessonSheikh');
+            const container = document.getElementById('sheikhPickerContainer');
+            if (!grid || !hiddenSelect) return;
+
+            // Remove error state
+            if (container) container.classList.remove('error');
+
+            // Deselect all
+            grid.querySelectorAll('.sheikh-card').forEach(c => c.classList.remove('selected'));
+
+            // Select clicked
+            cardElement.classList.add('selected');
+
+            // Sync with hidden select
+            hiddenSelect.value = sheikhId;
+        }
+
+        /**
+         * Sync cards visual state with hidden select value
+         */
+        function syncSheikhCards() {
+            const currentValue = document.getElementById('lessonSheikh').value;
+            document.querySelectorAll('.sheikh-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.sheikhId === currentValue);
+            });
+        }
+
         async function addSheikh() {
             const name = document.getElementById('sheikhName').value.trim();
+            const image = (document.getElementById('sheikhImage')?.value || '').trim();
             if (!name) return alert('أدخل اسم الشيخ');
 
             try {
                 const res = await fetch('/api/sheikhs', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name })
+                    body: JSON.stringify({ name, image })
                 });
                 if (res.ok) {
                     document.getElementById('sheikhName').value = '';
+                    if (document.getElementById('sheikhImage')) document.getElementById('sheikhImage').value = '';
                     loadSheikhs();
                     alert('✅ تم إضافة الشيخ');
                 } else {
@@ -2411,6 +3515,118 @@
                 console.error('Delete sheikh error:', error);
             }
         }
+
+        // ============ Phase 2: Edit Sheikh Modal ============
+        function openEditSheikhModal(sheikhId) {
+            const sheikh = sheikhsList.find(s => s._id === sheikhId);
+            if (!sheikh) return;
+
+            document.getElementById('editSheikhId').value = sheikh._id;
+            document.getElementById('editSheikhName').value = sheikh.name;
+            document.getElementById('editSheikhImage').value = sheikh.image || '';
+            document.getElementById('editSheikhActive').checked = sheikh.isActive !== false;
+
+            // Avatar preview
+            const preview = document.getElementById('editAvatarPreview');
+            if (sheikh.image && sheikh.image.trim()) {
+                preview.innerHTML = `<img src="${sheikh.image}" onerror="this.parentElement.innerHTML='<i class=\\'fa-solid fa-user-tie\\'></i>'">`;
+            } else {
+                preview.innerHTML = '<i class="fa-solid fa-user-tie"></i>';
+            }
+
+            document.getElementById('editSheikhModal').style.display = 'flex';
+        }
+
+        async function saveSheikhEdit() {
+            const btn = document.getElementById('saveSheikhBtn');
+            const id = document.getElementById('editSheikhId').value;
+            const data = {
+                name: document.getElementById('editSheikhName').value.trim(),
+                image: document.getElementById('editSheikhImage').value.trim(),
+                isActive: document.getElementById('editSheikhActive').checked
+            };
+
+            if (!data.name) return alert('أدخل اسم الشيخ');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+
+            try {
+                const res = await fetch(`/api/sheikhs/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    closeEditSheikhModal();
+                    loadSheikhs();
+                    alert('✅ تم تحديث بيانات الشيخ');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert('❌ ' + (err.error || 'فشل التحديث'));
+                }
+            } catch (error) {
+                console.error('Edit sheikh error:', error);
+                alert('❌ خطأ في الاتصال');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> حفظ';
+            }
+        }
+
+        function closeEditSheikhModal() {
+            document.getElementById('editSheikhModal').style.display = 'none';
+        }
+
+        function updateEditAvatarPreview() {
+            const url = document.getElementById('editSheikhImage').value.trim();
+            const preview = document.getElementById('editAvatarPreview');
+            if (url) {
+                preview.innerHTML = `<img src="${url}" onerror="this.parentElement.innerHTML='<i class=\\'fa-solid fa-user-tie\\'></i>'">`;
+            } else {
+                preview.innerHTML = '<i class="fa-solid fa-user-tie"></i>';
+            }
+        }
+
+        async function uploadSheikhAvatar(input) {
+            const file = input.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert('❌ الصورة أكبر من 2MB');
+                input.value = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            try {
+                const res = await fetch('/api/upload/avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const { url } = await res.json();
+                    document.getElementById('editSheikhImage').value = url;
+                    document.getElementById('editAvatarPreview').innerHTML = `<img src="${url}?t=${Date.now()}">`;
+                } else {
+                    alert('❌ فشل رفع الصورة');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
+            input.value = '';
+        }
+
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('editSheikhModal').style.display !== 'none') {
+                closeEditSheikhModal();
+            }
+        });
 
         // ============ Lessons (MongoDB) - Dynamic System ============
         let currentEditId = null;
@@ -2706,6 +3922,7 @@
                 // اختيار الشيخ
                 const sheikhSelect = document.getElementById('lessonSheikh');
                 if (lesson.sheikhId) sheikhSelect.value = lesson.sheikhId;
+                syncSheikhCards(); // ✨ Sync cards with selected sheikh
 
                 // اختيار التصنيف
                 if (lesson.categoryId) setCategoryPickerValue(lesson.categoryId);
@@ -2758,6 +3975,7 @@
             document.getElementById('lessonContent').value = '';
             document.getElementById('lessonRawSource').value = '';
             document.getElementById('lessonSheikh').selectedIndex = 0;
+            syncSheikhCards(); // ✨ Clear cards selection
             if (document.getElementById('lessonStatus'))
                 document.getElementById('lessonStatus').value = 'draft';
             resetCategoryPicker();
@@ -3331,18 +4549,27 @@
 
             const wrap = document.createElement('div');
             wrap.className = 'category-level-wrap';
+            wrap.setAttribute('data-level', levelIndex);
             wrap.innerHTML = `
-                <label>${labelText}</label>
-                <select onchange="onCategoryLevelSelect(${levelIndex}, this.value)">
-                    <option value="">-- اختر --</option>
-                    ${nodes.map(n => `<option value="${n._id}" data-name="${n.name}" data-icon="${n.icon || 'fa-solid fa-folder'}">${n.icon ? '' : '📁'} ${n.name} ${n.children && n.children.length > 0 ? '(' + n.children.length + ')' : ''}</option>`).join('')}
-                </select>
+                <label class="level-label"><i class="fa-solid fa-layer-group"></i> ${labelText}</label>
+                <div class="category-cards-grid">
+                    ${nodes.map(n => `
+                        <button type="button" class="category-card" 
+                                data-category-id="${n._id}" 
+                                data-category-name="${n.name}"
+                                onclick="onCategoryLevelSelect(${levelIndex}, '${n._id}', this)">
+                            <i class="${n.icon || 'fa-solid fa-folder'}"></i>
+                            <span class="card-name">${n.name}</span>
+                            ${n.children && n.children.length > 0 ? `<span class="card-count">${n.children.length}</span>` : ''}
+                        </button>
+                    `).join('')}
+                </div>
             `;
             container.appendChild(wrap);
             updateCategoryBreadcrumb();
         }
 
-        function onCategoryLevelSelect(levelIndex, selectedId) {
+        function onCategoryLevelSelect(levelIndex, selectedId, element) {
             if (!selectedId) {
                 // Reset from this level
                 categorySelectedPath = categorySelectedPath.slice(0, levelIndex);
@@ -3369,6 +4596,15 @@
 
             // Remove error state
             document.getElementById('categoryPicker').classList.remove('error');
+
+            // ✨ Highlight selected card (NEW - UI only)
+            if (element) {
+                const levelWrap = element.closest('.category-level-wrap');
+                if (levelWrap) {
+                    levelWrap.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+                    element.classList.add('selected');
+                }
+            }
 
             // If has children, show next level
             if (node.children && node.children.length > 0) {
@@ -3401,10 +4637,16 @@
                 breadcrumb.innerHTML = '<span class="crumb-placeholder">اختر التصنيف...</span>';
                 return;
             }
-            breadcrumb.innerHTML = categorySelectedPath.map((item, i) => {
-                const sep = i < categorySelectedPath.length - 1 ? ' <span class="crumb-sep">◂</span> ' : '';
-                return `<span class="crumb-item">${item.name}</span>${sep}`;
-            }).join('');
+            breadcrumb.innerHTML = `
+                <span class="crumb-pill crumb-home" onclick="resetCategoryPicker()" title="العودة للرئيسية">
+                    <i class="fa-solid fa-home"></i>
+                </span>` +
+                categorySelectedPath.map((item, i) => {
+                    return `<span class="crumb-sep">◂</span>
+                    <span class="crumb-pill" style="animation-delay: ${i * 0.1}s" title="${item.name}">
+                        <i class="${item.icon || 'fa-solid fa-folder'}"></i> ${item.name}
+                    </span>`;
+                }).join('');
         }
 
         function resetCategoryPicker() {
