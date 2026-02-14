@@ -438,6 +438,679 @@
             filter: brightness(1.1);
         }
 
+        /* ═══════════ Lesson Action Buttons (Premium v3) ═══════════ */
+
+        /* --- CSS Variables for button colors --- */
+        :root {
+            --v3-edit-1: #667eea;
+            --v3-edit-2: #764ba2;
+            --v3-publish-1: #11998e;
+            --v3-publish-2: #38ef7d;
+            --v3-unpublish-1: #f7971e;
+            --v3-unpublish-2: #ffd200;
+            --v3-copy-1: #a855f7;
+            --v3-copy-2: #6366f1;
+            --v3-move-1: #f59e0b;
+            --v3-move-2: #ea580c;
+            --v3-del-1: #ef4444;
+            --v3-del-2: #b91c1c;
+        }
+
+        /* Glassmorphism container */
+        .lesson-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 10px 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            margin-top: 8px;
+        }
+
+        /* Base button */
+        .lesson-actions .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border: none;
+            border-radius: 999px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.3px;
+            will-change: transform;
+        }
+
+        /* Hover lift + glow */
+        .lesson-actions .action-btn:hover {
+            transform: translateY(-3px) scale(1.04);
+            filter: brightness(1.08);
+        }
+
+        /* Active press */
+        .lesson-actions .action-btn:active {
+            transform: translateY(0px) scale(0.96);
+            transition: all 0.08s;
+        }
+
+        /* Focus ring accessibility */
+        .lesson-actions .action-btn:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.4);
+            outline-offset: 3px;
+        }
+
+        /* ─── Button specific gradients + glow shadows ─── */
+        .action-btn.btn-edit {
+            background: linear-gradient(135deg, var(--v3-edit-1), var(--v3-edit-2));
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-btn.btn-edit:hover {
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .action-btn.btn-publish {
+            background: linear-gradient(135deg, var(--v3-publish-1), var(--v3-publish-2));
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .action-btn.btn-publish:hover {
+            box-shadow: 0 8px 30px rgba(56, 239, 125, 0.4);
+        }
+
+        .action-btn.btn-unpublish {
+            background: linear-gradient(135deg, var(--v3-unpublish-1), var(--v3-unpublish-2));
+            box-shadow: 0 4px 15px rgba(247, 151, 30, 0.3);
+        }
+
+        .action-btn.btn-unpublish:hover {
+            box-shadow: 0 8px 30px rgba(255, 210, 0, 0.4);
+        }
+
+        .action-btn.btn-copy {
+            background: linear-gradient(135deg, var(--v3-copy-1), var(--v3-copy-2));
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .action-btn.btn-copy:hover {
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .action-btn.btn-move {
+            background: linear-gradient(135deg, var(--v3-move-1), var(--v3-move-2));
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .action-btn.btn-move:hover {
+            box-shadow: 0 8px 30px rgba(234, 88, 12, 0.4);
+        }
+
+        .action-btn.btn-del {
+            background: linear-gradient(135deg, var(--v3-del-1), var(--v3-del-2));
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .action-btn.btn-del:hover {
+            box-shadow: 0 8px 30px rgba(185, 28, 28, 0.5);
+        }
+
+        /* ─── Icon animations per type ─── */
+        .action-btn.btn-edit:hover i {
+            animation: iconSpin 0.5s ease;
+        }
+
+        .action-btn.btn-publish:hover i {
+            animation: iconRocket 0.5s ease;
+        }
+
+        .action-btn.btn-unpublish:hover i {
+            animation: iconShake 0.4s ease;
+        }
+
+        .action-btn.btn-copy:hover i {
+            animation: iconPop 0.4s ease;
+        }
+
+        .action-btn.btn-move:hover i {
+            animation: iconSlide 0.5s ease;
+        }
+
+        .action-btn.btn-del:hover i {
+            animation: iconShake 0.4s ease;
+        }
+
+        .action-btn i {
+            font-size: 0.95rem;
+            transition: transform 0.2s;
+        }
+
+        @keyframes iconSpin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(15deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+
+        @keyframes iconRocket {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-5px) scale(1.15);
+            }
+        }
+
+        @keyframes iconShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-3px);
+            }
+
+            75% {
+                transform: translateX(3px);
+            }
+        }
+
+        @keyframes iconPop {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.35);
+            }
+        }
+
+        @keyframes iconSlide {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(4px);
+            }
+        }
+
+        /* ─── CSS Tooltips ─── */
+        .action-btn[data-tooltip] {
+            position: relative;
+        }
+
+        .action-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            padding: 5px 12px;
+            background: rgba(15, 23, 42, 0.9);
+            color: #f1f5f9;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s ease;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ─── Ripple (JS injected circles) ─── */
+        .ripple-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: translate(-50%, -50%) scale(0);
+            animation: rippleWave 0.6s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes rippleWave {
+            to {
+                transform: translate(-50%, -50%) scale(15);
+                opacity: 0;
+            }
+        }
+
+        /* ─── Responsive: Icons-only on mobile ─── */
+        @media (max-width: 768px) {
+            .lesson-actions {
+                padding: 8px 10px;
+                gap: 6px;
+            }
+
+            .action-btn .btn-label {
+                display: none;
+            }
+
+            .lesson-actions .action-btn {
+                padding: 10px 12px;
+                border-radius: 50%;
+                min-width: 40px;
+                min-height: 40px;
+                justify-content: center;
+            }
+
+            .action-btn i {
+                font-size: 1rem;
+            }
+        }
+
+        /* ═══════════ Add Category Form (Premium) ═══════════ */
+        .cat-form-card {
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.06), rgba(218, 165, 32, 0.02));
+            border: 1px solid rgba(218, 165, 32, 0.2);
+            border-radius: 20px;
+            padding: 0;
+            margin-bottom: 24px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .cat-form-card:hover {
+            border-color: rgba(218, 165, 32, 0.4);
+            box-shadow: 0 8px 35px rgba(218, 165, 32, 0.12);
+        }
+
+        /* Gradient Header */
+        .cat-form-header {
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.25), rgba(184, 134, 11, 0.15));
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(218, 165, 32, 0.15);
+        }
+
+        .cat-form-header i {
+            font-size: 1.4rem;
+            color: var(--gold);
+            animation: headerPulse 2s ease-in-out infinite;
+        }
+
+        .cat-form-header h4 {
+            margin: 0;
+            color: var(--gold);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        @keyframes headerPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        /* Form Body */
+        .cat-form-body {
+            padding: 20px 22px;
+        }
+
+        .cat-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .cat-form-body .form-group {
+            margin: 0;
+        }
+
+        .cat-form-body label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 6px;
+        }
+
+        .cat-form-body label i {
+            color: var(--gold);
+            font-size: 0.85rem;
+        }
+
+        /* Icon Preview */
+        .cat-icon-preview {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.2), rgba(218, 165, 32, 0.08));
+            border-radius: 14px;
+            font-size: 1.5rem;
+            color: var(--gold);
+            border: 1px solid rgba(218, 165, 32, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .cat-icon-preview:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
+        }
+
+        /* Color Input */
+        .cat-color-input {
+            height: 44px;
+            width: 100%;
+            border: 2px solid rgba(218, 165, 32, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cat-color-input:hover {
+            border-color: rgba(218, 165, 32, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* Add Button */
+        .cat-add-btn {
+            height: 44px;
+            padding: 0 24px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            color: #1a1a2e;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(218, 165, 32, 0.3);
+            white-space: nowrap;
+        }
+
+        .cat-add-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 30px rgba(218, 165, 32, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .cat-add-btn:active {
+            transform: translateY(0) scale(0.97);
+        }
+
+        .cat-add-btn i {
+            transition: transform 0.3s;
+        }
+
+        .cat-add-btn:hover i {
+            transform: rotate(90deg);
+        }
+
+        /* Quick Icons Section */
+        .cat-quick-icons-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .cat-quick-icons-title i {
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+
+        /* Quick Icon Grid */
+        .cat-quick-icons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .qi-btn {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.05rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .qi-btn:hover {
+            background: rgba(218, 165, 32, 0.15);
+            color: var(--gold);
+            border-color: rgba(218, 165, 32, 0.4);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 6px 20px rgba(218, 165, 32, 0.2);
+        }
+
+        .qi-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        /* Quick Icon Tooltip */
+        .qi-btn[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            padding: 4px 10px;
+            background: rgba(15, 23, 42, 0.92);
+            color: #f1f5f9;
+            font-size: 0.7rem;
+            font-weight: 500;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 100;
+            border: 1px solid rgba(218, 165, 32, 0.2);
+        }
+
+        .qi-btn[data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Selected Quick Icon */
+        .qi-btn.active {
+            background: rgba(218, 165, 32, 0.22);
+            border-color: rgba(218, 165, 32, 0.6);
+            color: var(--gold);
+            box-shadow: 0 0 12px rgba(218, 165, 32, 0.25);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        /* ─── Preset Colors ─── */
+        .cat-preset-colors {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .cat-preset-colors-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 14px;
+            margin-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .cat-preset-colors-title i {
+            color: var(--gold);
+        }
+
+        .preset-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .preset-dot:hover {
+            transform: scale(1.25);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+        }
+
+        .preset-dot:active {
+            transform: scale(0.9);
+        }
+
+        .preset-dot.active {
+            border-color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
+        }
+
+        .preset-dot[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            padding: 3px 8px;
+            background: rgba(15, 23, 42, 0.92);
+            color: #f1f5f9;
+            font-size: 0.65rem;
+            font-weight: 500;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .preset-dot[data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ─── Input Group (icons inside inputs) ─── */
+        .cat-input-group {
+            display: flex;
+            align-items: stretch;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .cat-input-group:focus-within {
+            border-color: rgba(218, 165, 32, 0.5);
+            box-shadow: 0 0 12px rgba(218, 165, 32, 0.12);
+        }
+
+        .cat-input-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            min-width: 44px;
+            background: rgba(218, 165, 32, 0.1);
+            color: var(--gold);
+            font-size: 0.95rem;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .cat-input-group input {
+            flex: 1;
+            border: none !important;
+            border-radius: 0 !important;
+            background: transparent;
+        }
+
+        .cat-input-group input:focus {
+            box-shadow: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cat-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cat-form-row {
+                flex-direction: column;
+            }
+
+            .qi-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 0.95rem;
+            }
+
+            .preset-dot {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
         /* Container */
         .container {
             max-width: 1400px;
@@ -2796,51 +3469,71 @@
                                     class="fa-solid fa-house"></i> الرئيسية</span>
                         </div>
 
-                        <!-- Add Category Form -->
-                        <div
-                            style="background:rgba(218,165,32,0.08); border:1px solid rgba(218,165,32,0.25); border-radius:12px; padding:18px; margin-bottom:20px;">
-                            <h4 style="color:var(--gold); margin-bottom:12px;"><i class="fa-solid fa-circle-plus"></i>
-                                إضافة
-                                قسم
-                                جديد</h4>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                                <div class="form-group" style="margin:0">
-                                    <label>اسم القسم</label>
-                                    <input type="text" id="catName" placeholder="مثال: القرآن الكريم">
-                                </div>
-                                <div class="form-group" style="margin:0">
-                                    <label>الوصف (اختياري)</label>
-                                    <input type="text" id="catDesc" placeholder="وصف مختصر">
-                                </div>
+                        <!-- Add Category Form (Premium) -->
+                        <div class="cat-form-card">
+                            <!-- Gradient Header -->
+                            <div class="cat-form-header">
+                                <i class="fa-solid fa-circle-plus"></i>
+                                <h4>إضافة قسم جديد</h4>
                             </div>
-                            <div style="display:flex; gap:12px; margin-top:12px; align-items:flex-end; flex-wrap:wrap;">
-                                <div class="form-group" style="margin:0; flex:1">
-                                    <label>الأيقونة (Font Awesome)</label>
-                                    <div style="display:flex; gap:8px; align-items:center;">
-                                        <input type="text" id="catIcon" value="fa-solid fa-folder" style="flex:1"
-                                            oninput="previewIcon()">
-                                        <div id="catIconPreview"
-                                            style="width:45px; height:45px; display:flex; align-items:center; justify-content:center; background:rgba(218,165,32,0.15); border-radius:10px; font-size:1.4rem; color:#DAA520;">
-                                            <i class="fa-solid fa-folder"></i>
+
+                            <!-- Form Body -->
+                            <div class="cat-form-body">
+                                <div class="cat-form-grid">
+                                    <div class="form-group">
+                                        <label><i class="fa-solid fa-tag"></i> اسم القسم</label>
+                                        <div class="cat-input-group">
+                                            <div class="cat-input-icon"><i class="fa-solid fa-font"></i></div>
+                                            <input type="text" id="catName" placeholder="مثال: القرآن الكريم">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label><i class="fa-solid fa-align-right"></i> الوصف (اختياري)</label>
+                                        <div class="cat-input-group">
+                                            <div class="cat-input-icon"><i class="fa-solid fa-pen-nib"></i></div>
+                                            <input type="text" id="catDesc" placeholder="وصف مختصر">
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group" style="margin:0; width:120px;">
-                                    <label>اللون</label>
-                                    <input type="color" id="catColor" value="#DAA520"
-                                        style="height:42px; width:100%; border:none; border-radius:8px; cursor:pointer;">
-                                </div>
-                                <button class="btn btn-primary" onclick="addCategory()"
-                                    style="height:42px; white-space:nowrap;">
-                                    <i class="fa-solid fa-plus"></i> إضافة
-                                </button>
-                            </div>
 
-                            <!-- Popular Icons Grid -->
-                            <div style="margin-top:12px;">
-                                <small style="color:rgba(255,255,255,0.5);">أيقونات سريعة:</small>
-                                <div id="quickIcons" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+                                <div class="cat-form-row"
+                                    style="display:flex; gap:14px; margin-top:14px; align-items:flex-end; flex-wrap:wrap;">
+                                    <div class="form-group" style="flex:1">
+                                        <label><i class="fa-solid fa-icons"></i> الأيقونة (Font Awesome)</label>
+                                        <div style="display:flex; gap:10px; align-items:center;">
+                                            <div class="cat-input-group" style="flex:1">
+                                                <div class="cat-input-icon"><i class="fa-solid fa-wand-sparkles"></i>
+                                                </div>
+                                                <input type="text" id="catIcon" value="fa-solid fa-folder"
+                                                    oninput="previewIcon()">
+                                            </div>
+                                            <div id="catIconPreview" class="cat-icon-preview">
+                                                <i class="fa-solid fa-folder"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="width:120px;">
+                                        <label><i class="fa-solid fa-palette"></i> اللون</label>
+                                        <input type="color" id="catColor" value="#DAA520" class="cat-color-input">
+                                    </div>
+                                    <button class="cat-add-btn" onclick="addCategory()">
+                                        <i class="fa-solid fa-plus"></i> إضافة
+                                    </button>
                                 </div>
+
+                                <!-- 🎨 Preset Colors -->
+                                <div class="cat-preset-colors-title">
+                                    <i class="fa-solid fa-swatchbook"></i>
+                                    <span>ألوان سريعة — اضغط لاختيار:</span>
+                                </div>
+                                <div id="presetColors" class="cat-preset-colors"></div>
+
+                                <!-- Quick Icons (Premium) -->
+                                <div class="cat-quick-icons-title">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    <span>أيقونات سريعة — اضغط لاختيار:</span>
+                                </div>
+                                <div id="quickIcons" class="cat-quick-icons"></div>
                             </div>
                         </div>
                     </div>
@@ -3749,12 +4442,12 @@
                                     ${isPublished ? 'منشور' : 'مسودة'}
                                 </span>
                             </div>
-                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                <button class="btn" style="background:#3498db;color:white;" onclick="editLesson('${l._id}')"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
-                                <button class="btn btn-success" onclick="togglePublish('${l._id}', ${isPublished})">${isPublished ? '<i class="fa-solid fa-upload"></i> إلغاء النشر' : '<i class="fa-solid fa-rocket"></i> نشر'}</button>
-                                <button class="btn btn-danger" onclick="deleteLesson('${l._id}')"><i class="fa-solid fa-trash-can"></i> حذف</button>
-                                <button class="btn" style="background:#9b59b6;color:white;" onclick="openCopyModal('${l._id}', '${l.title}')"><i class="fa-solid fa-copy"></i> نسخ</button>
-                                <button class="btn" style="background:#e67e22;color:white;" onclick="openMoveModal('${l._id}', '${l.title}')"><i class="fa-solid fa-arrows-up-down-left-right"></i> نقل</button>
+                            <div class="lesson-actions">
+                                <button class="action-btn btn-edit" data-tooltip="تعديل الدرس" onclick="editLesson('${l._id}')"><i class="fa-solid fa-pen-to-square"></i> <span class="btn-label">تعديل</span></button>
+                                <button class="action-btn ${isPublished ? 'btn-unpublish' : 'btn-publish'}" data-tooltip="${isPublished ? 'إلغاء النشر' : 'نشر الدرس'}" onclick="togglePublish('${l._id}', ${isPublished})">${isPublished ? '<i class="fa-solid fa-eye-slash"></i> <span class="btn-label">إلغاء النشر</span>' : '<i class="fa-solid fa-rocket"></i> <span class="btn-label">نشر</span>'}</button>
+                                <button class="action-btn btn-copy" data-tooltip="نسخ الدرس" onclick="openCopyModal('${l._id}', '${(l.title || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> <span class="btn-label">نسخ</span></button>
+                                <button class="action-btn btn-move" data-tooltip="نقل لمكان تاني" onclick="openMoveModal('${l._id}', '${(l.title || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-arrows-up-down-left-right"></i> <span class="btn-label">نقل</span></button>
+                                <button class="action-btn btn-del" data-tooltip="حذف الدرس" onclick="deleteLesson('${l._id}')"><i class="fa-solid fa-trash-can"></i> <span class="btn-label">حذف</span></button>
                             </div>
                         </div>
                     `;
@@ -3764,6 +4457,21 @@
                 console.error('Load lessons error:', error);
             }
         }
+
+        // ═══════════ Ripple Effect (Event Delegation) ═══════════
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.action-btn');
+            if (!btn) return;
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height) * 2;
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple-circle';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left) + 'px';
+            ripple.style.top = (e.clientY - rect.top) + 'px';
+            btn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 650);
+        });
 
         // ============ ⭐ Dynamic Lesson Editor (Phase 4) ============
 
@@ -4561,12 +5269,7 @@
 
         function renderQuickIcons() {
             document.getElementById('quickIcons').innerHTML = QUICK_ICONS.map(q => `
-                <button type="button" onclick="pickIcon('${q.icon}')" title="${q.label}"
-                    style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;
-                    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:8px;
-                    cursor:pointer; color:#ccc; font-size:1rem; transition:all 0.2s;"
-                    onmouseover="this.style.background='rgba(218,165,32,0.2)'; this.style.color='#DAA520'; this.style.borderColor='rgba(218,165,32,0.4)';"
-                    onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.color='#ccc'; this.style.borderColor='rgba(255,255,255,0.12)';">
+                <button type="button" class="qi-btn" data-tooltip="${q.label}" onclick="pickIcon('${q.icon}')">
                     <i class="${q.icon}"></i>
                 </button>
             `).join('');
@@ -4575,12 +5278,50 @@
         function pickIcon(iconClass) {
             document.getElementById('catIcon').value = iconClass;
             previewIcon();
+            // Selected state
+            document.querySelectorAll('.qi-btn').forEach(b => b.classList.remove('active'));
+            const match = document.querySelector(`.qi-btn[onclick*="${iconClass}"]`);
+            if (match) match.classList.add('active');
         }
 
         function previewIcon() {
             const iconClass = document.getElementById('catIcon').value.trim();
             document.getElementById('catIconPreview').innerHTML = `<i class="${iconClass}"></i>`;
         }
+
+        // ─── Preset Colors ───
+        const PRESET_COLORS = [
+            { hex: '#DAA520', label: 'ذهبي' },
+            { hex: '#10B981', label: 'أخضر' },
+            { hex: '#3B82F6', label: 'أزرق' },
+            { hex: '#8B5CF6', label: 'بنفسجي' },
+            { hex: '#EF4444', label: 'أحمر' },
+            { hex: '#F97316', label: 'برتقالي' },
+            { hex: '#EC4899', label: 'وردي' },
+            { hex: '#6B7280', label: 'رمادي' },
+        ];
+
+        function renderPresetColors() {
+            const container = document.getElementById('presetColors');
+            if (!container) return;
+            container.innerHTML = PRESET_COLORS.map(c => `
+                <div class="preset-dot${c.hex === '#DAA520' ? ' active' : ''}" 
+                     data-tooltip="${c.label}"
+                     style="background:${c.hex}" 
+                     onclick="pickColor('${c.hex}', this)"></div>
+            `).join('');
+        }
+
+        function pickColor(hex, el) {
+            document.getElementById('catColor').value = hex;
+            document.querySelectorAll('.preset-dot').forEach(d => d.classList.remove('active'));
+            if (el) el.classList.add('active');
+        }
+
+        // render on load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPresetColors();
+        });
 
         // ============ Tree View Functions ============
 

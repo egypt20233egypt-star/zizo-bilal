@@ -268,10 +268,10 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     let redirectTo = urlParams.get('returnUrl');
 
-                    // أولوية 2: لو المستخدم جاي من /admin/v5 أو /admin/panel (من الـ referrer)
+                    // أولوية 2: لو المستخدم جاي من /admin/panel أو /admin/panel (من الـ referrer)
                     if (!redirectTo && document.referrer) {
-                        if (document.referrer.includes('/admin/v5')) {
-                            redirectTo = '/admin/v5';
+                        if (document.referrer.includes('/admin/panel')) {
+                            redirectTo = '/admin/panel';
                         } else if (document.referrer.includes('/admin/panel')) {
                             redirectTo = '/admin/panel';
                         }
@@ -279,7 +279,7 @@
 
                     // Default: اللوحة الجديدة v5
                     if (!redirectTo) {
-                        redirectTo = '/admin/v5';
+                        redirectTo = '/admin/panel';
                     }
 
                     setTimeout(() => {

@@ -107,7 +107,7 @@ app.get('/admin/panel', requireAuth, (req, res) => {
 });
 
 // Admin Panel v5 (Modern UI)
-app.get('/admin/v5', requireAuth, (req, res) => {
+app.get('/admin/panel', requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'admin_panel_v5.html'));
 });
 
