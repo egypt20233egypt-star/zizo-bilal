@@ -53,7 +53,11 @@
             background: var(--bg);
             color: var(--text);
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased
+            -webkit-font-smoothing: antialiased;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         h1,
@@ -79,9 +83,10 @@
             inset: 0;
             pointer-events: none;
             z-index: 0;
-            background-image:
-                repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(201, 169, 97, .018) 40px, rgba(201, 169, 97, .018) 80px),
-                repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(201, 169, 97, .018) 40px, rgba(201, 169, 97, .018) 80px);
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 20%, rgba(13, 25, 55, .7) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(15, 30, 60, .5) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 50% 50%, rgba(237, 186, 38, .02) 0%, transparent 60%);
         }
 
         /* ═══ Navbar ═══ */
@@ -884,11 +889,11 @@
             justify-content: center;
             align-items: stretch;
             padding: 0;
-            background: rgba(6, 11, 20, .93);
+            background: linear-gradient(180deg, rgba(8, 14, 26, .96) 0%, rgba(4, 8, 16, .99) 100%);
             backdrop-filter: blur(22px);
             -webkit-backdrop-filter: blur(22px);
-            border-top: 1px solid rgba(237, 186, 38, .08);
-            box-shadow: 0 -4px 24px rgba(0, 0, 0, .4);
+            border-top: 1px solid rgba(237, 186, 38, .1);
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(237, 186, 38, .06);
         }
 
         .bnav-item {
@@ -1325,17 +1330,11 @@
             <i class="fa-solid fa-user-tie"></i>
             <span>الشيوخ</span>
         </a>
-        <!-- More button (appears on small screens) -->
+        <!-- More button (appears on small screens - JS fills overflow dynamically) -->
         <button class="bnav-more" id="bnavMore" onclick="toggleOverflow()">
             <i class="fa-solid fa-chevron-up"></i>
             <span>المزيد</span>
-            <!-- Overflow flyout -->
-            <div class="bnav-overflow" id="bnavOverflow">
-                <a href="#sheikhs" class="bnav-item" data-overflow>
-                    <i class="fa-solid fa-user-tie"></i>
-                    <span>الشيوخ</span>
-                </a>
-            </div>
+            <div class="bnav-overflow" id="bnavOverflow"></div>
         </button>
     </nav>
 
@@ -1374,19 +1373,34 @@
             btn.classList.toggle('open');
             ov.classList.toggle('show');
         }
+        function buildOverflow() {
+            const ov = document.getElementById('bnavOverflow');
+            ov.innerHTML = '';
+            document.querySelectorAll('#bottomNav > .bnav-item').forEach(item => {
+                if (getComputedStyle(item).display === 'none') {
+                    const clone = item.cloneNode(true);
+                    clone.removeAttribute('data-priority');
+                    clone.addEventListener('click', () => {
+                        document.getElementById('bnavMore')?.classList.remove('open');
+                        ov.classList.remove('show');
+                    });
+                    ov.appendChild(clone);
+                }
+            });
+        }
         function initNav() {
             const n = document.getElementById('navbar'), fabTop = document.getElementById('fabTop');
-            const bnavItems = document.querySelectorAll('#bottomNav > .bnav-item[href^="#"]');
             const sections = ['hero', 'categories', 'lessons', 'sheikhs'];
+            // Build overflow on resize
+            buildOverflow();
+            window.addEventListener('resize', () => { buildOverflow(); });
             window.addEventListener('scroll', () => {
                 n.classList.toggle('scrolled', scrollY > 60);
                 fabTop.classList.toggle('show', scrollY > 500);
                 // Active section tracking
                 let cur = 'hero';
                 sections.forEach(id => { const el = document.getElementById(id); if (el && scrollY >= el.offsetTop - 200) cur = id; });
-                bnavItems.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
-                // Also update overflow items
-                document.querySelectorAll('.bnav-overflow .bnav-item[href^="#"]').forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
+                document.querySelectorAll('.bnav-item[href^="#"]').forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
             }, { passive: true });
             // Close overflow when clicking outside
             document.addEventListener('click', e => {
