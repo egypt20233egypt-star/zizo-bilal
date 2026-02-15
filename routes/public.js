@@ -101,15 +101,14 @@ router.get('/landing', async (req, res) => {
 
 // ============ GET /api/public/nav ============
 // أيقونات الشريط السفلي (بدون auth - للصفحة الرئيسية)
-let navCache = null;
-let navCacheTime = 0;
-const NAV_CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
+const navCache = require('../utils/navCache');
 
 router.get('/nav', async (req, res) => {
     try {
-        const now = Date.now();
-        if (navCache && (now - navCacheTime) < NAV_CACHE_DURATION) {
-            return res.json(navCache);
+        // جرب الكاش الأول
+        const cached = navCache.get();
+        if (cached) {
+            return res.json(cached);
         }
 
         const NavItem = require('../models/NavItem');
@@ -118,8 +117,7 @@ router.get('/nav', async (req, res) => {
             .select('label icon href target type priority order')
             .lean();
 
-        navCache = items;
-        navCacheTime = now;
+        navCache.set(items);
         res.json(items);
     } catch (error) {
         console.error('❌ Public Nav Error:', error);

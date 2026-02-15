@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const NavItem = require('../models/NavItem');
+const navCache = require('../utils/navCache');
 
 // ============ GET /api/nav-items ============
 // جلب كل الأيقونات (للأدمن - محمي)
@@ -54,6 +55,7 @@ router.post('/', async (req, res) => {
         });
 
         await item.save();
+        navCache.invalidate();
         console.log(`✅ NavItem added: ${label}`);
         res.status(201).json(item);
 
@@ -86,6 +88,7 @@ router.put('/reorder', async (req, res) => {
         }));
 
         await NavItem.bulkWrite(bulkOps);
+        navCache.invalidate();
         console.log(`✅ NavItems reordered: ${items.length} items`);
         res.json({ success: true, message: `تم ترتيب ${items.length} أيقونة` });
 
@@ -125,7 +128,7 @@ router.put('/:id', async (req, res) => {
         }
 
         // Invalidate cache
-        navPublicCache = null;
+        navCache.invalidate();
 
         console.log(`✅ NavItem updated: ${item.label}`);
         res.json(item);
@@ -150,7 +153,7 @@ router.delete('/:id', async (req, res) => {
         }
 
         // Invalidate cache
-        navPublicCache = null;
+        navCache.invalidate();
 
         console.log(`🗑️ NavItem deleted: ${item.label}`);
         res.json({ success: true, message: `تم حذف "${item.label}"` });
@@ -161,7 +164,7 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// ============ Cache variable (used by public route) ============
-let navPublicCache = null;
+// ============ Cache ============
+// الكاش المشترك مع public.js عبر utils/navCache.js
 
 module.exports = router;

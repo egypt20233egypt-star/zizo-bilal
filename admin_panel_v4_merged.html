@@ -6271,7 +6271,14 @@
                 return;
             }
             list.innerHTML = navItemsData.map((item, idx) => `
-                <div class="nav-item-row" data-id="${item._id}" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-elevated);border-radius:12px;border:1px solid var(--border);transition:all .2s;">
+                <div class="nav-item-row" data-id="${item._id}" data-idx="${idx}" draggable="true"
+                     style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-elevated);border-radius:12px;border:1px solid var(--border);transition:all .2s;cursor:grab;"
+                     ondragstart="navDragStart(event,${idx})"
+                     ondragover="navDragOver(event,${idx})"
+                     ondrop="navDrop(event,${idx})"
+                     ondragend="navDragEnd(event)"
+                     ondragenter="event.preventDefault();this.style.borderColor='#EDBA26';this.style.background='rgba(237,186,38,.08)';"
+                     ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-elevated)';">
                     <!-- Drag Handle -->
                     <span style="cursor:grab;color:var(--text-secondary);font-size:1.1rem;" title="اسحب للترتيب">
                         <i class="fa-solid fa-grip-vertical"></i>
@@ -6305,6 +6312,46 @@
                     </button>
                 </div>
             `).join('');
+        }
+
+        // ============ Drag & Drop للترتيب ============
+        let dragFromIdx = null;
+
+        function navDragStart(e, idx) {
+            dragFromIdx = idx;
+            e.dataTransfer.effectAllowed = 'move';
+            e.target.style.opacity = '0.5';
+        }
+
+        function navDragOver(e, idx) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function navDrop(e, toIdx) {
+            e.preventDefault();
+            if (dragFromIdx === null || dragFromIdx === toIdx) return;
+
+            // نقل العنصر في الـ array
+            const [moved] = navItemsData.splice(dragFromIdx, 1);
+            navItemsData.splice(toIdx, 0, moved);
+
+            renderNavItems();
+            updateNavPreviewBar();
+
+            // حفظ تلقائي بعد السحب
+            saveNavOrder();
+            dragFromIdx = null;
+        }
+
+        function navDragEnd(e) {
+            e.target.style.opacity = '1';
+            // Reset all borders
+            document.querySelectorAll('.nav-item-row').forEach(row => {
+                row.style.borderColor = 'var(--border)';
+                row.style.background = 'var(--bg-elevated)';
+            });
+            dragFromIdx = null;
         }
 
         function updateNavPreviewBar() {
