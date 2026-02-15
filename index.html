@@ -1374,11 +1374,11 @@
                 nav.innerHTML = '';
 
                 // === نظام الأيقونات العشوائية ===
-                const maxVisible = 4; // عدد الخانات الظاهرة (بدون المركزي و"المزيد")
-                const centerItem = allItems.find(i => i.type === 'center');
-                const linkItems = allItems.filter(i => i.type !== 'center');
-                const fixedItems = linkItems.filter(i => (i.displayMode || 'fixed') === 'fixed');
-                const rotatingItems = linkItems.filter(i => i.displayMode === 'rotating');
+                const maxVisible = 4; // عدد الخانات الظاهرة (بدون "المزيد")
+
+                // فصل الثابتين والعشوائيين — المركزي يتعامل زي أي أيقونة عادية
+                const fixedItems = allItems.filter(i => (i.displayMode || 'fixed') === 'fixed');
+                const rotatingItems = allItems.filter(i => i.displayMode === 'rotating');
 
                 // Fisher-Yates shuffle للعشوائيين
                 for (let i = rotatingItems.length - 1; i > 0; i--) {
@@ -1387,11 +1387,9 @@
                 }
 
                 // حساب الخانات المتاحة
-                // لو الثابتين أكتر من maxVisible → الثابتين الأوائل (بالترتيب) يظهروا والباقي يختفي
                 const visibleFixed = fixedItems.slice(0, maxVisible);
                 const hiddenFixed = fixedItems.slice(maxVisible);
 
-                // الخانات الفاضية بعد الثابتين
                 const rotatingSlots = Math.max(0, maxVisible - visibleFixed.length);
                 const visibleRotating = rotatingItems.slice(0, rotatingSlots);
                 const hiddenRotating = rotatingItems.slice(rotatingSlots);
@@ -1402,20 +1400,14 @@
                 const hiddenItems = [...hiddenFixed, ...hiddenRotating]
                     .sort((a, b) => a.order - b.order);
 
-                // رسم الأيقونات الظاهرة
-                let centerRendered = false;
-                visibleItems.forEach((item, idx) => {
-                    // ضع المركزي في النص
-                    if (centerItem && !centerRendered && idx >= Math.floor(visibleItems.length / 2)) {
-                        renderCenterBtn(nav, centerItem);
-                        centerRendered = true;
+                // رسم الأيقونات الظاهرة (المركزي معاهم بترتيبه)
+                visibleItems.forEach(item => {
+                    if (item.type === 'center') {
+                        renderCenterBtn(nav, item);
+                    } else {
+                        renderNavLink(nav, item);
                     }
-                    renderNavLink(nav, item);
                 });
-                // لو المركزي مطلعش → حطه في الآخر
-                if (centerItem && !centerRendered) {
-                    renderCenterBtn(nav, centerItem);
-                }
 
                 // زرار "المزيد" لو فيه أيقونات مخفية
                 if (hiddenItems.length > 0) {
@@ -1442,13 +1434,10 @@
                     btn.appendChild(ov);
                     nav.appendChild(btn);
                 }
-
-                // Note: لا نستخدم buildOverflow() هنا لأن نظام الـ rotation بيتعامل مع المزيد مباشرة
             } catch (err) {
                 console.error('❌ Failed to load nav:', err);
             }
         }
-
         // Helper: رسم أيقونة عادية
         function renderNavLink(nav, item) {
             const a = document.createElement('a');

@@ -6280,48 +6280,107 @@
                 list.innerHTML = '<div class="alert">لا توجد أيقونات. اضغط "إضافة أيقونة" أو شغل: node scripts/seed_nav.js</div>';
                 return;
             }
-            list.innerHTML = navItemsData.map((item, idx) => `
-                <div class="nav-item-row" data-id="${item._id}" data-idx="${idx}" draggable="true"
-                     style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-elevated);border-radius:12px;border:1px solid var(--border);transition:all .2s;cursor:grab;"
+
+            // inject CSS once
+            if (!document.getElementById('navPremiumCSS')) {
+                const css = document.createElement('style');
+                css.id = 'navPremiumCSS';
+                css.textContent = `
+                    .ni-card{position:relative;display:grid;grid-template-columns:auto 48px 1fr auto auto auto auto;align-items:center;gap:10px;padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:var(--bg-elevated);transition:all .3s cubic-bezier(.23,1,.32,1);cursor:grab;animation:niSlideIn .4s ease both;}
+                    .ni-card:hover{border-color:rgba(108,92,231,.3);background:var(--bg-hover);transform:translateX(-3px);box-shadow:0 4px 20px rgba(0,0,0,.3);}
+                    @keyframes niSlideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+                    .ni-icon-box{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.25rem;transition:all .3s;}
+                    .ni-icon-box.link{background:rgba(108,92,231,.1);color:var(--accent);}
+                    .ni-icon-box.center{background:linear-gradient(135deg,#EDBA26,#F5D245);color:#1a1a1a;border-radius:50%;box-shadow:0 4px 16px rgba(237,186,38,.35);}
+                    .ni-card:hover .ni-icon-box{transform:scale(1.1) rotate(-5deg);}
+                    .ni-info{min-width:0;display:flex;flex-direction:column;gap:3px;}
+                    .ni-name{font-weight:700;font-size:.95rem;color:var(--text-primary);display:flex;align-items:center;gap:6px;}
+                    .ni-meta{font-size:.72rem;color:var(--text-secondary);display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+                    .ni-meta-tag{padding:2px 8px;border-radius:8px;font-size:.65rem;font-weight:600;display:inline-flex;align-items:center;gap:3px;}
+                    .ni-tag-fixed{background:rgba(0,214,143,.1);color:#00D68F;border:1px solid rgba(0,214,143,.15);}
+                    .ni-tag-rotating{background:rgba(255,184,0,.1);color:#FFB800;border:1px solid rgba(255,184,0,.15);animation:niPulse 2s ease-in-out infinite;}
+                    .ni-tag-center{background:rgba(108,92,231,.1);color:var(--accent);border:1px solid rgba(108,92,231,.2);}
+                    .ni-tag-high{background:rgba(0,214,143,.08);color:#00D68F;}
+                    .ni-tag-med{background:rgba(255,184,0,.08);color:#FFB800;}
+                    .ni-tag-low{background:rgba(255,59,92,.08);color:#FF3B5C;}
+                    @keyframes niPulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+                    .ni-status{font-size:.75rem;padding:4px 12px;border-radius:20px;font-weight:600;white-space:nowrap;}
+                    .ni-status.on{background:rgba(0,214,143,.12);color:#00D68F;}
+                    .ni-status.off{background:rgba(255,59,92,.12);color:#FF3B5C;}
+                    .ni-arrows{display:flex;flex-direction:column;gap:1px;}
+                    .ni-arrows button{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:3px 6px;font-size:.75rem;border-radius:6px;transition:all .2s;}
+                    .ni-arrows button:hover:not(:disabled){color:var(--accent);background:var(--accent-soft);}
+                    .ni-arrows button:disabled{opacity:.25;cursor:default;}
+                    .ni-act{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;font-size:.82rem;transition:all .2s;display:flex;align-items:center;gap:4px;}
+                    .ni-act:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);transform:translateY(-1px);}
+                    .ni-act.del:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-soft);}
+                    .ni-grip{color:var(--text-muted);font-size:1rem;cursor:grab;padding:4px;transition:color .2s;}
+                    .ni-card:hover .ni-grip{color:var(--accent);}
+                    @media(max-width:768px){.ni-card{grid-template-columns:auto 40px 1fr auto;gap:8px;padding:10px 12px;}.ni-arrows,.ni-status{display:none;}.ni-act{padding:5px 8px;font-size:.78rem;}}
+                    .ni-header-stats{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+                    .ni-stat-chip{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;font-size:.78rem;font-weight:600;border:1px solid var(--border);background:var(--bg-elevated);}
+                `;
+                document.head.appendChild(css);
+            }
+
+            // Stats header
+            const fixedCount = navItemsData.filter(i => (i.displayMode || 'fixed') === 'fixed' && i.type !== 'center').length;
+            const rotatingCount = navItemsData.filter(i => i.displayMode === 'rotating').length;
+            const centerCount = navItemsData.filter(i => i.type === 'center').length;
+            const activeCount = navItemsData.filter(i => i.isActive).length;
+
+            let html = `<div class="ni-header-stats">
+                <div class="ni-stat-chip"><i class="fa-solid fa-icons" style="color:var(--accent);"></i> ${navItemsData.length} أيقونة</div>
+                <div class="ni-stat-chip"><i class="fa-solid fa-lock" style="color:#00D68F;"></i> ${fixedCount} ثابت</div>
+                <div class="ni-stat-chip"><i class="fa-solid fa-shuffle" style="color:#FFB800;"></i> ${rotatingCount} عشوائي</div>
+                ${centerCount ? `<div class="ni-stat-chip"><i class="fa-solid fa-circle-dot" style="color:var(--accent);"></i> ${centerCount} مركزي</div>` : ''}
+                <div class="ni-stat-chip"><i class="fa-solid fa-toggle-on" style="color:#00D68F;"></i> ${activeCount} مفعّل</div>
+            </div>`;
+
+            html += navItemsData.map((item, idx) => {
+                const isCenter = item.type === 'center';
+                const mode = item.displayMode || 'fixed';
+                const pr = item.priority;
+
+                return `
+                <div class="ni-card" data-id="${item._id}" data-idx="${idx}" draggable="true"
+                     style="animation-delay:${idx * 50}ms;"
                      ondragstart="navDragStart(event,${idx})"
                      ondragover="navDragOver(event,${idx})"
                      ondrop="navDrop(event,${idx})"
                      ondragend="navDragEnd(event)"
-                     ondragenter="event.preventDefault();this.style.borderColor='#EDBA26';this.style.background='rgba(237,186,38,.08)';"
+                     ondragenter="event.preventDefault();this.style.borderColor='var(--accent)';this.style.background='var(--accent-soft)';"
                      ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-elevated)';">
-                    <!-- Drag Handle -->
-                    <span style="cursor:grab;color:var(--text-secondary);font-size:1.1rem;" title="اسحب للترتيب">
-                        <i class="fa-solid fa-grip-vertical"></i>
-                    </span>
-                    <!-- Icon Preview -->
-                    <div style="width:44px;height:44px;border-radius:${item.type === 'center' ? '50%' : '10px'};background:${item.type === 'center' ? 'linear-gradient(135deg,#EDBA26,#F5D245)' : 'rgba(237,186,38,.1)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="${item.icon}" style="font-size:1.2rem;color:${item.type === 'center' ? '#1a1a1a' : '#EDBA26'};"></i>
+                    <span class="ni-grip" title="اسحب للترتيب"><i class="fa-solid fa-grip-vertical"></i></span>
+                    <div class="ni-icon-box ${isCenter ? 'center' : 'link'}">
+                        <i class="${item.icon}"></i>
                     </div>
-                    <!-- Info -->
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-weight:600;color:var(--text-primary);font-size:.95rem;">${item.label}</div>
-                        <div style="font-size:.75rem;color:var(--text-secondary);direction:ltr;text-align:right;">${item.href} · ${item.type === 'center' ? '🔵 مركزي' : '⚪ عادي'} · ${item.priority === 'high' ? '🟢 عالية' : item.priority === 'med' ? '🟡 متوسطة' : '🔴 منخفضة'} · ${(item.displayMode || 'fixed') === 'fixed' ? '🔒 ثابت' : '🎲 عشوائي'}</div>
+                    <div class="ni-info">
+                        <div class="ni-name">
+                            ${item.label}
+                            <span class="ni-meta-tag ${isCenter ? 'ni-tag-center' : mode === 'fixed' ? 'ni-tag-fixed' : 'ni-tag-rotating'}">
+                                ${isCenter ? '⚡ مركزي' : mode === 'fixed' ? '🔒 ثابت' : '🎲 عشوائي'}
+                            </span>
+                        </div>
+                        <div class="ni-meta">
+                            <span style="direction:ltr;">${item.href}</span>
+                            <span class="ni-meta-tag ni-tag-${pr === 'high' ? 'high' : pr === 'med' ? 'med' : 'low'}" style="border:none;">
+                                ${pr === 'high' ? '🟢 عالية' : pr === 'med' ? '🟡 متوسطة' : '🔴 منخفضة'}
+                            </span>
+                            ${item.target === '_blank' ? '<span style="opacity:.5;"><i class="fa-solid fa-up-right-from-square" style="font-size:.6rem;"></i></span>' : ''}
+                        </div>
                     </div>
-                    <!-- Status -->
-                    <span style="font-size:.8rem;padding:4px 10px;border-radius:20px;background:${item.isActive ? 'rgba(46,204,113,.15)' : 'rgba(231,76,60,.15)'};color:${item.isActive ? '#2ecc71' : '#e74c3c'};">${item.isActive ? 'مفعّل' : 'معطّل'}</span>
-                    <!-- Move buttons -->
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                        <button onclick="moveNavItem(${idx},-1)" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:2px 6px;font-size:.8rem;" ${idx === 0 ? 'disabled' : ''}>
-                            <i class="fa-solid fa-chevron-up"></i>
-                        </button>
-                        <button onclick="moveNavItem(${idx},1)" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:2px 6px;font-size:.8rem;" ${idx === navItemsData.length - 1 ? 'disabled' : ''}>
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </button>
+                    <span class="ni-status ${item.isActive ? 'on' : 'off'}">${item.isActive ? '✓ مفعّل' : '✗ معطّل'}</span>
+                    <div class="ni-arrows">
+                        <button onclick="moveNavItem(${idx},-1)" ${idx === 0 ? 'disabled' : ''} title="لفوق"><i class="fa-solid fa-chevron-up"></i></button>
+                        <button onclick="moveNavItem(${idx},1)" ${idx === navItemsData.length - 1 ? 'disabled' : ''} title="لتحت"><i class="fa-solid fa-chevron-down"></i></button>
                     </div>
-                    <!-- Actions -->
-                    <button class="btn" style="padding:6px 12px;font-size:.85rem;" onclick="openNavModal('${item._id}')">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button class="btn" style="padding:6px 12px;font-size:.85rem;color:var(--danger);" onclick="deleteNavItem('${item._id}','${item.label}')">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            `).join('');
+                    <button class="ni-act" onclick="openNavModal('${item._id}')" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="ni-act del" onclick="deleteNavItem('${item._id}','${item.label}')" title="حذف"><i class="fa-solid fa-trash-can"></i></button>
+                </div>`;
+            }).join('');
+
+            list.innerHTML = html;
         }
 
         // ============ Drag & Drop للترتيب ============
@@ -6342,22 +6401,19 @@
             e.preventDefault();
             if (dragFromIdx === null || dragFromIdx === toIdx) return;
 
-            // نقل العنصر في الـ array
             const [moved] = navItemsData.splice(dragFromIdx, 1);
             navItemsData.splice(toIdx, 0, moved);
 
             renderNavItems();
             updateNavPreviewBar();
 
-            // حفظ تلقائي بعد السحب
             saveNavOrder();
             dragFromIdx = null;
         }
 
         function navDragEnd(e) {
             e.target.style.opacity = '1';
-            // Reset all borders
-            document.querySelectorAll('.nav-item-row').forEach(row => {
+            document.querySelectorAll('.ni-card').forEach(row => {
                 row.style.borderColor = 'var(--border)';
                 row.style.background = 'var(--bg-elevated)';
             });
@@ -6372,19 +6428,53 @@
                 bar.innerHTML = '<span style="color:var(--text-secondary);font-size:.85rem;">لا توجد أيقونات مفعّلة</span>';
                 return;
             }
-            bar.innerHTML = activeItems.map(item => {
-                if (item.type === 'center') {
-                    return `<div style="padding:0 16px;display:flex;align-items:center;">
-                        <div style="width:52px;height:52px;background:linear-gradient(135deg,#EDBA26,#F5D245);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(237,186,38,.4);margin-top:-14px;">
-                            <i class="${item.icon}" style="font-size:1.3rem;color:#1a1a1a;"></i>
+
+            const maxVisible = 4;
+            const centerItem = activeItems.find(i => i.type === 'center');
+            const linkItems = activeItems.filter(i => i.type !== 'center');
+            const fixedItems = linkItems.filter(i => (i.displayMode || 'fixed') === 'fixed');
+            const rotatingItems = linkItems.filter(i => i.displayMode === 'rotating');
+            const visibleFixed = fixedItems.slice(0, maxVisible);
+            const rotatingSlots = Math.max(0, maxVisible - visibleFixed.length);
+            const visibleRotating = rotatingItems.slice(0, rotatingSlots);
+            const visibleItems = [...visibleFixed, ...visibleRotating];
+            const hiddenCount = linkItems.length - visibleItems.length;
+
+            // نص الأيقونات العادية
+            const midPoint = Math.floor(visibleItems.length / 2);
+            let html = '';
+
+            visibleItems.forEach((item, idx) => {
+                // حط المركزي في النص بالظبط
+                if (centerItem && idx === midPoint) {
+                    html += `<div style="padding:0 12px;display:flex;align-items:center;">
+                        <div style="width:48px;height:48px;background:linear-gradient(135deg,#EDBA26,#F5D245);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(237,186,38,.4);margin-top:-14px;">
+                            <i class="${centerItem.icon}" style="font-size:1.2rem;color:#1a1a1a;"></i>
                         </div>
                     </div>`;
                 }
-                return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 14px;color:rgba(237,186,38,.7);font-size:.65rem;cursor:default;">
-                    <i class="${item.icon}" style="font-size:1.1rem;"></i>
+                const isFixed = (item.displayMode || 'fixed') === 'fixed';
+                html += `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;color:${isFixed ? 'rgba(237,186,38,.85)' : 'rgba(255,184,0,.6)'};font-size:.62rem;cursor:default;position:relative;transition:all .3s;border-bottom:2px solid ${isFixed ? 'rgba(237,186,38,.4)' : 'transparent'};">
+                    <i class="${item.icon}" style="font-size:1rem;"></i>
                     <span>${item.label}</span>
+                    <span style="position:absolute;top:-2px;right:-2px;font-size:.5rem;">${isFixed ? '🔒' : '🎲'}</span>
                 </div>`;
-            }).join('');
+            });
+            // لو مفيش أيقونات عادية بس فيه مركزي
+            if (centerItem && visibleItems.length === 0) {
+                html += `<div style="padding:0 12px;display:flex;align-items:center;">
+                    <div style="width:48px;height:48px;background:linear-gradient(135deg,#EDBA26,#F5D245);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(237,186,38,.4);margin-top:-14px;">
+                        <i class="${centerItem.icon}" style="font-size:1.2rem;color:#1a1a1a;"></i>
+                    </div>
+                </div>`;
+            }
+            if (hiddenCount > 0) {
+                html += `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;color:rgba(255,255,255,.35);font-size:.62rem;cursor:default;">
+                    <i class="fa-solid fa-chevron-up" style="font-size:.9rem;"></i>
+                    <span>+${hiddenCount} المزيد</span>
+                </div>`;
+            }
+            bar.innerHTML = html;
         }
 
         function moveNavItem(index, direction) {
