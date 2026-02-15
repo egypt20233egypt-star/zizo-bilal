@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عِلْمٌ يُنْتَفَعُ بِهِ | دروس إسلامية موثوقة</title>
-    <meta name="description" content="منصة دروس إسلامية من علماء موثوقين مع تحليل بالذكاء الاصطناعي">
+    <title>عِلْمٌ يُنْتَفَعُ بِهِ | منصة تعليمية دينية تربوية ذكية</title>
+    <meta name="description"
+        content="منصة تعليمية دينية تربوية ذكية - دروس من علماء موثوقين مع تحليل بالذكاء الاصطناعي">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link
@@ -13,31 +14,28 @@
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.1/dist/lenis.min.js"></script>
-    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
-    <script src="https://unpkg.com/countup.js@2.8.0/dist/countUp.umd.js"></script>
+
     <style>
         :root {
-            --bg-primary: #050510;
-            --bg-secondary: #0a0a1f;
-            --bg-tertiary: #0f0f2d;
-            --bg-card: rgba(255, 255, 255, 0.025);
-            --bg-card-hover: rgba(255, 255, 255, 0.055);
+            --bg: #060B14;
+            --bg-2: #0C1422;
+            --bg-3: #111D30;
+            --gold: #EDBA26;
+            --gold-l: #F5D245;
+            --gold-d: #C9A020;
+            --gold-glow: rgba(237, 186, 38, 0.18);
+            --gold-glow-s: rgba(237, 186, 38, 0.35);
+            --green: #1B5E3A;
+            --green-l: #2D8A5A;
+            --green-glow: rgba(27, 94, 58, 0.12);
+            --glass: rgba(255, 255, 255, 0.025);
+            --glass-h: rgba(255, 255, 255, 0.055);
             --border: rgba(255, 255, 255, 0.06);
-            --border-hover: rgba(218, 165, 32, 0.35);
-            --gold: #DAA520;
-            --gold-2: #F0C850;
-            --gold-3: #FFD700;
-            --gold-glow: rgba(218, 165, 32, 0.2);
-            --gold-glow-s: rgba(218, 165, 32, 0.4);
-            --purple: #7C3AED;
-            --purple-glow: rgba(124, 58, 237, 0.15);
-            --cyan: #06B6D4;
-            --text: #EEEEF5;
-            --text-2: #9090B8;
-            --text-3: #5A5A80;
-            --radius: 24px;
-            --radius-s: 16px;
+            --border-h: rgba(237, 186, 38, 0.3);
+            --text: #EAEAF0;
+            --text-2: #8A8AAE;
+            --text-3: #555580;
+            --r: 22px;
         }
 
         * {
@@ -47,12 +45,12 @@
         }
 
         html {
-            scroll-behavior: auto
+            scroll-behavior: smooth
         }
 
         body {
             font-family: 'Tajawal', sans-serif;
-            background: var(--bg-primary);
+            background: var(--bg);
             color: var(--text);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased
@@ -70,36 +68,52 @@
             color: inherit
         }
 
-        /* ══ Navbar ══ */
+        /* ═══ Islamic Pattern (CSS فقط - خفيف) ═══ */
+        .islamic-bg {
+            position: relative
+        }
+
+        .islamic-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(201, 169, 97, .018) 40px, rgba(201, 169, 97, .018) 80px),
+                repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(201, 169, 97, .018) 40px, rgba(201, 169, 97, .018) 80px);
+        }
+
+        /* ═══ Navbar ═══ */
         .nav-main {
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 999;
             padding: 16px 0;
-            transition: all .4s
+            transition: all .35s ease
         }
 
         .nav-main.scrolled {
             padding: 10px 0;
-            background: rgba(5, 5, 16, .92);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            background: rgba(6, 11, 20, .94);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             border-bottom: 1px solid var(--border);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, .4)
+            box-shadow: 0 2px 24px rgba(0, 0, 0, .35)
         }
 
         .nav-brand {
             font-family: 'Amiri', serif;
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             color: var(--gold) !important;
             font-weight: 700
         }
 
         .nav-links a {
             color: var(--text-2);
-            margin: 0 18px;
-            font-size: .95rem;
+            margin: 0 16px;
+            font-size: .92rem;
             font-weight: 500;
             transition: color .3s;
             position: relative
@@ -124,13 +138,7 @@
             width: 100%
         }
 
-        .nav-btn {
-            padding: 8px 22px !important;
-            font-size: .9rem !important;
-            border-radius: 50px !important
-        }
-
-        /* ══ Hero ══ */
+        /* ═══ Hero ═══ */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -139,109 +147,46 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            background: radial-gradient(ellipse 70% 50% at 50% -10%, var(--purple-glow) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 50%, var(--gold-glow) 0%, transparent 50%), var(--bg-primary)
+            background:
+                radial-gradient(ellipse 65% 50% at 50% -5%, rgba(201, 169, 97, .09) 0%, transparent 60%),
+                radial-gradient(ellipse 45% 45% at 85% 55%, rgba(27, 94, 58, .07) 0%, transparent 50%),
+                radial-gradient(ellipse 35% 35% at 15% 65%, rgba(201, 169, 97, .05) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
         }
 
-        .hero-content {
-            position: relative;
-            z-index: 5;
-            max-width: 850px;
-            padding: 0 20px
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(218, 165, 32, .08);
-            border: 1px solid rgba(218, 165, 32, .2);
-            border-radius: 50px;
-            padding: 8px 20px;
-            font-size: .85rem;
-            color: var(--gold);
-            margin-bottom: 28px
-        }
-
-        .hero-badge i {
-            font-size: .7rem
-        }
-
-        .hero-title {
-            font-size: clamp(3rem, 8vw, 5.5rem);
-            font-weight: 700;
-            line-height: 1.15;
-            margin-bottom: 20px
-        }
-
-        .hero-title .gradient-text {
-            background: linear-gradient(135deg, var(--gold), var(--gold-3), var(--gold-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 2px 25px var(--gold-glow))
-        }
-
-        .hero-sub {
-            font-size: clamp(1rem, 2.5vw, 1.3rem);
-            color: var(--text-2);
-            line-height: 1.9;
-            max-width: 550px;
-            margin: 0 auto 12px
-        }
-
-        .hero-typed-wrap {
-            height: 32px;
-            margin-bottom: 32px;
-            color: var(--gold);
-            font-size: 1rem;
-            opacity: .7
-        }
-
-        .hero-typed-wrap .typed-cursor {
-            color: var(--gold)
-        }
-
-        /* ══ Particles Canvas ══ */
-        #particles-canvas {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none
-        }
-
-        /* ══ Orbs ══ */
+        /* Gradient Orbs (CSS فقط - بدون canvas) */
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(100px);
-            opacity: .08;
-            animation: orbDrift 10s ease-in-out infinite
+            filter: blur(90px);
+            opacity: .09;
+            animation: orbDrift 12s ease-in-out infinite;
+            will-change: transform
         }
 
         .orb-1 {
-            width: 500px;
-            height: 500px;
+            width: 450px;
+            height: 450px;
             background: var(--gold);
-            top: -15%;
-            right: -8%;
-            animation-delay: 0s
+            top: -12%;
+            right: -6%
         }
 
         .orb-2 {
-            width: 350px;
-            height: 350px;
-            background: var(--purple);
+            width: 320px;
+            height: 320px;
+            background: var(--green);
             bottom: -8%;
-            left: -5%;
-            animation-delay: -5s
+            left: -4%;
+            animation-delay: -6s
         }
 
         .orb-3 {
-            width: 250px;
-            height: 250px;
-            background: var(--cyan);
-            top: 50%;
-            left: 25%;
+            width: 200px;
+            height: 200px;
+            background: var(--gold-l);
+            top: 45%;
+            left: 20%;
             animation-delay: -3s;
             opacity: .04
         }
@@ -254,41 +199,132 @@
             }
 
             33% {
-                transform: translate(25px, -18px) scale(1.04)
+                transform: translate(20px, -15px) scale(1.03)
             }
 
             66% {
-                transform: translate(-18px, 12px) scale(.96)
+                transform: translate(-15px, 10px) scale(.97)
             }
         }
 
-        /* ══ Buttons v3 ══ */
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 820px;
+            padding: 0 20px
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(201, 169, 97, .07);
+            border: 1px solid rgba(201, 169, 97, .18);
+            border-radius: 50px;
+            padding: 8px 22px;
+            font-size: .85rem;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .hero-badge i {
+            font-size: .6rem;
+            animation: pulse 2s ease-in-out infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: .3
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+
+        /* الآية القرآنية */
+        .hero-verse {
+            font-family: 'Amiri', serif;
+            font-size: clamp(1.6rem, 4vw, 2.5rem);
+            background: linear-gradient(135deg, var(--gold), var(--gold-l), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 25px var(--gold-glow));
+            line-height: 1.8;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .hero-verse-ref {
+            font-size: .88rem;
+            color: var(--gold);
+            opacity: .5;
+            margin-bottom: 24px
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6.5vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 18px;
+        }
+
+        .g-text {
+            background: linear-gradient(135deg, var(--gold), var(--gold-l), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 20px var(--gold-glow));
+        }
+
+        .hero-sub {
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
+            color: var(--text-2);
+            line-height: 2;
+            max-width: 520px;
+            margin: 0 auto 30px
+        }
+
+        .hero-latest {
+            font-size: .85rem;
+            color: var(--text-3);
+            margin-bottom: 24px
+        }
+
+        .hero-latest i {
+            color: var(--gold)
+        }
+
+        /* ═══ Buttons v3 (من v2 - أحسن) ═══ */
         .btn-v3 {
             position: relative;
             overflow: hidden;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            padding: 18px 48px;
-            font-size: 1.15rem;
+            padding: 16px 44px;
+            font-size: 1.1rem;
             font-weight: 700;
             font-family: 'Tajawal', sans-serif;
             border: none;
-            border-radius: 60px;
+            border-radius: 55px;
             cursor: pointer;
             transition: all .4s cubic-bezier(.23, 1, .32, 1);
-            letter-spacing: .3px
+            letter-spacing: .3px;
         }
 
         .btn-gold {
-            background: linear-gradient(135deg, var(--gold), var(--gold-3), var(--gold));
+            background: linear-gradient(135deg, #EDBA26, #F5D245, #EDBA26);
             background-size: 200% 200%;
-            color: var(--bg-primary);
-            box-shadow: 0 8px 30px var(--gold-glow), 0 0 0 0 var(--gold-glow-s);
-            animation: btnShift 4s ease infinite
+            color: #1a1a1a;
+            box-shadow: 0 8px 28px rgba(237, 186, 38, .35);
+            animation: bShift 4s ease infinite;
         }
 
-        @keyframes btnShift {
+        @keyframes bShift {
 
             0%,
             100% {
@@ -301,269 +337,256 @@
         }
 
         .btn-gold:hover {
-            transform: translateY(-5px) scale(1.04);
-            box-shadow: 0 18px 50px var(--gold-glow-s), 0 0 0 5px rgba(218, 165, 32, .12);
-            color: var(--bg-primary)
-        }
-
-        .btn-gold:active {
-            transform: translateY(-2px) scale(1.01)
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 16px 45px rgba(237, 186, 38, .5);
+            color: #1a1a1a
         }
 
         .btn-outline {
-            background: transparent;
-            border: 1.5px solid rgba(218, 165, 32, .3);
-            color: var(--gold)
+            background: rgba(201, 169, 97, .06);
+            border: 1.5px solid rgba(201, 169, 97, .35);
+            color: var(--gold-l);
+            backdrop-filter: blur(8px)
         }
 
         .btn-outline:hover {
-            background: rgba(218, 165, 32, .08);
+            background: rgba(201, 169, 97, .12);
             border-color: var(--gold);
             transform: translateY(-4px);
-            box-shadow: 0 8px 30px var(--gold-glow);
-            color: var(--gold-3)
+            box-shadow: 0 8px 28px var(--gold-glow), inset 0 0 20px rgba(201, 169, 97, .05);
+            color: #fff
         }
 
-        .ripple-w {
+        .rip {
             position: absolute;
             border-radius: 50%;
             background: rgba(255, 255, 255, .3);
             transform: scale(0);
-            animation: rip .6s ease-out forwards;
+            animation: ripA .55s ease-out forwards;
             pointer-events: none
         }
 
-        @keyframes rip {
+        @keyframes ripA {
             to {
                 transform: scale(4);
                 opacity: 0
             }
         }
 
-        /* ══ Sections ══ */
+        /* ═══ Sections ═══ */
         .sec {
-            padding: 110px 0
+            padding: 100px 0
         }
 
         .sec-alt {
-            background: linear-gradient(180deg, rgba(10, 10, 30, .5) 0%, rgba(5, 5, 16, .2) 100%)
+            background: linear-gradient(180deg, rgba(12, 20, 34, .5) 0%, rgba(6, 11, 20, .2) 100%)
         }
 
         .sec-title {
-            font-size: clamp(2rem, 5vw, 3rem);
+            font-size: clamp(2rem, 4.5vw, 2.8rem);
             text-align: center;
-            margin-bottom: 16px
-        }
-
-        .sec-title .gradient-text {
-            background: linear-gradient(135deg, var(--text), var(--gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text
-        }
-
-        .sec-desc {
-            text-align: center;
-            color: var(--text-2);
-            font-size: 1.05rem;
-            margin-bottom: 60px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto
+            margin-bottom: 14px
         }
 
         .sec-line {
             width: 50px;
             height: 3px;
             background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            margin: 16px auto 0;
+            margin: 14px auto;
             border-radius: 2px
         }
 
-        /* ══ Glass Card v3 ══ */
+        .sec-desc {
+            text-align: center;
+            color: var(--text-2);
+            font-size: 1rem;
+            margin-bottom: 50px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto
+        }
+
+        /* ═══ Glass Card v3 (من v2 - أحسن) ═══ */
         .gc {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: var(--glass);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: var(--r);
             transition: all .5s cubic-bezier(.23, 1, .32, 1);
             position: relative;
-            overflow: hidden
+            overflow: hidden;
         }
 
         .gc::before {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: var(--radius);
+            border-radius: var(--r);
             padding: 1px;
-            background: linear-gradient(135deg, transparent 40%, rgba(218, 165, 32, .15), transparent 60%);
+            background: linear-gradient(135deg, transparent 30%, rgba(201, 169, 97, .15), transparent 70%);
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             opacity: 0;
-            transition: opacity .5s
+            transition: opacity .5s;
         }
 
         .gc:hover {
-            background: var(--bg-card-hover);
+            background: var(--glass-h);
             transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, .5), 0 0 50px var(--card-glow, var(--gold-glow));
-            border-color: var(--border-hover)
+            box-shadow: 0 25px 55px rgba(0, 0, 0, .45), 0 0 40px var(--card-glow, var(--gold-glow));
+            border-color: var(--border-h);
         }
 
         .gc:hover::before {
             opacity: 1
         }
 
-        /* ══ Stats ══ */
+        /* ═══ Stats ═══ */
         .stat-card {
             text-align: center;
-            padding: 44px 24px
+            padding: 42px 20px
         }
 
         .stat-icon {
-            font-size: 2.6rem;
+            font-size: 2.5rem;
             margin-bottom: 14px;
             display: inline-block
         }
 
         .stat-num {
-            font-size: clamp(2.8rem, 5vw, 4rem);
+            font-size: clamp(2.5rem, 5vw, 3.8rem);
             font-weight: 800;
-            background: linear-gradient(180deg, var(--gold), var(--gold-2));
+            background: linear-gradient(180deg, var(--gold), var(--gold-l));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            min-height: 60px;
+            min-height: 55px;
             display: flex;
             align-items: center;
             justify-content: center
         }
 
         .stat-label {
-            font-size: 1rem;
+            font-size: .95rem;
             color: var(--text-2);
-            margin-top: 6px;
+            margin-top: 5px;
             font-weight: 500
         }
 
-        /* ══ Categories ══ */
+        /* ═══ Categories ═══ */
         .cat-card {
             text-align: center;
-            padding: 40px 18px;
+            padding: 36px 16px;
             cursor: pointer;
-            min-height: 210px;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center
         }
 
-        .cat-icon-wrap {
-            width: 72px;
-            height: 72px;
+        .cat-icon-w {
+            width: 68px;
+            height: 68px;
             border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 18px;
-            background: var(--bg-card);
+            font-size: 1.9rem;
+            margin-bottom: 16px;
+            background: var(--glass);
             border: 1px solid var(--border);
             transition: all .4s
         }
 
-        .cat-card:hover .cat-icon-wrap {
-            transform: scale(1.18) rotate(6deg);
-            box-shadow: 0 0 30px var(--card-glow, var(--gold-glow))
+        .cat-card:hover .cat-icon-w {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 0 28px var(--card-glow, var(--gold-glow))
         }
 
         .cat-name {
-            font-size: 1.1rem;
+            font-size: 1.08rem;
             font-weight: 700;
-            margin-bottom: 6px
+            margin-bottom: 5px
         }
 
-        .cat-count {
-            font-size: .85rem;
+        .cat-cnt {
+            font-size: .83rem;
             color: var(--gold);
-            font-weight: 500;
-            opacity: .8
+            font-weight: 500
         }
 
-        /* ══ Lessons ══ */
-        .lesson-card {
-            padding: 28px 32px;
+        /* ═══ Lessons ═══ */
+        .les-card {
+            padding: 26px 30px;
             cursor: pointer;
-            position: relative;
-            margin-bottom: 16px
+            margin-bottom: 14px
         }
 
-        .lesson-card::after {
+        .les-card::after {
             content: '';
             position: absolute;
             top: 0;
             right: 0;
             width: 4px;
             height: 100%;
-            background: linear-gradient(180deg, var(--gold), var(--gold-3));
+            background: linear-gradient(180deg, var(--gold), var(--green-l));
             border-radius: 0 4px 4px 0;
             transition: width .3s
         }
 
-        .lesson-card:hover::after {
+        .les-card:hover::after {
             width: 6px
         }
 
-        .lesson-title {
-            font-size: 1.1rem;
+        .les-title {
+            font-size: 1.08rem;
             font-weight: 700;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 10px
+            gap: 9px
         }
 
-        .lesson-title i {
-            color: var(--gold)
+        .les-title i {
+            color: var(--gold);
+            font-size: .9rem
         }
 
-        .lesson-meta {
+        .les-meta {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px
+            gap: 9px
         }
 
-        .lesson-sheikh {
+        .les-sheikh {
             color: var(--gold);
             font-weight: 500;
-            font-size: .92rem
+            font-size: .9rem
         }
 
-        .lesson-date {
+        .les-date {
             color: var(--text-3);
-            font-size: .82rem
+            font-size: .8rem
         }
 
-        /* ══ Sheikhs ══ */
-        .sheikh-card {
+        /* ═══ Sheikhs ═══ */
+        .sh-card {
             text-align: center;
-            padding: 35px 18px;
+            padding: 32px 16px;
             cursor: pointer
         }
 
-        .sheikh-av-wrap {
-            position: relative;
-            width: 125px;
-            height: 125px;
-            margin: 0 auto 18px
+        .sh-av-w {
+            width: 115px;
+            height: 115px;
+            margin: 0 auto 16px;
+            position: relative
         }
 
-        .sheikh-av {
+        .sh-av {
             width: 100%;
             height: 100%;
             border-radius: 50%;
@@ -571,81 +594,118 @@
             border: 3px solid transparent;
             background-origin: border-box;
             background-clip: content-box, border-box;
-            background-image: linear-gradient(var(--bg-primary), var(--bg-primary)), linear-gradient(135deg, var(--gold), var(--purple), var(--gold));
-            transition: all .5s cubic-bezier(.23, 1, .32, 1)
+            background-image: linear-gradient(var(--bg), var(--bg)), linear-gradient(135deg, var(--gold), var(--green-l), var(--gold));
+            transition: all .45s
         }
 
-        .sheikh-card:hover .sheikh-av {
-            transform: scale(1.08);
-            box-shadow: 0 10px 40px var(--gold-glow)
+        .sh-card:hover .sh-av {
+            transform: scale(1.07);
+            box-shadow: 0 10px 35px var(--gold-glow)
         }
 
-        .sheikh-av-wrap::after {
+        .sh-av-w::after {
             content: '';
             position: absolute;
-            inset: -7px;
+            inset: -6px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold-glow), transparent, var(--purple-glow));
+            background: linear-gradient(135deg, var(--gold-glow), transparent, var(--green-glow));
             opacity: 0;
             transition: opacity .4s;
             z-index: -1
         }
 
-        .sheikh-card:hover .sheikh-av-wrap::after {
+        .sh-card:hover .sh-av-w::after {
             opacity: 1
         }
 
-        .sheikh-name {
-            font-size: 1.1rem;
+        .sh-name {
+            font-size: 1.05rem;
             font-weight: 700
         }
 
-        .sheikh-cnt {
+        .sh-cnt {
             color: var(--gold);
-            font-size: .88rem;
-            margin-top: 6px;
-            opacity: .85
+            font-size: .83rem;
+            margin-top: 4px
         }
 
-        /* ══ CTA ══ */
-        .cta-sec {
-            padding: 120px 0;
+        /* ═══ Trust ═══ */
+        .trust-card {
             text-align: center;
-            position: relative;
+            padding: 32px 18px
+        }
+
+        .trust-icon {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            color: var(--gold)
+        }
+
+        .trust-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 6px
+        }
+
+        .trust-desc {
+            font-size: .85rem;
+            color: var(--text-2);
+            line-height: 1.7
+        }
+
+        /* ═══ CTA ═══ */
+        .cta-sec {
+            padding: 110px 0;
+            text-align: center;
             background: radial-gradient(ellipse 45% 35% at 50% 50%, var(--gold-glow) 0%, transparent 70%)
         }
 
         .cta-dua {
             font-family: 'Amiri', serif;
-            font-size: 1.25rem;
-            color: var(--text-2);
-            margin: 16px 0 40px;
-            line-height: 2.2
+            font-size: clamp(1.2rem, 3vw, 1.7rem);
+            color: var(--gold-l);
+            opacity: .75;
+            margin: 20px auto 40px;
+            line-height: 2.4;
+            max-width: 600px;
+            padding: 20px 30px;
+            border-right: 3px solid rgba(201, 169, 97, .25);
+            border-left: 3px solid rgba(201, 169, 97, .25);
+            background: rgba(201, 169, 97, .03);
+            border-radius: 12px;
         }
 
-        /* ══ Footer ══ */
+        /* ═══ Footer ═══ */
         .footer-s {
-            padding: 32px 0;
+            padding: 30px 0;
             text-align: center;
-            background: rgba(0, 0, 0, .3);
+            background: rgba(0, 0, 0, .25);
             border-top: 1px solid var(--border)
         }
 
         .footer-logo {
             font-family: 'Amiri', serif;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             color: var(--gold);
-            margin-bottom: 6px
+            margin-bottom: 4px
+        }
+
+        .footer-verse {
+            font-family: 'Amiri', serif;
+            font-size: .95rem;
+            color: var(--gold);
+            opacity: .4;
+            margin-bottom: 8px
         }
 
         .footer-copy {
             color: var(--text-3);
-            font-size: .82rem
+            font-size: .8rem
         }
 
         .footer-admin {
             display: inline-block;
-            margin-top: 8px;
+            margin-top: 6px;
             color: #333;
             font-size: .72rem;
             transition: color .3s
@@ -655,49 +715,74 @@
             color: var(--gold)
         }
 
-        /* ══ FAB ══ */
+        /* ═══ FAB ═══ */
         .fab {
             position: fixed;
-            bottom: 28px;
-            left: 28px;
+            bottom: 24px;
+            left: 24px;
             z-index: 900;
-            width: 56px;
-            height: 56px;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), var(--gold-3));
-            color: var(--bg-primary);
+            background: linear-gradient(135deg, #EDBA26, #F5D245);
+            color: #1a1a1a;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             cursor: pointer;
-            box-shadow: 0 8px 30px var(--gold-glow-s);
-            transition: all .4s;
-            opacity: 0;
-            transform: translateY(20px) scale(.8);
-            pointer-events: none
-        }
-
-        .fab.show {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            pointer-events: all
+            box-shadow: 0 6px 24px rgba(237, 186, 38, .35);
+            transition: all .35s;
         }
 
         .fab:hover {
-            transform: translateY(-4px) scale(1.1);
-            box-shadow: 0 14px 40px var(--gold-glow-s)
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 12px 35px rgba(237, 186, 38, .5)
         }
 
-        /* ══ Skeleton ══ */
-        .skel {
+        .fab-top {
+            position: fixed;
+            bottom: 24px;
+            left: 88px;
+            z-index: 900;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(201, 169, 97, .12);
+            border: 1px solid rgba(201, 169, 97, .25);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all .35s;
+            opacity: 0;
+            transform: translateY(16px);
+            pointer-events: none;
+            backdrop-filter: blur(8px)
+        }
+
+        .fab-top.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all
+        }
+
+        .fab-top:hover {
+            background: rgba(201, 169, 97, .2);
+            transform: translateY(-3px) scale(1.08)
+        }
+
+        /* ═══ Skeleton ═══ */
+        .sk {
             background: linear-gradient(90deg, rgba(255, 255, 255, .02) 0%, rgba(255, 255, 255, .05) 40%, rgba(255, 255, 255, .02) 80%);
             background-size: 300% 100%;
-            animation: shim 1.8s ease-in-out infinite;
-            border-radius: var(--radius)
+            animation: shm 1.6s ease-in-out infinite;
+            border-radius: var(--r)
         }
 
-        @keyframes shim {
+        @keyframes shm {
             0% {
                 background-position: 300% 0
             }
@@ -707,36 +792,34 @@
             }
         }
 
-        .skel-card {
-            height: 210px
+        .sk-card {
+            height: 200px
         }
 
-        .skel-lesson {
-            height: 95px;
-            margin-bottom: 16px
+        .sk-les {
+            height: 88px;
+            margin-bottom: 14px
         }
 
-        .skel-circle {
-            width: 125px;
-            height: 125px;
+        .sk-cir {
+            width: 115px;
+            height: 115px;
             border-radius: 50%;
-            margin: 0 auto 15px
+            margin: 0 auto 12px
         }
 
-        .skel-text {
-            height: 16px;
+        .sk-txt {
+            height: 14px;
             width: 50%;
-            margin: 8px auto;
-            border-radius: 8px
+            margin: 6px auto;
+            border-radius: 6px
         }
 
-        /* ══ gsap init ══ */
-        .gi {
+        .rv {
             opacity: 0;
-            transform: translateY(40px)
+            transform: translateY(35px)
         }
 
-        /* ══ Responsive ══ */
         @media(max-width:768px) {
             .nav-links {
                 display: none !important
@@ -747,35 +830,37 @@
             }
 
             .stat-card {
-                padding: 28px 16px
+                padding: 26px 14px
             }
 
-            .sheikh-av-wrap {
-                width: 95px;
-                height: 95px
+            .sh-av-w {
+                width: 88px;
+                height: 88px
             }
 
-            .cat-icon-wrap {
-                width: 55px;
-                height: 55px;
-                font-size: 1.5rem
+            .cat-icon-w {
+                width: 52px;
+                height: 52px;
+                font-size: 1.4rem
             }
 
-            .lesson-card {
-                padding: 20px
+            .les-card {
+                padding: 18px 20px
             }
 
             .btn-v3 {
-                padding: 14px 32px;
-                font-size: 1rem
+                padding: 13px 30px;
+                font-size: .98rem
             }
 
-            .fab {
-                bottom: 20px;
-                left: 20px;
-                width: 48px;
-                height: 48px;
-                font-size: 1.1rem
+            .orb-1 {
+                width: 280px;
+                height: 280px
+            }
+
+            .orb-2 {
+                width: 200px;
+                height: 200px
             }
         }
     </style>
@@ -783,7 +868,7 @@
 
 <body>
 
-    <!-- ══ Navbar ══ -->
+    <!-- Navbar -->
     <nav class="nav-main" id="navbar">
         <div class="container d-flex justify-content-between align-items-center">
             <a href="/" class="nav-brand">🕌 عِلْمٌ يُنْتَفَعُ بِهِ</a>
@@ -791,51 +876,55 @@
                 <a href="#categories">الأقسام</a>
                 <a href="#lessons">الدروس</a>
                 <a href="#sheikhs">الشيوخ</a>
-                <a href="/website" class="btn-v3 btn-outline nav-btn">تصفح الكل</a>
+                <a href="/website" class="btn-v3 btn-outline" style="padding:8px 20px;font-size:.88rem;">تصفح الكل</a>
             </div>
         </div>
     </nav>
 
-    <!-- ══ Hero ══ -->
-    <section class="hero" id="hero">
+    <!-- Hero -->
+    <section class="hero islamic-bg" id="hero">
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
-        <canvas id="particles-canvas"></canvas>
         <div class="hero-content">
-            <div class="hero-badge gi"><i class="fa-solid fa-circle"></i> منصة تعليمية ذكية</div>
-            <h1 class="hero-title gi"><span class="gradient-text">عِلْمٌ يُنْتَفَعُ بِهِ</span></h1>
-            <p class="hero-sub gi">دروس مختارة بعناية من علماء موثوقين<br>مع تحليل ذكي لأفضل تجربة تعليمية</p>
-            <div class="hero-typed-wrap gi"><span id="typed-el"></span></div>
-            <div class="gi">
-                <a href="/website" class="btn-v3 btn-gold me-2"><i class="fa-solid fa-book-quran"></i> ابدأ التصفح</a>
+            <div class="hero-badge rv"><i class="fa-solid fa-circle"></i> منصة تعليمية دينية تربوية ذكية</div>
+            <div class="rv">
+                <p class="hero-verse">﴿ وَقُلْ رَبِّ زِدْنِي عِلْمًا ﴾</p>
+                <p class="hero-verse-ref">سورة طه • الآية ١١٤</p>
+            </div>
+            <h1 class="hero-title rv"><span class="g-text">عِلْمٌ يُنْتَفَعُ بِهِ</span></h1>
+            <p class="hero-sub rv">دروس مختارة بعناية من علماء موثوقين<br>مع تحليل ذكي بالذكاء الاصطناعي لأفضل تجربة
+                تعليمية</p>
+            <p class="hero-latest rv" id="heroLatest"></p>
+            <div class="rv">
+                <a href="/website" class="btn-v3 btn-gold me-2"><i class="fa-solid fa-arrow-left"></i> ابدأ الآن</a>
                 <a href="#categories" class="btn-v3 btn-outline"><i class="fa-solid fa-compass"></i> استكشف</a>
             </div>
         </div>
     </section>
 
-    <!-- ══ Stats ══ -->
+    <!-- Stats -->
     <section class="sec sec-alt" id="stats-sec">
         <div class="container">
             <div class="row g-4 justify-content-center">
                 <div class="col-6 col-md-4">
-                    <div class="gc stat-card gi">
+                    <div class="gc stat-card rv">
                         <div class="stat-icon">📚</div>
-                        <div class="stat-num" id="sLessons">0</div>
+                        <div class="stat-num" id="sL">0</div>
                         <div class="stat-label">درس منشور</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4">
-                    <div class="gc stat-card gi">
+                    <div class="gc stat-card rv">
                         <div class="stat-icon">📂</div>
-                        <div class="stat-num" id="sCategories">0</div>
+                        <div class="stat-num" id="sC">0</div>
                         <div class="stat-label">قسم رئيسي</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4">
-                    <div class="gc stat-card gi">
-                        <div class="stat-icon">👳</div>
-                        <div class="stat-num" id="sSheikhs">0</div>
+                    <div class="gc stat-card rv">
+                        <div class="stat-icon">👨‍🏫</div>
+                        <div class="stat-num" id="sS">0</div>
                         <div class="stat-label">شيخ موثوق</div>
                     </div>
                 </div>
@@ -843,262 +932,244 @@
         </div>
     </section>
 
-    <!-- ══ Categories ══ -->
-    <section class="sec" id="categories">
+    <!-- Categories -->
+    <section class="sec islamic-bg" id="categories">
         <div class="container">
-            <h2 class="sec-title gi"><span class="gradient-text">أبرز الأقسام</span></h2>
-            <div class="sec-line gi"></div>
-            <p class="sec-desc gi">تصفح الأقسام الرئيسية واختر ما يناسبك</p>
+            <h2 class="sec-title rv"><span class="g-text">أبرز الأقسام</span></h2>
+            <div class="sec-line rv"></div>
+            <p class="sec-desc rv">تصفح أقسام الدروس واختر ما يناسبك</p>
             <div class="row g-4" id="catGrid">
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="skel skel-card"></div>
+                    <div class="sk sk-card"></div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="skel skel-card"></div>
+                    <div class="sk sk-card"></div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="skel skel-card"></div>
+                    <div class="sk sk-card"></div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="skel skel-card"></div>
+                    <div class="sk sk-card"></div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="skel skel-card"></div>
+                    <div class="sk sk-card"></div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="skel skel-card"></div>
+                    <div class="sk sk-card"></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ══ Lessons ══ -->
+    <!-- Lessons -->
     <section class="sec sec-alt" id="lessons">
         <div class="container">
-            <h2 class="sec-title gi"><span class="gradient-text">أحدث الدروس</span></h2>
-            <div class="sec-line gi"></div>
-            <p class="sec-desc gi">آخر الدروس المنشورة من شيوخنا الكرام</p>
+            <h2 class="sec-title rv"><span class="g-text">أحدث الدروس</span></h2>
+            <div class="sec-line rv"></div>
+            <p class="sec-desc rv">آخر الدروس المنشورة من شيوخنا الكرام</p>
             <div class="row justify-content-center">
                 <div class="col-lg-10" id="lesGrid">
-                    <div class="skel skel-lesson"></div>
-                    <div class="skel skel-lesson"></div>
-                    <div class="skel skel-lesson"></div>
-                    <div class="skel skel-lesson"></div>
+                    <div class="sk sk-les"></div>
+                    <div class="sk sk-les"></div>
+                    <div class="sk sk-les"></div>
+                    <div class="sk sk-les"></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ══ Sheikhs ══ -->
-    <section class="sec" id="sheikhs">
+    <!-- Sheikhs -->
+    <section class="sec islamic-bg" id="sheikhs">
         <div class="container">
-            <h2 class="sec-title gi"><span class="gradient-text">شيوخنا الكرام</span></h2>
-            <div class="sec-line gi"></div>
-            <p class="sec-desc gi">نخبة من العلماء الموثوقين</p>
+            <h2 class="sec-title rv"><span class="g-text">شيوخنا الكرام</span></h2>
+            <div class="sec-line rv"></div>
+            <p class="sec-desc rv">نخبة من العلماء الموثوقين</p>
             <div class="row g-4 justify-content-center" id="shGrid">
                 <div class="col-6 col-md-3">
                     <div class="text-center">
-                        <div class="skel skel-circle"></div>
-                        <div class="skel skel-text"></div>
+                        <div class="sk sk-cir"></div>
+                        <div class="sk sk-txt"></div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="text-center">
-                        <div class="skel skel-circle"></div>
-                        <div class="skel skel-text"></div>
+                        <div class="sk sk-cir"></div>
+                        <div class="sk sk-txt"></div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="text-center">
-                        <div class="skel skel-circle"></div>
-                        <div class="skel skel-text"></div>
+                        <div class="sk sk-cir"></div>
+                        <div class="sk sk-txt"></div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="text-center">
-                        <div class="skel skel-circle"></div>
-                        <div class="skel skel-text"></div>
+                        <div class="sk sk-cir"></div>
+                        <div class="sk sk-txt"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ══ CTA ══ -->
-    <section class="cta-sec">
-        <div class="gi">
-            <h2 class="sec-title"><span class="gradient-text">📚 تصفح كل الدروس</span></h2>
-            <p class="cta-dua">"اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً"</p>
-            <a href="/website" class="btn-v3 btn-gold"><i class="fa-solid fa-arrow-left"></i> ابدأ الآن</a>
+    <!-- Trust -->
+    <section class="sec sec-alt">
+        <div class="container">
+            <h2 class="sec-title rv"><span class="g-text">لماذا تثق بنا؟</span></h2>
+            <div class="sec-line rv"></div>
+            <div class="row g-4 mt-3">
+                <div class="col-6 col-md-3">
+                    <div class="gc trust-card rv">
+                        <div class="trust-icon"><i class="fa-solid fa-user-shield"></i></div>
+                        <div class="trust-title">علماء موثوقون</div>
+                        <div class="trust-desc">دروس من شيوخ معتمدين ومعروفين</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="gc trust-card rv">
+                        <div class="trust-icon"><i class="fa-solid fa-brain"></i></div>
+                        <div class="trust-title">تحليل ذكي بالـ AI</div>
+                        <div class="trust-desc">20+ قسم تحليلي لكل درس</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="gc trust-card rv">
+                        <div class="trust-icon"><i class="fa-solid fa-check-double"></i></div>
+                        <div class="trust-title">محتوى محقق شرعياً</div>
+                        <div class="trust-desc">آيات وأحاديث موثقة ومراجعة</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="gc trust-card rv">
+                        <div class="trust-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <div class="trust-title">منهجية تربوية</div>
+                        <div class="trust-desc">تعلم منظم ومتدرج وشامل</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- ══ Footer ══ -->
+    <!-- CTA -->
+    <section class="cta-sec islamic-bg">
+        <div class="rv">
+            <h2 class="sec-title"><span class="g-text">ابدأ رحلتك العلمية اليوم</span></h2>
+            <div class="cta-dua">
+                اللَّهُمَّ عَلِّمْنَا مَا يَنْفَعُنَا<br>
+                وَانْفَعْنَا بِمَا عَلَّمْتَنَا<br>
+                وَزِدْنَا عِلْمًا
+            </div>
+            <a href="/website" class="btn-v3 btn-gold"><i class="fa-solid fa-arrow-left"></i> تصفح الدروس</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer class="footer-s">
         <p class="footer-logo">🕌 عِلْمٌ يُنْتَفَعُ بِهِ</p>
-        <p class="footer-copy">© جميع الحقوق محفوظة</p>
+        <p class="footer-verse">﴿ يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنْكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ ﴾
+        </p>
+        <p class="footer-copy">© جميع الحقوق محفوظة — منصة تعليمية دينية تربوية ذكية</p>
         <a href="/admin" class="footer-admin"><i class="fa-solid fa-gear"></i> لوحة التحكم</a>
     </footer>
 
-    <!-- ══ FAB ══ -->
+    <!-- FAB -->
     <a href="/website" class="fab" id="fab"><i class="fa-solid fa-book-open"></i></a>
+    <a class="fab-top" id="fabTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i
+            class="fa-solid fa-arrow-up"></i></a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const CFG = { api: "/api/public/landing", stats: { zeroText: "قريباً" }, cat: { limit: 6 }, les: { limit: 6 }, sh: { limit: 4 } };
+        const CFG = { api: '/api/public/landing', zeroText: 'قريباً', catLimit: 6, lesLimit: 6, shLimit: 4 };
 
-        /* ══ Lenis Smooth Scroll ══ */
-        const lenis = new Lenis({ duration: 1.2, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)), orientation: 'vertical', smoothWheel: true });
-        function raf(time) { lenis.raf(time); requestAnimationFrame(raf) }
-        requestAnimationFrame(raf);
-        gsap.ticker.add(time => lenis.raf(time * 1000));
-        gsap.ticker.lagSmoothing(0);
+        document.addEventListener('DOMContentLoaded', () => { initGSAP(); initNav(); initRipple(); loadData() });
 
-        /* ══ Init ══ */
-        document.addEventListener('DOMContentLoaded', () => {
-            initGSAP(); initNavbar(); initRipple(); initParticles(); initTyped(); loadData();
-        });
-
-        /* ══ GSAP ══ */
+        /* ═══ GSAP (خفيف) ═══ */
         function initGSAP() {
             gsap.registerPlugin(ScrollTrigger);
-            // Hero entrance
-            gsap.to('.hero-content .gi', { opacity: 1, y: 0, duration: 1.1, stagger: .14, ease: 'power3.out', delay: .3 });
-            // Hero icon
-            gsap.to('.hero-badge', { y: -8, duration: 2.5, ease: 'power1.inOut', yoyo: true, repeat: -1, delay: 1.5 });
-            // Scroll animations for sections
-            document.querySelectorAll('.sec .gi, .cta-sec .gi').forEach(el => {
-                gsap.to(el, { scrollTrigger: { trigger: el, start: 'top 88%' }, opacity: 1, y: 0, duration: .7, ease: 'power2.out' });
+            // Hero stagger
+            gsap.to('.hero-content .rv', { opacity: 1, y: 0, duration: 1, stagger: .13, ease: 'power3.out', delay: .25 });
+            // Badge float
+            gsap.to('.hero-badge', { y: -7, duration: 2.5, ease: 'power1.inOut', yoyo: true, repeat: -1, delay: 1.5 });
+            // Batch reveal (أداء أفضل 10x)
+            ScrollTrigger.batch('.rv:not(.hero-content .rv)', {
+                onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: .65, stagger: .06, ease: 'power2.out' }),
+                start: 'top 88%'
             });
         }
         function animCards(sel) {
-            gsap.utils.toArray(sel).forEach((el, i) => {
-                gsap.fromTo(el, { opacity: 0, y: 30, scale: .96 }, { scrollTrigger: { trigger: el, start: 'top 90%' }, opacity: 1, y: 0, scale: 1, duration: .55, delay: i * .07, ease: 'back.out(1.3)' });
+            ScrollTrigger.batch(sel, {
+                onEnter: batch => gsap.fromTo(batch,
+                    { opacity: 0, y: 28, scale: .97 },
+                    { opacity: 1, y: 0, scale: 1, duration: .55, stagger: .07, ease: 'back.out(1.3)' }
+                ), start: 'top 90%'
             });
         }
 
-        /* ══ Navbar ══ */
-        function initNavbar() {
-            const n = document.getElementById('navbar');
-            window.addEventListener('scroll', () => n.classList.toggle('scrolled', window.scrollY > 60));
-            // FAB
-            const fab = document.getElementById('fab');
-            window.addEventListener('scroll', () => fab.classList.toggle('show', window.scrollY > 500));
-            // Smooth scroll
-            document.querySelectorAll('a[href^="#"]').forEach(a => {
-                a.addEventListener('click', e => { e.preventDefault(); const t = document.querySelector(a.getAttribute('href')); if (t) lenis.scrollTo(t, { offset: -80 }); });
-            });
+        /* ═══ Navbar + FAB ═══ */
+        function initNav() {
+            const n = document.getElementById('navbar'), fabTop = document.getElementById('fabTop');
+            window.addEventListener('scroll', () => { n.classList.toggle('scrolled', scrollY > 60); fabTop.classList.toggle('show', scrollY > 500) }, { passive: true });
         }
 
-        /* ══ Ripple ══ */
+        /* ═══ Ripple ═══ */
         function initRipple() {
-            document.addEventListener('click', e => {
-                const b = e.target.closest('.btn-v3'); if (!b) return;
-                const r = b.getBoundingClientRect(), s = document.createElement('span');
-                s.className = 'ripple-w'; const sz = Math.max(r.width, r.height);
-                s.style.width = s.style.height = sz + 'px';
-                s.style.left = (e.clientX - r.left - sz / 2) + 'px';
-                s.style.top = (e.clientY - r.top - sz / 2) + 'px';
-                b.appendChild(s); setTimeout(() => s.remove(), 600);
-            });
+            document.addEventListener('click', e => { const b = e.target.closest('.btn-v3'); if (!b) return; const r = b.getBoundingClientRect(), s = document.createElement('span'); s.className = 'rip'; const sz = Math.max(r.width, r.height); s.style.width = s.style.height = sz + 'px'; s.style.left = (e.clientX - r.left - sz / 2) + 'px'; s.style.top = (e.clientY - r.top - sz / 2) + 'px'; b.appendChild(s); setTimeout(() => s.remove(), 550) });
         }
 
-        /* ══ Particles (lightweight custom) ══ */
-        function initParticles() {
-            const c = document.getElementById('particles-canvas'), ctx = c.getContext('2d');
-            let w, h, particles = [];
-            function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight }
-            resize(); window.addEventListener('resize', resize);
-            const count = window.innerWidth < 768 ? 25 : 50;
-            for (let i = 0; i < count; i++) {
-                particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5 + .3, dx: (Math.random() - .5) * .3, dy: (Math.random() - .5) - .15, o: Math.random() * .4 + .1 });
-            }
-            function draw() {
-                ctx.clearRect(0, 0, w, h);
-                particles.forEach(p => {
-                    p.x += p.dx; p.y += p.dy;
-                    if (p.y < -10) p.y = h + 10; if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(218,165,32,${p.o})`; ctx.fill();
-                });
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
-
-        /* ══ Typed.js ══ */
-        function initTyped() {
-            new Typed('#typed-el', { strings: ['دروس محققة شرعياً...', 'تحليل بالذكاء الاصطناعي...', 'فوائد ودروس مستفادة...', 'شخصيات وأحداث تاريخية...'], typeSpeed: 40, backSpeed: 25, backDelay: 2000, loop: true, showCursor: true, cursorChar: '|' });
-        }
-
-        /* ══ Load Data ══ */
+        /* ═══ Load Data ═══ */
         async function loadData() {
-            try {
-                const r = await fetch(CFG.api); if (!r.ok) throw new Error(r.status);
-                const d = await r.json();
-                renderStats(d.stats); renderCats(d.categories); renderLes(d.lessons); renderSh(d.sheikhs); renderLatest(d.lessons);
-            } catch (e) { console.error('❌', e) }
+            try { const r = await fetch(CFG.api); if (!r.ok) throw new Error(r.status); const d = await r.json(); renderStats(d.stats); renderCats(d.categories); renderLes(d.lessons); renderSh(d.sheikhs); renderLatest(d.lessons) } catch (e) { console.error('❌', e) }
         }
 
-        /* ══ Stats + CountUp ══ */
-        function renderStats(s) {
-            doCount('sLessons', s.lessons); doCount('sCategories', s.categories); doCount('sSheikhs', s.sheikhs);
-        }
+        /* ═══ Stats ═══ */
+        function renderStats(s) { doCount('sL', s.lessons); doCount('sC', s.categories); doCount('sS', s.sheikhs) }
         function doCount(id, val) {
             const el = document.getElementById(id); if (!el) return;
-            if (val === 0) { el.textContent = CFG.stats.zeroText; el.style.fontSize = '1.4rem'; return; }
-            const obs = new IntersectionObserver(entries => {
-                if (entries[0].isIntersecting) {
-                    try {
-                        const cu = new countUp.CountUp(id, val, { duration: 2.5, suffix: '+', useGrouping: true, enableScrollSpy: false });
-                        if (!cu.error) cu.start(); else el.textContent = val + '+';
-                    } catch (e) { el.textContent = val + '+'; }
-                    obs.disconnect();
-                }
-            }, { threshold: .5 });
+            if (val === 0) { el.textContent = CFG.zeroText; el.style.fontSize = '1.3rem'; return }
+            const obs = new IntersectionObserver(entries => { if (entries[0].isIntersecting) { let cur = 0; const step = Math.max(1, val / 60); const timer = setInterval(() => { cur += step; if (cur >= val) { el.textContent = val + '+'; clearInterval(timer) } else el.textContent = Math.floor(cur) }, 25); obs.disconnect() } }, { threshold: .5 });
             obs.observe(el);
         }
 
-        /* ══ Categories ══ */
+        /* ═══ Categories ═══ */
         function renderCats(cats) {
-            const g = document.getElementById('catGrid'); if (!g || !cats.length) { if (g) g.innerHTML = '<p class="text-center" style="color:var(--text-2)">لا توجد أقسام</p>'; return; }
+            const g = document.getElementById('catGrid'); if (!g || !cats.length) { if (g) g.innerHTML = '<p class="text-center" style="color:var(--text-2)">لا توجد أقسام</p>'; return }
             const ic = ['📖', '🕌', '🤲', '📿', '🌙', '⭐'];
-            g.innerHTML = cats.slice(0, CFG.cat.limit).map((c, i) => {
-                const cl = c.color || '#DAA520'; const fa = c.icon && c.icon.startsWith('fa');
+            g.innerHTML = cats.slice(0, CFG.catLimit).map((c, i) => {
+                const cl = c.color || '#C9A961'; const fa = c.icon && c.icon.startsWith('fa');
                 const icon = fa ? `<i class="${c.icon}" style="color:${cl}"></i>` : (c.icon || ic[i] || '📁');
-                return `<div class="col-6 col-md-4 col-lg-2"><div class="gc cat-card" style="--card-glow:${cl}40" onclick="location.href='/website'"><div class="cat-icon-wrap" style="background:${cl}12;border-color:${cl}25">${icon}</div><div class="cat-name">${c.name}</div><div class="cat-count">${c.lessonCount || 0} درس</div></div></div>`;
-            }).join('');
-            animCards('#catGrid .gc');
+                return `<div class="col-6 col-md-4 col-lg-2"><div class="gc cat-card" style="--card-glow:${cl}35" onclick="location.href='/website'"><div class="cat-icon-w" style="background:${cl}10;border-color:${cl}20">${icon}</div><div class="cat-name">${c.name}</div><div class="cat-cnt">${c.lessonCount || 0} درس</div></div></div>`;
+            }).join(''); animCards('#catGrid .gc');
         }
 
-        /* ══ Lessons ══ */
+        /* ═══ Lessons ═══ */
         function renderLes(les) {
             const g = document.getElementById('lesGrid'); if (!g) return;
-            if (!les.length) { g.innerHTML = '<p class="text-center" style="color:var(--text-2)">لا توجد دروس</p>'; return; }
-            g.innerHTML = les.slice(0, CFG.les.limit).map(l => {
+            if (!les.length) { g.innerHTML = '<p class="text-center" style="color:var(--text-2)">لا توجد دروس</p>'; return }
+            g.innerHTML = les.slice(0, CFG.lesLimit).map(l => {
                 const d = new Date(l.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-                return `<div class="gc lesson-card" onclick="location.href='/website'"><div class="lesson-title"><i class="fa-solid fa-book-quran"></i>${l.title}</div><div class="lesson-meta"><span class="lesson-sheikh"><i class="fa-solid fa-user-tie"></i> ${l.sheikhName}</span><span class="lesson-date"><i class="fa-regular fa-calendar"></i> ${d}</span></div></div>`;
-            }).join('');
-            animCards('#lesGrid .gc');
+                return `<div class="gc les-card" onclick="location.href='/website'"><div class="les-title"><i class="fa-solid fa-book-quran"></i>${l.title}</div><div class="les-meta"><span class="les-sheikh"><i class="fa-solid fa-user-tie"></i> ${l.sheikhName}</span><span class="les-date"><i class="fa-regular fa-calendar"></i> ${d}</span></div></div>`;
+            }).join(''); animCards('#lesGrid .gc');
         }
 
-        /* ══ Sheikhs ══ */
+        /* ═══ Sheikhs ═══ */
         function renderSh(sh) {
             const g = document.getElementById('shGrid'); if (!g) return;
-            if (!sh.length) { g.innerHTML = '<p class="text-center" style="color:var(--text-2)">لا يوجد شيوخ</p>'; return; }
-            g.innerHTML = sh.slice(0, CFG.sh.limit).map(s => {
-                const img = s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a2a1a&color=DAA520&size=160&font-size=0.38&bold=true`;
-                const fb = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a2a1a&color=DAA520&size=160`;
-                return `<div class="col-6 col-md-3"><div class="gc sheikh-card" onclick="location.href='/website'"><div class="sheikh-av-wrap"><img src="${img}" alt="${s.name}" class="sheikh-av" loading="lazy" onerror="this.src='${fb}'"></div><div class="sheikh-name">${s.name}</div><div class="sheikh-cnt"><i class="fa-solid fa-book"></i> ${s.lessonCount || 0} درس</div></div></div>`;
-            }).join('');
-            animCards('#shGrid .gc');
+            if (!sh.length) { g.innerHTML = '<p class="text-center" style="color:var(--text-2)">لا يوجد شيوخ</p>'; return }
+            g.innerHTML = sh.slice(0, CFG.shLimit).map(s => {
+                const img = s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a3a2a&color=C9A961&size=140&font-size=0.38&bold=true`;
+                const fb = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a3a2a&color=C9A961&size=140`;
+                return `<div class="col-6 col-md-3"><div class="gc sh-card" onclick="location.href='/website'"><div class="sh-av-w"><img src="${img}" alt="${s.name}" class="sh-av" loading="lazy" onerror="this.src='${fb}'"></div><div class="sh-name">${s.name}</div><div class="sh-cnt"><i class="fa-solid fa-book"></i> ${s.lessonCount || 0} درس</div></div></div>`;
+            }).join(''); animCards('#shGrid .gc');
         }
 
-        /* ══ Hero Latest ══ */
+        /* ═══ Hero Latest ═══ */
         function renderLatest(les) {
-            const el = document.getElementById('typed-el');
-            if (!les.length || !el) return;
-            // already handled by typed.js
+            const el = document.getElementById('heroLatest'); if (!el || !les.length) return;
+            const l = les[0], diff = Date.now() - new Date(l.createdAt).getTime();
+            const m = Math.floor(diff / 60000), h = Math.floor(diff / 3600000), d = Math.floor(diff / 86400000);
+            let t; if (m < 60) t = `منذ ${m} دقيقة`; else if (h < 24) t = `منذ ${h} ساعة`; else t = `منذ ${d} يوم`;
+            el.innerHTML = `<i class="fa-solid fa-sparkles"></i> آخر درس: "${l.title}" — ${t}`;
         }
     </script>
 </body>
