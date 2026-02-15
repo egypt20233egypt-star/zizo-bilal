@@ -1307,35 +1307,9 @@
                 class="fa-solid fa-arrow-up"></i></a>
     </div>
 
-    <!-- Bottom Navigation (Always visible - Responsive) -->
+    <!-- Bottom Navigation (ديناميكي - يتحمل من API) -->
     <nav class="bottom-nav" id="bottomNav">
-        <a href="#hero" class="bnav-item" data-priority="high">
-            <i class="fa-solid fa-house"></i>
-            <span>الرئيسية</span>
-        </a>
-        <a href="#categories" class="bnav-item" data-priority="high">
-            <i class="fa-solid fa-folder-open"></i>
-            <span>الأقسام</span>
-        </a>
-        <div class="bnav-center">
-            <a href="/website" target="_blank" class="bnav-center-btn" title="تصفح الكل">
-                <i class="fa-solid fa-book-open"></i>
-            </a>
-        </div>
-        <a href="#lessons" class="bnav-item" data-priority="high">
-            <i class="fa-solid fa-book-quran"></i>
-            <span>الدروس</span>
-        </a>
-        <a href="#sheikhs" class="bnav-item" data-priority="low">
-            <i class="fa-solid fa-user-tie"></i>
-            <span>الشيوخ</span>
-        </a>
-        <!-- More button (appears on small screens - JS fills overflow dynamically) -->
-        <button class="bnav-more" id="bnavMore" onclick="toggleOverflow()">
-            <i class="fa-solid fa-chevron-up"></i>
-            <span>المزيد</span>
-            <div class="bnav-overflow" id="bnavOverflow"></div>
-        </button>
+        <!-- JS will populate this from /api/public/nav -->
     </nav>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -1366,15 +1340,15 @@
             });
         }
 
-        /* ═══ Navbar + FAB + Bottom Nav ═══ */
+        /* ═══ Navbar + FAB + Bottom Nav (ديناميكي) ═══ */
         function toggleOverflow() {
             const btn = document.getElementById('bnavMore');
             const ov = document.getElementById('bnavOverflow');
-            btn.classList.toggle('open');
-            ov.classList.toggle('show');
+            if (btn && ov) { btn.classList.toggle('open'); ov.classList.toggle('show'); }
         }
         function buildOverflow() {
             const ov = document.getElementById('bnavOverflow');
+            if (!ov) return;
             ov.innerHTML = '';
             document.querySelectorAll('#bottomNav > .bnav-item').forEach(item => {
                 if (getComputedStyle(item).display === 'none') {
@@ -1388,21 +1362,66 @@
                 }
             });
         }
+        async function loadBottomNav() {
+            try {
+                const res = await fetch('/api/public/nav');
+                const items = await res.json();
+                const nav = document.getElementById('bottomNav');
+                if (!nav || !items.length) return;
+                nav.innerHTML = '';
+                let hasHiddenItems = false;
+                items.forEach(item => {
+                    if (item.type === 'center') {
+                        const div = document.createElement('div');
+                        div.className = 'bnav-center';
+                        const a = document.createElement('a');
+                        a.href = item.href;
+                        a.className = 'bnav-center-btn';
+                        a.title = item.label;
+                        if (item.target === '_blank') a.target = '_blank';
+                        a.innerHTML = `<i class="${item.icon}"></i>`;
+                        div.appendChild(a);
+                        nav.appendChild(div);
+                    } else {
+                        const a = document.createElement('a');
+                        a.href = item.href;
+                        a.className = 'bnav-item';
+                        a.setAttribute('data-priority', item.priority || 'high');
+                        if (item.target === '_blank') a.target = '_blank';
+                        a.innerHTML = `<i class="${item.icon}"></i><span>${item.label}</span>`;
+                        nav.appendChild(a);
+                        if (item.priority !== 'high') hasHiddenItems = true;
+                    }
+                });
+                if (hasHiddenItems) {
+                    const btn = document.createElement('button');
+                    btn.className = 'bnav-more';
+                    btn.id = 'bnavMore';
+                    btn.onclick = toggleOverflow;
+                    btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i><span>المزيد</span>';
+                    const ov = document.createElement('div');
+                    ov.className = 'bnav-overflow';
+                    ov.id = 'bnavOverflow';
+                    btn.appendChild(ov);
+                    nav.appendChild(btn);
+                }
+                buildOverflow();
+                window.addEventListener('resize', buildOverflow);
+            } catch (err) {
+                console.error('❌ Failed to load nav:', err);
+            }
+        }
         function initNav() {
             const n = document.getElementById('navbar'), fabTop = document.getElementById('fabTop');
-            const sections = ['hero', 'categories', 'lessons', 'sheikhs'];
-            // Build overflow on resize
-            buildOverflow();
-            window.addEventListener('resize', () => { buildOverflow(); });
+            loadBottomNav();
             window.addEventListener('scroll', () => {
                 n.classList.toggle('scrolled', scrollY > 60);
                 fabTop.classList.toggle('show', scrollY > 500);
-                // Active section tracking
+                const sections = ['hero', 'categories', 'lessons', 'sheikhs'];
                 let cur = 'hero';
                 sections.forEach(id => { const el = document.getElementById(id); if (el && scrollY >= el.offsetTop - 200) cur = id; });
                 document.querySelectorAll('.bnav-item[href^="#"]').forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
             }, { passive: true });
-            // Close overflow when clicking outside
             document.addEventListener('click', e => {
                 if (!e.target.closest('.bnav-more')) {
                     document.getElementById('bnavMore')?.classList.remove('open');

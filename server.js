@@ -90,6 +90,7 @@ app.use('/api/lessons', requireAuth, require('./routes/lessons'));
 app.use('/api/sections', requireAuth, require('./routes/sections')); // Section Registry API
 app.use('/api/sheikhs', requireAuth, require('./routes/sheikhs')); // Sheikhs API
 app.use('/api/categories', requireAuth, require('./routes/categories')); // Categories API (هرمي)
+app.use('/api/nav-items', requireAuth, require('./routes/navItems')); // Nav Items API (Bottom Nav)
 
 // Public API routes (بدون auth - للصفحة الرئيسية)
 app.use('/api/public', require('./routes/public'));

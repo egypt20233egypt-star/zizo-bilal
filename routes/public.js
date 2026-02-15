@@ -99,4 +99,32 @@ router.get('/landing', async (req, res) => {
     }
 });
 
+// ============ GET /api/public/nav ============
+// أيقونات الشريط السفلي (بدون auth - للصفحة الرئيسية)
+let navCache = null;
+let navCacheTime = 0;
+const NAV_CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
+
+router.get('/nav', async (req, res) => {
+    try {
+        const now = Date.now();
+        if (navCache && (now - navCacheTime) < NAV_CACHE_DURATION) {
+            return res.json(navCache);
+        }
+
+        const NavItem = require('../models/NavItem');
+        const items = await NavItem.find({ isActive: true })
+            .sort({ order: 1 })
+            .select('label icon href target type priority order')
+            .lean();
+
+        navCache = items;
+        navCacheTime = now;
+        res.json(items);
+    } catch (error) {
+        console.error('❌ Public Nav Error:', error);
+        res.status(500).json({ error: 'فشل جلب القائمة' });
+    }
+});
+
 module.exports = router;

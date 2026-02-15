@@ -3420,6 +3420,7 @@
                 <button class="tab" onclick="showTab('sheikhs')"><i class="fa-solid fa-user"></i> الشيوخ</button>
                 <button class="tab" onclick="showTab('lessons')"><i class="fa-solid fa-book-quran"></i> الدروس</button>
                 <button class="tab" onclick="showTab('addLesson')"><i class="fa-solid fa-plus"></i> إضافة درس</button>
+                <button class="tab" onclick="showTab('navItems')"><i class="fa-solid fa-bars"></i> شريط التنقل</button>
                 <button class="tab" onclick="showTab('preview')"><i class="fa-solid fa-eye"></i> معاينة</button>
             </div>
 
@@ -3715,6 +3716,135 @@
                     </button>
                 </div>
             </div>
+            <!-- ============ Nav Items Panel (شريط التنقل السفلي) ============ -->
+            <div id="navItems" class="panel">
+                <h2><i class="fa-solid fa-bars" style="color: var(--gold)"></i> إدارة شريط التنقل</h2>
+                <div class="alert" style="background: rgba(237,186,38,.1); border-color: rgba(237,186,38,.3);">
+                    <i class="fa-solid fa-circle-info"></i> تحكم في أيقونات الشريط السفلي اللي بيظهر في الصفحة الرئيسية.
+                    أضف، عدل، احذف، أو غير الترتيب.
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display:flex; gap:10px; margin-bottom:1.5rem; flex-wrap:wrap;">
+                    <button class="btn" style="background:var(--accent); color:#000; font-weight:700;"
+                        onclick="openNavModal()">
+                        <i class="fa-solid fa-plus"></i> إضافة أيقونة
+                    </button>
+                    <button class="btn" style="background:var(--bg-elevated);" onclick="saveNavOrder()">
+                        <i class="fa-solid fa-arrows-up-down"></i> حفظ الترتيب
+                    </button>
+                    <button class="btn" style="background:var(--bg-elevated);" onclick="loadNavItems()">
+                        <i class="fa-solid fa-rotate"></i> تحديث
+                    </button>
+                </div>
+
+                <!-- Live Preview Bar -->
+                <div style="margin-bottom:1.5rem;">
+                    <h4 style="color:var(--gold); margin-bottom:10px;"><i class="fa-solid fa-eye"></i> معاينة حية</h4>
+                    <div id="navPreviewBar"
+                        style="display:flex; justify-content:center; align-items:stretch; gap:0; padding:10px; background:linear-gradient(180deg,rgba(8,14,26,.96) 0%,rgba(4,8,16,.99) 100%); border-radius:16px; border:1px solid rgba(237,186,38,.1); box-shadow:0 -4px 30px rgba(0,0,0,.5); min-height:60px;">
+                        <!-- JS fills this -->
+                    </div>
+                </div>
+
+                <!-- Items List -->
+                <div id="navItemsList" style="display:flex; flex-direction:column; gap:8px;">
+                    <div class="alert">جاري تحميل الأيقونات...</div>
+                </div>
+            </div>
+
+            <!-- Nav Item Modal -->
+            <div class="modal fade" id="navItemModal" tabindex="-1" data-bs-theme="dark">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content"
+                        style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:16px;">
+                        <div class="modal-header" style="border-bottom:1px solid var(--border);">
+                            <h5 class="modal-title" id="navModalTitle" style="color:var(--gold);"><i
+                                    class="fa-solid fa-plus"></i> إضافة أيقونة</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
+                            <!-- Label -->
+                            <div class="mb-3">
+                                <label class="form-label">الاسم (الظاهر تحت الأيقونة)</label>
+                                <input type="text" class="form-control" id="navLabel" placeholder="مثال: الرئيسية"
+                                    maxlength="20" oninput="updateNavModalPreview()">
+                            </div>
+
+                            <!-- Icon Picker -->
+                            <div class="mb-3">
+                                <label class="form-label">اختر أيقونة</label>
+                                <div id="iconGrid"
+                                    style="display:grid; grid-template-columns:repeat(8,1fr); gap:6px; max-height:180px; overflow-y:auto; background:rgba(0,0,0,.3); padding:10px; border-radius:10px; margin-bottom:8px;">
+                                    <!-- JS fills icons -->
+                                </div>
+                                <input type="text" class="form-control" id="navIcon"
+                                    placeholder="أو اكتب: fa-solid fa-house" dir="ltr"
+                                    oninput="updateNavModalPreview()">
+                            </div>
+
+                            <!-- Href -->
+                            <div class="mb-3">
+                                <label class="form-label">الرابط</label>
+                                <input type="text" class="form-control" id="navHref"
+                                    placeholder="مثال: #hero أو /website" dir="ltr">
+                            </div>
+
+                            <!-- Type + Priority + Target (compact row) -->
+                            <div class="row g-2 mb-3">
+                                <div class="col-4">
+                                    <label class="form-label">النوع</label>
+                                    <select class="form-select" id="navType" onchange="updateNavModalPreview()">
+                                        <option value="link">عادي</option>
+                                        <option value="center">مركزي (ذهبي)</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label">الأولوية</label>
+                                    <select class="form-select" id="navPriority">
+                                        <option value="high">عالية (دائماً)</option>
+                                        <option value="med">متوسطة</option>
+                                        <option value="low">منخفضة</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label">الفتح</label>
+                                    <select class="form-select" id="navTarget">
+                                        <option value="_self">نفس التاب</option>
+                                        <option value="_blank">تاب جديد</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Active toggle -->
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="navActive" checked>
+                                <label class="form-check-label" for="navActive">مفعّل</label>
+                            </div>
+
+                            <!-- Modal Preview -->
+                            <div style="background:#080e1a; border-radius:12px; padding:16px;">
+                                <p style="margin:0 0 10px; color:#888; font-size:.75rem;">معاينة في الشريط:</p>
+                                <div
+                                    style="display:flex; justify-content:center; padding:12px; background:rgba(8,14,26,.96); border-radius:14px; border:1px solid rgba(237,186,38,.1);">
+                                    <div id="navModalPreview"
+                                        style="display:flex; flex-direction:column; align-items:center; gap:4px; color:rgba(237,186,38,.8); font-size:.68rem;">
+                                        <i class="fa-solid fa-question" style="font-size:1.2rem;"></i>
+                                        <span>أيقونة</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border-top:1px solid var(--border);">
+                            <button type="button" class="btn" data-bs-dismiss="modal">إلغاء</button>
+                            <button type="button" class="btn"
+                                style="background:var(--accent); color:#000; font-weight:700;" onclick="saveNavItem()">
+                                <i class="fa-solid fa-check"></i> حفظ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Preview Panel -->
             <div id="preview" class="panel">
@@ -3933,6 +4063,7 @@
             // 3. Load data if needed
             if (tabId === 'preview') updatePreviewSelect();
             if (tabId === 'categories') loadCategories(currentParentId);
+            if (tabId === 'navItems') loadNavItems();
         }
 
         // ============ Sections ============
@@ -6064,6 +6195,258 @@
                 fabContainer.style.opacity = window.scrollY > 100 ? '1' : '0.6';
             }
         });
+
+        // ============ Nav Items Management (شريط التنقل) ============
+        let navItemsData = [];
+        let editingNavId = null;
+
+        // أيقونات شائعة للـ Icon Picker
+        const popularIcons = [
+            'fa-house', 'fa-folder-open', 'fa-book-open', 'fa-book-quran',
+            'fa-user-tie', 'fa-mosque', 'fa-star', 'fa-heart',
+            'fa-magnifying-glass', 'fa-gear', 'fa-bell', 'fa-user',
+            'fa-calendar', 'fa-pen', 'fa-comment', 'fa-share',
+            'fa-circle-play', 'fa-headphones', 'fa-microphone', 'fa-video',
+            'fa-globe', 'fa-link', 'fa-bookmark', 'fa-clock',
+            'fa-moon', 'fa-sun', 'fa-hands-praying', 'fa-kaaba',
+            'fa-graduation-cap', 'fa-lightbulb', 'fa-trophy', 'fa-fire'
+        ];
+
+        function renderIconPicker(selectedIcon) {
+            const grid = document.getElementById('iconGrid');
+            if (!grid) return;
+            grid.innerHTML = popularIcons.map(icon => {
+                const fullClass = 'fa-solid ' + icon;
+                const isSelected = selectedIcon === fullClass;
+                return `<button type="button" onclick="selectNavIcon('${fullClass}')"
+                    style="width:38px;height:38px;background:${isSelected ? 'rgba(237,186,38,.3)' : 'rgba(255,255,255,.05)'};border:1px solid ${isSelected ? 'rgba(237,186,38,.5)' : 'rgba(255,255,255,.1)'};border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;"
+                    onmouseover="this.style.background='rgba(237,186,38,.2)'"
+                    onmouseout="this.style.background='${isSelected ? 'rgba(237,186,38,.3)' : 'rgba(255,255,255,.05)'}'"
+                    title="${icon}">
+                    <i class="${fullClass}" style="color:#EDBA26;font-size:1.1rem;"></i>
+                </button>`;
+            }).join('');
+        }
+
+        function selectNavIcon(iconClass) {
+            document.getElementById('navIcon').value = iconClass;
+            renderIconPicker(iconClass);
+            updateNavModalPreview();
+        }
+
+        function updateNavModalPreview() {
+            const icon = document.getElementById('navIcon')?.value || 'fa-solid fa-question';
+            const label = document.getElementById('navLabel')?.value || 'أيقونة';
+            const type = document.getElementById('navType')?.value || 'link';
+            const preview = document.getElementById('navModalPreview');
+            if (!preview) return;
+
+            if (type === 'center') {
+                preview.style.cssText = 'width:52px;height:52px;background:linear-gradient(135deg,#EDBA26,#F5D245);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(237,186,38,.4);';
+                preview.innerHTML = `<i class="${icon}" style="font-size:1.4rem;color:#1a1a1a;"></i>`;
+            } else {
+                preview.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;color:rgba(237,186,38,.8);font-size:.68rem;';
+                preview.innerHTML = `<i class="${icon}" style="font-size:1.2rem;"></i><span>${label}</span>`;
+            }
+        }
+
+        async function loadNavItems() {
+            try {
+                const res = await fetch('/api/nav-items');
+                if (!res.ok) throw new Error('خطأ في الجلب');
+                navItemsData = await res.json();
+                renderNavItems();
+                updateNavPreviewBar();
+            } catch (err) {
+                console.error('❌ Load NavItems Error:', err);
+                document.getElementById('navItemsList').innerHTML =
+                    '<div class="alert" style="color:var(--danger);">❌ فشل تحميل الأيقونات</div>';
+            }
+        }
+
+        function renderNavItems() {
+            const list = document.getElementById('navItemsList');
+            if (!navItemsData.length) {
+                list.innerHTML = '<div class="alert">لا توجد أيقونات. اضغط "إضافة أيقونة" أو شغل: node scripts/seed_nav.js</div>';
+                return;
+            }
+            list.innerHTML = navItemsData.map((item, idx) => `
+                <div class="nav-item-row" data-id="${item._id}" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-elevated);border-radius:12px;border:1px solid var(--border);transition:all .2s;">
+                    <!-- Drag Handle -->
+                    <span style="cursor:grab;color:var(--text-secondary);font-size:1.1rem;" title="اسحب للترتيب">
+                        <i class="fa-solid fa-grip-vertical"></i>
+                    </span>
+                    <!-- Icon Preview -->
+                    <div style="width:44px;height:44px;border-radius:${item.type === 'center' ? '50%' : '10px'};background:${item.type === 'center' ? 'linear-gradient(135deg,#EDBA26,#F5D245)' : 'rgba(237,186,38,.1)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="${item.icon}" style="font-size:1.2rem;color:${item.type === 'center' ? '#1a1a1a' : '#EDBA26'};"></i>
+                    </div>
+                    <!-- Info -->
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;color:var(--text-primary);font-size:.95rem;">${item.label}</div>
+                        <div style="font-size:.75rem;color:var(--text-secondary);direction:ltr;text-align:right;">${item.href} · ${item.type === 'center' ? '🔵 مركزي' : '⚪ عادي'} · ${item.priority === 'high' ? '🟢 عالية' : item.priority === 'med' ? '🟡 متوسطة' : '🔴 منخفضة'}</div>
+                    </div>
+                    <!-- Status -->
+                    <span style="font-size:.8rem;padding:4px 10px;border-radius:20px;background:${item.isActive ? 'rgba(46,204,113,.15)' : 'rgba(231,76,60,.15)'};color:${item.isActive ? '#2ecc71' : '#e74c3c'};">${item.isActive ? 'مفعّل' : 'معطّل'}</span>
+                    <!-- Move buttons -->
+                    <div style="display:flex;flex-direction:column;gap:2px;">
+                        <button onclick="moveNavItem(${idx},-1)" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:2px 6px;font-size:.8rem;" ${idx === 0 ? 'disabled' : ''}>
+                            <i class="fa-solid fa-chevron-up"></i>
+                        </button>
+                        <button onclick="moveNavItem(${idx},1)" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:2px 6px;font-size:.8rem;" ${idx === navItemsData.length - 1 ? 'disabled' : ''}>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <!-- Actions -->
+                    <button class="btn" style="padding:6px 12px;font-size:.85rem;" onclick="openNavModal('${item._id}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn" style="padding:6px 12px;font-size:.85rem;color:var(--danger);" onclick="deleteNavItem('${item._id}','${item.label}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateNavPreviewBar() {
+            const bar = document.getElementById('navPreviewBar');
+            if (!bar) return;
+            const activeItems = navItemsData.filter(i => i.isActive);
+            if (!activeItems.length) {
+                bar.innerHTML = '<span style="color:var(--text-secondary);font-size:.85rem;">لا توجد أيقونات مفعّلة</span>';
+                return;
+            }
+            bar.innerHTML = activeItems.map(item => {
+                if (item.type === 'center') {
+                    return `<div style="padding:0 16px;display:flex;align-items:center;">
+                        <div style="width:52px;height:52px;background:linear-gradient(135deg,#EDBA26,#F5D245);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(237,186,38,.4);margin-top:-14px;">
+                            <i class="${item.icon}" style="font-size:1.3rem;color:#1a1a1a;"></i>
+                        </div>
+                    </div>`;
+                }
+                return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 14px;color:rgba(237,186,38,.7);font-size:.65rem;cursor:default;">
+                    <i class="${item.icon}" style="font-size:1.1rem;"></i>
+                    <span>${item.label}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function moveNavItem(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= navItemsData.length) return;
+            const temp = navItemsData[index];
+            navItemsData[index] = navItemsData[newIndex];
+            navItemsData[newIndex] = temp;
+            renderNavItems();
+            updateNavPreviewBar();
+        }
+
+        async function saveNavOrder() {
+            try {
+                const items = navItemsData.map((item, i) => ({ _id: item._id, order: i }));
+                const res = await fetch('/api/nav-items/reorder', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items })
+                });
+                if (!res.ok) throw new Error('فشل الحفظ');
+                alert('✅ تم حفظ الترتيب بنجاح!');
+            } catch (err) {
+                console.error('❌ Save order error:', err);
+                alert('❌ فشل حفظ الترتيب');
+            }
+        }
+
+        function openNavModal(id) {
+            editingNavId = id || null;
+            const modal = new bootstrap.Modal(document.getElementById('navItemModal'));
+
+            if (id) {
+                const item = navItemsData.find(i => i._id === id);
+                if (!item) return;
+                document.getElementById('navModalTitle').innerHTML = '<i class="fa-solid fa-pen"></i> تعديل أيقونة';
+                document.getElementById('navLabel').value = item.label;
+                document.getElementById('navIcon').value = item.icon;
+                document.getElementById('navHref').value = item.href;
+                document.getElementById('navType').value = item.type;
+                document.getElementById('navPriority').value = item.priority;
+                document.getElementById('navTarget').value = item.target;
+                document.getElementById('navActive').checked = item.isActive;
+                renderIconPicker(item.icon);
+            } else {
+                document.getElementById('navModalTitle').innerHTML = '<i class="fa-solid fa-plus"></i> إضافة أيقونة';
+                document.getElementById('navLabel').value = '';
+                document.getElementById('navIcon').value = '';
+                document.getElementById('navHref').value = '';
+                document.getElementById('navType').value = 'link';
+                document.getElementById('navPriority').value = 'high';
+                document.getElementById('navTarget').value = '_self';
+                document.getElementById('navActive').checked = true;
+                renderIconPicker('');
+            }
+
+            updateNavModalPreview();
+            modal.show();
+        }
+
+        async function saveNavItem() {
+            const data = {
+                label: document.getElementById('navLabel').value.trim(),
+                icon: document.getElementById('navIcon').value.trim(),
+                href: document.getElementById('navHref').value.trim(),
+                type: document.getElementById('navType').value,
+                priority: document.getElementById('navPriority').value,
+                target: document.getElementById('navTarget').value,
+                isActive: document.getElementById('navActive').checked
+            };
+
+            // Validation
+            const errors = [];
+            if (!data.label) errors.push('الاسم مطلوب');
+            if (data.label.length > 20) errors.push('الاسم طويل جداً (20 حرف max)');
+            if (!data.icon) errors.push('الأيقونة مطلوبة');
+            if (!data.icon.startsWith('fa-')) errors.push('الأيقونة لازم تبدأ بـ fa-');
+            if (!data.href) errors.push('الرابط مطلوب');
+            if (/^(javascript|data):/i.test(data.href)) errors.push('⚠️ رابط غير آمن');
+
+            if (errors.length) {
+                alert('⚠️ أخطاء:\n' + errors.map(e => '• ' + e).join('\n'));
+                return;
+            }
+
+            try {
+                const url = editingNavId ? `/api/nav-items/${editingNavId}` : '/api/nav-items';
+                const method = editingNavId ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (!res.ok) {
+                    alert('❌ ' + (result.error || 'فشل الحفظ'));
+                    return;
+                }
+                bootstrap.Modal.getInstance(document.getElementById('navItemModal'))?.hide();
+                alert('✅ تم الحفظ بنجاح!');
+                loadNavItems();
+            } catch (err) {
+                console.error('❌ Save NavItem error:', err);
+                alert('❌ فشل الحفظ');
+            }
+        }
+
+        async function deleteNavItem(id, label) {
+            if (!confirm(`🗑️ حذف "${label}" من الشريط؟`)) return;
+            try {
+                const res = await fetch(`/api/nav-items/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('فشل الحذف');
+                alert('✅ تم الحذف');
+                loadNavItems();
+            } catch (err) {
+                console.error('❌ Delete error:', err);
+                alert('❌ فشل الحذف');
+            }
+        }
     </script>
 
     <!-- Bootstrap 5 JS Bundle -->
