@@ -91,6 +91,9 @@ app.use('/api/sections', requireAuth, require('./routes/sections')); // Section 
 app.use('/api/sheikhs', requireAuth, require('./routes/sheikhs')); // Sheikhs API
 app.use('/api/categories', requireAuth, require('./routes/categories')); // Categories API (هرمي)
 
+// Public API routes (بدون auth - للصفحة الرئيسية)
+app.use('/api/public', require('./routes/public'));
+
 // ============ Page Routes ============
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -101,14 +104,9 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin_v4.html')); // صفحة Login
 });
 
-// Admin Panel (محمي)
+// Admin Panel (محمي) - admin_panel_v4_merged.html فقط
 app.get('/admin/panel', requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'admin_panel_v4_merged.html'));
-});
-
-// Admin Panel v5 (Modern UI)
-app.get('/admin/panel', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin_panel_v5.html'));
 });
 
 app.get('/website', (req, res) => {
@@ -137,6 +135,7 @@ app.get('/api/status', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🏠 Landing: http://localhost:${PORT}/`);
     console.log(`📊 Admin: http://localhost:${PORT}/admin`);
     console.log(`🌐 Website: http://localhost:${PORT}/website`);
     console.log(`🔌 API: http://localhost:${PORT}/api/lessons`);
