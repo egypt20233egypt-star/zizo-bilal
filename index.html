@@ -15,24 +15,34 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap"
         rel="stylesheet">
+    <!-- GSAP (أقوى مكتبة animation) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
     <style>
         /* ═══════════════════════════════════════
-           CSS Variables (سهل التعديل)
+           CSS Variables
            ═══════════════════════════════════════ */
         :root {
-            --dark-bg: #0a0a1a;
-            --dark-bg2: #0f0f24;
-            --dark-bg3: #1a1a2e;
+            --dark-1: #06060f;
+            --dark-2: #0c0c1d;
+            --dark-3: #13132b;
+            --dark-4: #1a1a3e;
             --gold: #DAA520;
             --gold-light: #FFD700;
-            --gold-glow: rgba(218, 165, 32, 0.3);
-            --glass: rgba(255, 255, 255, 0.04);
-            --glass-hover: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f0f0f0;
-            --text-muted: #8b8b9e;
-            --radius: 20px;
+            --gold-soft: #F0C850;
+            --gold-glow: rgba(218, 165, 32, 0.25);
+            --gold-glow-strong: rgba(218, 165, 32, 0.45);
+            --purple: #6C5CE7;
+            --purple-glow: rgba(108, 92, 231, 0.2);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-hover: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-border-hover: rgba(218, 165, 32, 0.25);
+            --text: #EAEAF5;
+            --text-dim: #7B7BA0;
+            --radius: 24px;
+            --radius-sm: 16px;
         }
 
         * {
@@ -41,11 +51,16 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Tajawal', sans-serif;
-            background: var(--dark-bg);
-            color: var(--text-main);
+            background: var(--dark-1);
+            color: var(--text);
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         h1,
@@ -61,57 +76,85 @@
         }
 
         /* ═══════════════════════════════════════
-           Glassmorphism Card
+           Glassmorphism Cards (v3)
            ═══════════════════════════════════════ */
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius);
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Gradient border on hover */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            padding: 1px;
+            background: linear-gradient(135deg, transparent 30%, var(--gold-glow), transparent 70%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
 
         .glass-card:hover {
             background: var(--glass-hover);
-            transform: translateY(-8px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-            border-color: rgba(218, 165, 32, 0.3);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.5),
+                0 0 40px var(--card-glow, var(--gold-glow));
+            border-color: var(--glass-border-hover);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
         }
 
         /* ═══════════════════════════════════════
-           Navbar
+           Navbar (Premium)
            ═══════════════════════════════════════ */
-        .navbar-landing {
+        .navbar-premium {
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 1000;
-            padding: 16px 0;
-            background: rgba(10, 10, 26, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            transition: all 0.3s;
+            padding: 18px 0;
+            background: transparent;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .navbar-landing.scrolled {
+        .navbar-premium.scrolled {
             padding: 10px 0;
-            background: rgba(10, 10, 26, 0.95);
+            background: rgba(6, 6, 15, 0.92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .nav-brand {
             font-family: 'Amiri', serif;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             color: var(--gold) !important;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .nav-links a {
-            color: var(--text-muted);
-            margin: 0 14px;
-            font-size: 1rem;
+            color: var(--text-dim);
+            margin: 0 16px;
+            font-size: 0.95rem;
             font-weight: 500;
+            position: relative;
             transition: color 0.3s;
         }
 
@@ -119,8 +162,23 @@
             color: var(--gold);
         }
 
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            right: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
         /* ═══════════════════════════════════════
-           Hero Section
+           Hero Section (Premium)
            ═══════════════════════════════════════ */
         .hero {
             min-height: 100vh;
@@ -129,142 +187,193 @@
             justify-content: center;
             text-align: center;
             position: relative;
-            background: linear-gradient(160deg, var(--dark-bg) 0%, var(--dark-bg2) 40%, var(--dark-bg3) 100%);
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, var(--purple-glow) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 50%, var(--gold-glow) 0%, transparent 50%),
+                linear-gradient(180deg, var(--dark-1) 0%, var(--dark-2) 50%, var(--dark-3) 100%);
             overflow: hidden;
         }
 
-        /* خط زخرفي خفيف */
-        .hero::before {
-            content: '';
+        /* Animated gradient orbs */
+        .hero-orb {
             position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
-            opacity: 0.15;
             border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.12;
+            animation: orbFloat 8s ease-in-out infinite;
         }
 
-        .hero::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(106, 90, 205, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
+        .hero-orb-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--gold);
+            top: -15%;
+            right: -10%;
+            animation-delay: 0s;
+        }
+
+        .hero-orb-2 {
+            width: 350px;
+            height: 350px;
+            background: var(--purple);
+            bottom: -10%;
+            left: -5%;
+            animation-delay: -4s;
+        }
+
+        .hero-orb-3 {
+            width: 200px;
+            height: 200px;
+            background: var(--gold-light);
+            top: 40%;
+            left: 30%;
+            animation-delay: -2s;
+            opacity: 0.06;
+        }
+
+        @keyframes orbFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -20px) scale(1.05);
+            }
+
+            66% {
+                transform: translate(-20px, 15px) scale(0.95);
+            }
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
+            max-width: 800px;
+            padding: 0 20px;
         }
 
         .hero-icon {
-            font-size: 5rem;
+            font-size: 4.5rem;
             display: inline-block;
-            animation: heroFloat 4s ease-in-out infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes heroFloat {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-18px);
-            }
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 30px var(--gold-glow));
         }
 
         .hero-title {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-size: clamp(2.8rem, 7vw, 5rem);
             font-weight: 700;
-            color: var(--gold);
-            text-shadow: 0 0 40px var(--gold-glow);
-            line-height: 1.3;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            text-shadow: none;
+            filter: drop-shadow(0 2px 20px var(--gold-glow));
         }
 
         .hero-tagline {
-            font-size: clamp(1rem, 2.5vw, 1.5rem);
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 20px auto 10px;
-            line-height: 1.8;
+            font-size: clamp(1rem, 2.5vw, 1.35rem);
+            color: var(--text-dim);
+            max-width: 550px;
+            margin: 24px auto 12px;
+            line-height: 1.9;
         }
 
         .hero-latest {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 35px;
-            opacity: 0.7;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            opacity: 0.6;
+            margin-bottom: 36px;
+        }
+
+        .hero-latest i {
+            color: var(--gold);
         }
 
         /* ═══════════════════════════════════════
-           Ripple Button
+           Floating Buttons v3
            ═══════════════════════════════════════ */
-        .btn-ripple {
+        .btn-v3 {
             position: relative;
             overflow: hidden;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            padding: 16px 44px;
-            font-size: 1.25rem;
+            padding: 18px 48px;
+            font-size: 1.2rem;
             font-weight: 700;
             font-family: 'Tajawal', sans-serif;
             border: none;
-            border-radius: 50px;
+            border-radius: 60px;
             cursor: pointer;
-            transition: all 0.35s ease;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            letter-spacing: 0.3px;
         }
 
-        .btn-gold {
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            color: var(--dark-bg);
-            box-shadow: 0 10px 35px var(--gold-glow);
+        .btn-v3-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+            background-size: 200% 200%;
+            color: var(--dark-1);
+            box-shadow:
+                0 8px 32px var(--gold-glow),
+                0 0 0 0 var(--gold-glow-strong);
+            animation: btnGradient 3s ease infinite;
         }
 
-        .btn-gold:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 18px 50px rgba(218, 165, 32, 0.45);
-            color: var(--dark-bg);
+        @keyframes btnGradient {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
         }
 
-        .btn-outline-gold {
+        .btn-v3-gold:hover {
+            transform: translateY(-5px) scale(1.04);
+            box-shadow:
+                0 16px 48px var(--gold-glow-strong),
+                0 0 0 4px rgba(218, 165, 32, 0.15);
+            color: var(--dark-1);
+        }
+
+        .btn-v3-gold:active {
+            transform: translateY(-2px) scale(1.01);
+        }
+
+        .btn-v3-outline {
             background: transparent;
-            border: 2px solid var(--gold);
+            border: 2px solid rgba(218, 165, 32, 0.4);
             color: var(--gold);
+            box-shadow: 0 0 0 0 var(--gold-glow);
         }
 
-        .btn-outline-gold:hover {
-            background: var(--gold);
-            color: var(--dark-bg);
+        .btn-v3-outline:hover {
+            background: rgba(218, 165, 32, 0.08);
+            border-color: var(--gold);
             transform: translateY(-4px);
+            box-shadow: 0 8px 30px var(--gold-glow);
+            color: var(--gold-light);
         }
 
-        .ripple-effect {
+        /* Ripple */
+        .ripple-wave {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            animation: rippleAnim 0.6s ease-out forwards;
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(0);
+            animation: rippleExpand 0.65s ease-out forwards;
             pointer-events: none;
         }
 
-        @keyframes rippleAnim {
-            from {
-                width: 0;
-                height: 0;
-                opacity: 0.7;
-            }
-
+        @keyframes rippleExpand {
             to {
-                width: 300px;
-                height: 300px;
+                transform: scale(4);
                 opacity: 0;
             }
         }
@@ -272,20 +381,27 @@
         /* ═══════════════════════════════════════
            Section Styles
            ═══════════════════════════════════════ */
-        .section-padding {
-            padding: 90px 0;
+        .section-block {
+            padding: 100px 0;
         }
 
         .section-alt {
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.05) 100%);
+            background: linear-gradient(180deg, rgba(13, 13, 30, 0.6) 0%, rgba(6, 6, 15, 0.3) 100%);
         }
 
         .section-title {
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-size: clamp(2rem, 4.5vw, 2.8rem);
             text-align: center;
-            margin-bottom: 55px;
+            margin-bottom: 60px;
             position: relative;
-            padding-bottom: 18px;
+            padding-bottom: 20px;
+        }
+
+        .section-title span {
+            background: linear-gradient(135deg, var(--text), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .section-title::after {
@@ -294,36 +410,39 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
+            width: 60px;
             height: 3px;
             background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-radius: 2px;
         }
 
         /* ═══════════════════════════════════════
-           Stats Section
+           Stats
            ═══════════════════════════════════════ */
         .stat-card {
             text-align: center;
-            padding: 35px 20px;
+            padding: 40px 24px;
         }
 
         .stat-icon {
-            font-size: 2.8rem;
-            margin-bottom: 12px;
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            display: inline-block;
         }
 
         .stat-number {
-            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-size: clamp(2.5rem, 5vw, 3.8rem);
             font-weight: 800;
-            color: var(--gold);
-            line-height: 1.2;
+            background: linear-gradient(180deg, var(--gold), var(--gold-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .stat-label {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            margin-top: 5px;
+            font-size: 1.05rem;
+            color: var(--text-dim);
+            margin-top: 6px;
+            font-weight: 500;
         }
 
         /* ═══════════════════════════════════════
@@ -331,59 +450,85 @@
            ═══════════════════════════════════════ */
         .category-card {
             text-align: center;
-            padding: 35px 15px;
+            padding: 40px 18px;
             cursor: pointer;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        .category-card:hover {
-            box-shadow: 0 15px 40px var(--card-glow, var(--gold-glow));
+        .category-icon-wrap {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 18px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s;
         }
 
-        .category-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            transition: transform 0.4s;
-        }
-
-        .category-card:hover .category-icon {
-            transform: scale(1.2) rotate(5deg);
+        .category-card:hover .category-icon-wrap {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 0 25px var(--card-glow, var(--gold-glow));
         }
 
         .category-name {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .category-count {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--gold);
             font-weight: 500;
+            opacity: 0.8;
         }
 
         /* ═══════════════════════════════════════
            Lesson Cards
            ═══════════════════════════════════════ */
         .lesson-card {
-            padding: 25px 30px;
+            padding: 28px 32px;
             cursor: pointer;
-            border-right: 4px solid var(--gold);
+            position: relative;
             margin-bottom: 16px;
         }
 
-        .lesson-card:hover {
-            border-right-width: 6px;
+        .lesson-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--gold), var(--gold-light));
+            border-radius: 0 4px 4px 0;
+            transition: width 0.3s;
+        }
+
+        .lesson-card:hover::after {
+            width: 6px;
         }
 
         .lesson-title {
             font-size: 1.15rem;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .lesson-title i {
             color: var(--gold);
-            margin-left: 8px;
+            font-size: 1rem;
         }
 
         .lesson-meta {
@@ -391,17 +536,18 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
 
         .lesson-sheikh {
             color: var(--gold);
             font-weight: 500;
+            font-size: 0.95rem;
         }
 
         .lesson-date {
-            color: var(--text-muted);
-            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
         }
 
         /* ═══════════════════════════════════════
@@ -409,87 +555,121 @@
            ═══════════════════════════════════════ */
         .sheikh-card {
             text-align: center;
-            padding: 30px 15px;
+            padding: 35px 18px;
             cursor: pointer;
         }
 
-        .sheikh-avatar {
+        .sheikh-avatar-wrap {
+            position: relative;
             width: 130px;
             height: 130px;
+            margin: 0 auto 18px;
+        }
+
+        .sheikh-avatar {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--gold);
-            margin: 0 auto 15px;
-            display: block;
-            transition: all 0.4s;
+            border: 3px solid transparent;
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            background-image:
+                linear-gradient(var(--dark-1), var(--dark-1)),
+                linear-gradient(135deg, var(--gold), var(--purple), var(--gold));
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .sheikh-card:hover .sheikh-avatar {
             transform: scale(1.08);
-            box-shadow: 0 10px 35px var(--gold-glow);
+            box-shadow: 0 10px 40px var(--gold-glow);
+        }
+
+        /* Glow ring */
+        .sheikh-avatar-wrap::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-glow), transparent, var(--purple-glow));
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: -1;
+        }
+
+        .sheikh-card:hover .sheikh-avatar-wrap::after {
+            opacity: 1;
         }
 
         .sheikh-name {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
         }
 
         .sheikh-count {
             color: var(--gold);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             margin-top: 6px;
+            opacity: 0.85;
         }
 
         /* ═══════════════════════════════════════
            CTA Section
            ═══════════════════════════════════════ */
         .cta-section {
-            padding: 100px 0;
+            padding: 110px 0;
             text-align: center;
-            background: linear-gradient(180deg, transparent, rgba(218, 165, 32, 0.03), transparent);
+            position: relative;
+            background:
+                radial-gradient(ellipse 50% 40% at 50% 50%, var(--gold-glow) 0%, transparent 70%);
         }
 
         .cta-title {
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            color: var(--gold);
-            margin-bottom: 15px;
+            font-size: clamp(2rem, 4.5vw, 2.8rem);
+            margin-bottom: 16px;
+        }
+
+        .cta-title span {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .cta-dua {
             font-family: 'Amiri', serif;
-            font-size: 1.3rem;
-            color: var(--text-muted);
-            margin-bottom: 35px;
-            line-height: 2;
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            margin-bottom: 40px;
+            line-height: 2.2;
         }
 
         /* ═══════════════════════════════════════
            Footer
            ═══════════════════════════════════════ */
         .footer-section {
-            padding: 35px 0;
+            padding: 36px 0;
             text-align: center;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.3);
             border-top: 1px solid var(--glass-border);
         }
 
         .footer-logo {
             font-family: 'Amiri', serif;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: var(--gold);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .footer-copyright {
-            color: var(--text-muted);
-            font-size: 0.9rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
         }
 
         .footer-admin {
             display: inline-block;
-            margin-top: 10px;
-            color: #555;
-            font-size: 0.8rem;
+            margin-top: 8px;
+            color: #444;
+            font-size: 0.75rem;
             transition: color 0.3s;
         }
 
@@ -498,22 +678,25 @@
         }
 
         /* ═══════════════════════════════════════
-           Loading Skeleton
+           Skeleton Loading
            ═══════════════════════════════════════ */
         .skeleton {
-            background: linear-gradient(90deg, var(--glass) 25%, rgba(255, 255, 255, 0.08) 50%, var(--glass) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
+            background: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0.02) 0%,
+                    rgba(255, 255, 255, 0.06) 40%,
+                    rgba(255, 255, 255, 0.02) 80%);
+            background-size: 300% 100%;
+            animation: shimmer 1.8s ease-in-out infinite;
             border-radius: var(--radius);
         }
 
         @keyframes shimmer {
             0% {
-                background-position: 200% 0;
+                background-position: 300% 0;
             }
 
             100% {
-                background-position: -200% 0;
+                background-position: -300% 0;
             }
         }
 
@@ -522,8 +705,9 @@
         }
 
         .skeleton-lesson {
-            height: 90px;
+            height: 95px;
             margin-bottom: 16px;
+            border-radius: var(--radius);
         }
 
         .skeleton-circle {
@@ -534,48 +718,18 @@
         }
 
         .skeleton-text {
-            height: 20px;
-            width: 60%;
-            margin: 10px auto;
+            height: 18px;
+            width: 55%;
+            margin: 8px auto;
+            border-radius: 8px;
         }
 
         /* ═══════════════════════════════════════
-           Scroll Reveal Animation
+           GSAP Animations (initial states)
            ═══════════════════════════════════════ */
-        .reveal {
+        .gsap-fade {
             opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Staggered animation delay */
-        .stagger-1 {
-            transition-delay: 0.05s;
-        }
-
-        .stagger-2 {
-            transition-delay: 0.10s;
-        }
-
-        .stagger-3 {
-            transition-delay: 0.15s;
-        }
-
-        .stagger-4 {
-            transition-delay: 0.20s;
-        }
-
-        .stagger-5 {
-            transition-delay: 0.25s;
-        }
-
-        .stagger-6 {
-            transition-delay: 0.30s;
+            transform: translateY(40px);
         }
 
         /* ═══════════════════════════════════════
@@ -583,92 +737,123 @@
            ═══════════════════════════════════════ */
         @media (max-width: 768px) {
             .nav-links {
-                display: none;
+                display: none !important;
             }
 
-            .section-padding {
-                padding: 60px 0;
+            .section-block {
+                padding: 70px 0;
             }
 
             .stat-card {
-                padding: 25px 15px;
+                padding: 28px 16px;
             }
 
-            .sheikh-avatar {
+            .sheikh-avatar-wrap {
                 width: 100px;
                 height: 100px;
             }
 
+            .category-icon-wrap {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+
             .lesson-card {
-                padding: 20px;
+                padding: 20px 22px;
+            }
+
+            .btn-v3 {
+                padding: 14px 32px;
+                font-size: 1.05rem;
+            }
+
+            .hero-orb-1 {
+                width: 300px;
+                height: 300px;
+            }
+
+            .hero-orb-2 {
+                width: 200px;
+                height: 200px;
             }
         }
     </style>
 </head>
 
 <body>
-    <!-- ═══════════════════ Navbar ═══════════════════ -->
-    <nav class="navbar-landing" id="navbar">
+    <!-- ═══════════ Navbar ═══════════ -->
+    <nav class="navbar-premium" id="navbar">
         <div class="container d-flex justify-content-between align-items-center">
             <a href="/" class="nav-brand">🕌 عِلْمٌ يُنْتَفَعُ بِهِ</a>
-            <div class="nav-links d-none d-md-flex">
+            <div class="nav-links d-none d-md-flex align-items-center">
                 <a href="#categories">الأقسام</a>
                 <a href="#lessons">الدروس</a>
                 <a href="#sheikhs">الشيوخ</a>
-                <a href="/website">تصفح الكل</a>
+                <a href="/website" class="btn-v3 btn-v3-outline" style="padding: 8px 24px; font-size: 0.9rem;">
+                    تصفح الكل
+                </a>
             </div>
         </div>
     </nav>
 
-    <!-- ═══════════════════ Hero ═══════════════════ -->
+    <!-- ═══════════ Hero ═══════════ -->
     <section class="hero" id="hero">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+
         <div class="hero-content">
-            <div class="hero-icon">🕌</div>
-            <h1 class="hero-title">عِلْمٌ يُنْتَفَعُ بِهِ</h1>
-            <p class="hero-tagline">دروس مختارة بعناية من علماء موثوقين<br>مع تحليل ذكي لأفضل تجربة تعليمية</p>
-            <p class="hero-latest" id="heroLatest"></p>
-            <a href="/website" class="btn-ripple btn-gold" id="heroCTA">
-                <i class="fa-solid fa-book-quran"></i>
-                ابدأ التصفح
-            </a>
+            <div class="hero-icon gsap-fade">🕌</div>
+            <h1 class="hero-title gsap-fade">عِلْمٌ يُنْتَفَعُ بِهِ</h1>
+            <p class="hero-tagline gsap-fade">
+                دروس مختارة بعناية من علماء موثوقين
+                <br>مع تحليل ذكي لأفضل تجربة تعليمية
+            </p>
+            <p class="hero-latest gsap-fade" id="heroLatest"></p>
+            <div class="gsap-fade">
+                <a href="/website" class="btn-v3 btn-v3-gold">
+                    <i class="fa-solid fa-book-quran"></i>
+                    ابدأ التصفح
+                </a>
+            </div>
         </div>
     </section>
 
-    <!-- ═══════════════════ Stats ═══════════════════ -->
-    <section class="section-padding section-alt" id="statsSection">
+    <!-- ═══════════ Stats ═══════════ -->
+    <section class="section-block section-alt" id="statsSection">
         <div class="container">
             <div class="row g-4 justify-content-center">
                 <div class="col-6 col-md-4">
-                    <div class="glass-card stat-card reveal">
+                    <div class="glass-card stat-card gsap-fade">
                         <div class="stat-icon">📚</div>
                         <div class="stat-number" id="statLessons">0</div>
-                        <div class="stat-label">درس</div>
+                        <div class="stat-label">درس منشور</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4">
-                    <div class="glass-card stat-card reveal">
+                    <div class="glass-card stat-card gsap-fade">
                         <div class="stat-icon">📂</div>
                         <div class="stat-number" id="statCategories">0</div>
-                        <div class="stat-label">قسم</div>
+                        <div class="stat-label">قسم رئيسي</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4">
-                    <div class="glass-card stat-card reveal">
+                    <div class="glass-card stat-card gsap-fade">
                         <div class="stat-icon">👳</div>
                         <div class="stat-number" id="statSheikhs">0</div>
-                        <div class="stat-label">شيخ</div>
+                        <div class="stat-label">شيخ موثوق</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ═══════════════════ Categories ═══════════════════ -->
-    <section class="section-padding" id="categories">
+    <!-- ═══════════ Categories ═══════════ -->
+    <section class="section-block" id="categories">
         <div class="container">
-            <h2 class="section-title reveal">📂 أبرز الأقسام</h2>
+            <h2 class="section-title gsap-fade"><span>أبرز الأقسام</span></h2>
             <div class="row g-4" id="categoriesGrid">
-                <!-- Skeleton Loading -->
                 <div class="col-6 col-md-4 col-lg-2">
                     <div class="skeleton skeleton-card"></div>
                 </div>
@@ -691,13 +876,12 @@
         </div>
     </section>
 
-    <!-- ═══════════════════ Lessons ═══════════════════ -->
-    <section class="section-padding section-alt" id="lessons">
+    <!-- ═══════════ Lessons ═══════════ -->
+    <section class="section-block section-alt" id="lessons">
         <div class="container">
-            <h2 class="section-title reveal">🎙️ أحدث الدروس</h2>
+            <h2 class="section-title gsap-fade"><span>أحدث الدروس</span></h2>
             <div class="row justify-content-center">
                 <div class="col-lg-10" id="lessonsGrid">
-                    <!-- Skeleton Loading -->
                     <div class="skeleton skeleton-lesson"></div>
                     <div class="skeleton skeleton-lesson"></div>
                     <div class="skeleton skeleton-lesson"></div>
@@ -707,12 +891,11 @@
         </div>
     </section>
 
-    <!-- ═══════════════════ Sheikhs ═══════════════════ -->
-    <section class="section-padding" id="sheikhs">
+    <!-- ═══════════ Sheikhs ═══════════ -->
+    <section class="section-block" id="sheikhs">
         <div class="container">
-            <h2 class="section-title reveal">👨‍🏫 شيوخنا الكرام</h2>
+            <h2 class="section-title gsap-fade"><span>شيوخنا الكرام</span></h2>
             <div class="row g-4 justify-content-center" id="sheikhsGrid">
-                <!-- Skeleton Loading -->
                 <div class="col-6 col-md-3">
                     <div class="text-center">
                         <div class="skeleton skeleton-circle"></div>
@@ -741,135 +924,178 @@
         </div>
     </section>
 
-    <!-- ═══════════════════ CTA ═══════════════════ -->
+    <!-- ═══════════ CTA ═══════════ -->
     <section class="cta-section">
-        <div class="reveal">
-            <h2 class="cta-title">📚 تصفح كل الدروس</h2>
+        <div class="gsap-fade">
+            <h2 class="cta-title"><span>📚 تصفح كل الدروس</span></h2>
             <p class="cta-dua">"اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً"</p>
-            <a href="/website" class="btn-ripple btn-gold">
+            <a href="/website" class="btn-v3 btn-v3-gold">
                 <i class="fa-solid fa-arrow-left"></i>
                 ابدأ الآن
             </a>
         </div>
     </section>
 
-    <!-- ═══════════════════ Footer ═══════════════════ -->
+    <!-- ═══════════ Footer ═══════════ -->
     <footer class="footer-section">
         <p class="footer-logo">🕌 عِلْمٌ يُنْتَفَعُ بِهِ</p>
         <p class="footer-copyright">© جميع الحقوق محفوظة</p>
         <a href="/admin" class="footer-admin"><i class="fa-solid fa-gear"></i> لوحة التحكم</a>
     </footer>
 
-    <!-- ═══════════════════ Scripts ═══════════════════ -->
+    <!-- ═══════════ Scripts ═══════════ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        /* ═══════════════════════════════════════════════
-           Config (غير من هنا بدون لمس الكود)
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Config
+           ═══════════════════════════════════════ */
         const PAGE_CONFIG = {
-            site: {
-                name: "عِلْمٌ يُنْتَفَعُ بِهِ",
-                tagline: "دروس مختارة من علماء موثوقين",
-            },
+            site: { name: "عِلْمٌ يُنْتَفَعُ بِهِ" },
             sections: {
-                hero: { enabled: true },
                 stats: { enabled: true, zeroText: "قريباً" },
                 categories: { enabled: true, limit: 6 },
                 lessons: { enabled: true, limit: 6 },
                 sheikhs: { enabled: true, limit: 4 },
-                footer: { enabled: true },
             },
             api: "/api/public/landing",
         };
 
-        /* ═══════════════════════════════════════════════
-           App Init
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Init
+           ═══════════════════════════════════════ */
         document.addEventListener('DOMContentLoaded', () => {
+            initGSAP();
             initNavbar();
             initRipple();
-            initScrollReveal();
             loadLandingData();
         });
 
-        /* ═══════════════════════════════════════════════
-           Navbar Scroll Effect
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           GSAP Animations
+           ═══════════════════════════════════════ */
+        function initGSAP() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero animations (staggered entrance)
+            gsap.to('.hero-content .gsap-fade', {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                stagger: 0.15,
+                ease: 'power3.out',
+                delay: 0.3
+            });
+
+            // Hero icon float
+            gsap.to('.hero-icon', {
+                y: -15,
+                duration: 2.5,
+                ease: 'power1.inOut',
+                yoyo: true,
+                repeat: -1
+            });
+
+            // Stats cards
+            gsap.utils.toArray('#statsSection .gsap-fade').forEach((el, i) => {
+                gsap.to(el, {
+                    scrollTrigger: { trigger: el, start: 'top 85%' },
+                    opacity: 1, y: 0, duration: 0.8, delay: i * 0.12, ease: 'power2.out'
+                });
+            });
+
+            // Section titles
+            gsap.utils.toArray('.section-title.gsap-fade').forEach(el => {
+                gsap.to(el, {
+                    scrollTrigger: { trigger: el, start: 'top 85%' },
+                    opacity: 1, y: 0, duration: 0.7, ease: 'power2.out'
+                });
+            });
+
+            // CTA section
+            gsap.utils.toArray('.cta-section .gsap-fade').forEach(el => {
+                gsap.to(el, {
+                    scrollTrigger: { trigger: el, start: 'top 80%' },
+                    opacity: 1, y: 0, duration: 0.8, ease: 'power2.out'
+                });
+            });
+        }
+
+        function animateCards(selector) {
+            gsap.utils.toArray(selector).forEach((el, i) => {
+                gsap.fromTo(el,
+                    { opacity: 0, y: 35, scale: 0.95 },
+                    {
+                        scrollTrigger: { trigger: el, start: 'top 88%' },
+                        opacity: 1, y: 0, scale: 1,
+                        duration: 0.6,
+                        delay: i * 0.08,
+                        ease: 'back.out(1.4)'
+                    }
+                );
+            });
+        }
+
+        /* ═══════════════════════════════════════
+           Navbar
+           ═══════════════════════════════════════ */
         function initNavbar() {
             const navbar = document.getElementById('navbar');
             window.addEventListener('scroll', () => {
-                navbar.classList.toggle('scrolled', window.scrollY > 50);
+                navbar.classList.toggle('scrolled', window.scrollY > 60);
             });
 
-            // Smooth scroll for anchor links
             document.querySelectorAll('a[href^="#"]').forEach(link => {
                 link.addEventListener('click', e => {
                     e.preventDefault();
                     const target = document.querySelector(link.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
             });
         }
 
-        /* ═══════════════════════════════════════════════
-           Ripple Effect (v3 Buttons)
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Ripple Effect (v3)
+           ═══════════════════════════════════════ */
         function initRipple() {
-            document.querySelectorAll('.btn-ripple').forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    const rect = this.getBoundingClientRect();
-                    const ripple = document.createElement('span');
-                    ripple.className = 'ripple-effect';
-                    ripple.style.left = (e.clientX - rect.left - 150) + 'px';
-                    ripple.style.top = (e.clientY - rect.top - 150) + 'px';
-                    this.appendChild(ripple);
-                    setTimeout(() => ripple.remove(), 600);
-                });
+            document.addEventListener('click', e => {
+                const btn = e.target.closest('.btn-v3');
+                if (!btn) return;
+
+                const rect = btn.getBoundingClientRect();
+                const ripple = document.createElement('span');
+                ripple.className = 'ripple-wave';
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                btn.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 650);
             });
         }
 
-        /* ═══════════════════════════════════════════════
-           Scroll Reveal (Intersection Observer)
-           ═══════════════════════════════════════════════ */
-        function initScrollReveal() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-        }
-
-        /* ═══════════════════════════════════════════════
-           Load Data from API
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Load Data
+           ═══════════════════════════════════════ */
         async function loadLandingData() {
             try {
                 const res = await fetch(PAGE_CONFIG.api);
-                if (!res.ok) throw new Error('API Error');
+                if (!res.ok) throw new Error('API Error ' + res.status);
                 const data = await res.json();
 
-                if (PAGE_CONFIG.sections.stats.enabled) renderStats(data.stats);
-                if (PAGE_CONFIG.sections.categories.enabled) renderCategories(data.categories);
-                if (PAGE_CONFIG.sections.lessons.enabled) renderLessons(data.lessons);
-                if (PAGE_CONFIG.sections.sheikhs.enabled) renderSheikhs(data.sheikhs);
+                renderStats(data.stats);
+                renderCategories(data.categories);
+                renderLessons(data.lessons);
+                renderSheikhs(data.sheikhs);
                 renderHeroLatest(data.lessons);
-
             } catch (err) {
-                console.error('❌ Landing data error:', err);
-                // لو الـ API فشل → خلي الـ skeleton ظاهر
+                console.error('❌ Landing error:', err);
             }
         }
 
-        /* ═══════════════════════════════════════════════
-           Render: Stats (Animated Counters)
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Stats (Animated Counters)
+           ═══════════════════════════════════════ */
         function renderStats(stats) {
             const cfg = PAGE_CONFIG.sections.stats;
             animateCounter('statLessons', stats.lessons, cfg.zeroText);
@@ -877,8 +1103,8 @@
             animateCounter('statSheikhs', stats.sheikhs, cfg.zeroText);
         }
 
-        function animateCounter(elId, target, zeroText) {
-            const el = document.getElementById(elId);
+        function animateCounter(id, target, zeroText) {
+            const el = document.getElementById(id);
             if (!el) return;
 
             if (target === 0) {
@@ -887,46 +1113,53 @@
                 return;
             }
 
-            let current = 0;
-            const duration = 2000;
-            const step = target / (duration / 16);
-
-            const timer = setInterval(() => {
-                current += step;
-                if (current >= target) {
-                    el.textContent = target + '+';
-                    clearInterval(timer);
-                } else {
-                    el.textContent = Math.floor(current);
+            const observer = new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting) {
+                    let current = 0;
+                    const step = target / 80;
+                    const timer = setInterval(() => {
+                        current += step;
+                        if (current >= target) {
+                            el.textContent = target + '+';
+                            clearInterval(timer);
+                        } else {
+                            el.textContent = Math.floor(current);
+                        }
+                    }, 20);
+                    observer.disconnect();
                 }
-            }, 16);
+            }, { threshold: 0.5 });
+
+            observer.observe(el);
         }
 
-        /* ═══════════════════════════════════════════════
-           Render: Categories
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Categories
+           ═══════════════════════════════════════ */
         function renderCategories(categories) {
             const grid = document.getElementById('categoriesGrid');
             if (!grid || !categories.length) {
-                if (grid) grid.innerHTML = '<p class="text-center text-muted">لا توجد أقسام حالياً</p>';
+                if (grid) grid.innerHTML = '<p class="text-center" style="color:var(--text-dim)">لا توجد أقسام حالياً</p>';
                 return;
             }
 
-            const fallbackIcons = ['📖', '🕌', '🤲', '📿', '🌙', '⭐'];
+            const icons = ['📖', '🕌', '🤲', '📿', '🌙', '⭐'];
 
             grid.innerHTML = categories.slice(0, PAGE_CONFIG.sections.categories.limit).map((cat, i) => {
                 const color = cat.color || '#DAA520';
                 const hasFA = cat.icon && cat.icon.startsWith('fa');
-                const icon = hasFA
+                const iconContent = hasFA
                     ? `<i class="${cat.icon}" style="color:${color}"></i>`
-                    : (cat.icon || fallbackIcons[i] || '📁');
+                    : (cat.icon || icons[i] || '📁');
 
                 return `
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card category-card reveal stagger-${i + 1}"
-                         style="--card-glow: ${color}33"
+                    <div class="glass-card category-card"
+                         style="--card-glow: ${color}40"
                          onclick="location.href='/website'">
-                        <div class="category-icon">${icon}</div>
+                        <div class="category-icon-wrap" style="background: ${color}15; border-color: ${color}30">
+                            ${iconContent}
+                        </div>
                         <div class="category-name">${cat.name}</div>
                         <div class="category-count">${cat.lessonCount || 0} درس</div>
                     </div>
@@ -934,108 +1167,95 @@
             `;
             }).join('');
 
-            // Re-observe new elements
-            initScrollReveal();
+            animateCards('#categoriesGrid .glass-card');
         }
 
-        /* ═══════════════════════════════════════════════
-           Render: Lessons
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Lessons
+           ═══════════════════════════════════════ */
         function renderLessons(lessons) {
             const grid = document.getElementById('lessonsGrid');
             if (!grid) return;
 
             if (!lessons.length) {
-                grid.innerHTML = '<p class="text-center text-muted">لا توجد دروس منشورة حالياً</p>';
+                grid.innerHTML = '<p class="text-center" style="color:var(--text-dim)">لا توجد دروس منشورة حالياً</p>';
                 return;
             }
 
-            grid.innerHTML = lessons.slice(0, PAGE_CONFIG.sections.lessons.limit).map((l, i) => {
+            grid.innerHTML = lessons.slice(0, PAGE_CONFIG.sections.lessons.limit).map(l => {
                 const date = new Date(l.createdAt).toLocaleDateString('ar-EG', {
                     year: 'numeric', month: 'long', day: 'numeric'
                 });
 
                 return `
-                <div class="glass-card lesson-card reveal stagger-${i + 1}"
-                     onclick="location.href='/website'">
+                <div class="glass-card lesson-card" onclick="location.href='/website'">
                     <div class="lesson-title">
                         <i class="fa-solid fa-book-quran"></i>
                         ${l.title}
                     </div>
                     <div class="lesson-meta">
-                        <span class="lesson-sheikh">
-                            <i class="fa-solid fa-user-tie"></i> ${l.sheikhName}
-                        </span>
-                        <span class="lesson-date">
-                            <i class="fa-regular fa-calendar"></i> ${date}
-                        </span>
+                        <span class="lesson-sheikh"><i class="fa-solid fa-user-tie"></i> ${l.sheikhName}</span>
+                        <span class="lesson-date"><i class="fa-regular fa-calendar"></i> ${date}</span>
                     </div>
                 </div>
             `;
             }).join('');
 
-            initScrollReveal();
+            animateCards('#lessonsGrid .glass-card');
         }
 
-        /* ═══════════════════════════════════════════════
-           Render: Sheikhs
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Sheikhs
+           ═══════════════════════════════════════ */
         function renderSheikhs(sheikhs) {
             const grid = document.getElementById('sheikhsGrid');
             if (!grid) return;
 
             if (!sheikhs.length) {
-                grid.innerHTML = '<p class="text-center text-muted">لا يوجد شيوخ حالياً</p>';
+                grid.innerHTML = '<p class="text-center" style="color:var(--text-dim)">لا يوجد شيوخ حالياً</p>';
                 return;
             }
 
-            grid.innerHTML = sheikhs.slice(0, PAGE_CONFIG.sections.sheikhs.limit).map((s, i) => {
-                const img = s.image
-                    ? s.image
-                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a5f4a&color=fff&size=150&font-size=0.4`;
-
-                const fallbackImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a5f4a&color=fff&size=150`;
+            grid.innerHTML = sheikhs.slice(0, PAGE_CONFIG.sections.sheikhs.limit).map(s => {
+                const img = s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a3a2a&color=DAA520&size=160&font-size=0.38&bold=true`;
+                const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a3a2a&color=DAA520&size=160`;
 
                 return `
                 <div class="col-6 col-md-3">
-                    <div class="glass-card sheikh-card reveal stagger-${i + 1}"
-                         onclick="location.href='/website'">
-                        <img src="${img}" alt="${s.name}" class="sheikh-avatar" loading="lazy"
-                             onerror="this.src='${fallbackImg}'">
-                        <div class="sheikh-name">${s.name}</div>
-                        <div class="sheikh-count">
-                            <i class="fa-solid fa-book"></i> ${s.lessonCount || 0} درس
+                    <div class="glass-card sheikh-card" onclick="location.href='/website'">
+                        <div class="sheikh-avatar-wrap">
+                            <img src="${img}" alt="${s.name}" class="sheikh-avatar" loading="lazy"
+                                 onerror="this.src='${fallback}'">
                         </div>
+                        <div class="sheikh-name">${s.name}</div>
+                        <div class="sheikh-count"><i class="fa-solid fa-book"></i> ${s.lessonCount || 0} درس</div>
                     </div>
                 </div>
             `;
             }).join('');
 
-            initScrollReveal();
+            animateCards('#sheikhsGrid .glass-card');
         }
 
-        /* ═══════════════════════════════════════════════
-           Render: Hero Latest Lesson Info
-           ═══════════════════════════════════════════════ */
+        /* ═══════════════════════════════════════
+           Hero Latest Info
+           ═══════════════════════════════════════ */
         function renderHeroLatest(lessons) {
             const el = document.getElementById('heroLatest');
             if (!el || !lessons.length) return;
 
             const latest = lessons[0];
-            const now = Date.now();
-            const created = new Date(latest.createdAt).getTime();
-            const diff = now - created;
-
-            let timeText;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
+            const diff = Date.now() - new Date(latest.createdAt).getTime();
+            const mins = Math.floor(diff / 60000);
+            const hrs = Math.floor(diff / 3600000);
             const days = Math.floor(diff / 86400000);
 
-            if (minutes < 60) timeText = `منذ ${minutes} دقيقة`;
-            else if (hours < 24) timeText = `منذ ${hours} ساعة`;
-            else timeText = `منذ ${days} يوم`;
+            let time;
+            if (mins < 60) time = `منذ ${mins} دقيقة`;
+            else if (hrs < 24) time = `منذ ${hrs} ساعة`;
+            else time = `منذ ${days} يوم`;
 
-            el.innerHTML = `<i class="fa-solid fa-clock"></i> آخر درس مضاف: "${latest.title}" — ${timeText}`;
+            el.innerHTML = `<i class="fa-solid fa-sparkles"></i> آخر درس: "${latest.title}" — ${time}`;
         }
 
     </script>
