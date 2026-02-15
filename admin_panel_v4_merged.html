@@ -3822,6 +3822,16 @@
                                 <label class="form-check-label" for="navActive">مفعّل</label>
                             </div>
 
+                            <!-- Display Mode (ثابت / عشوائي) -->
+                            <div class="mb-3">
+                                <label class="form-label">وضع العرض</label>
+                                <select class="form-select" id="navDisplayMode">
+                                    <option value="fixed">🔒 ثابت (يظهر دايماً)</option>
+                                    <option value="rotating">🎲 عشوائي (يتبدل كل زيارة)</option>
+                                </select>
+                                <small style="color:var(--text-secondary);font-size:.72rem;">الثابت بيظهر دايماً.
+                                    العشوائي بيتبدل مع أيقونات عشوائية تانية كل ما الصفحة تتحمل.</small>
+                            </div>
                             <!-- Modal Preview -->
                             <div style="background:#080e1a; border-radius:12px; padding:16px;">
                                 <p style="margin:0 0 10px; color:#888; font-size:.75rem;">معاينة في الشريط:</p>
@@ -6290,7 +6300,7 @@
                     <!-- Info -->
                     <div style="flex:1;min-width:0;">
                         <div style="font-weight:600;color:var(--text-primary);font-size:.95rem;">${item.label}</div>
-                        <div style="font-size:.75rem;color:var(--text-secondary);direction:ltr;text-align:right;">${item.href} · ${item.type === 'center' ? '🔵 مركزي' : '⚪ عادي'} · ${item.priority === 'high' ? '🟢 عالية' : item.priority === 'med' ? '🟡 متوسطة' : '🔴 منخفضة'}</div>
+                        <div style="font-size:.75rem;color:var(--text-secondary);direction:ltr;text-align:right;">${item.href} · ${item.type === 'center' ? '🔵 مركزي' : '⚪ عادي'} · ${item.priority === 'high' ? '🟢 عالية' : item.priority === 'med' ? '🟡 متوسطة' : '🔴 منخفضة'} · ${(item.displayMode || 'fixed') === 'fixed' ? '🔒 ثابت' : '🎲 عشوائي'}</div>
                     </div>
                     <!-- Status -->
                     <span style="font-size:.8rem;padding:4px 10px;border-radius:20px;background:${item.isActive ? 'rgba(46,204,113,.15)' : 'rgba(231,76,60,.15)'};color:${item.isActive ? '#2ecc71' : '#e74c3c'};">${item.isActive ? 'مفعّل' : 'معطّل'}</span>
@@ -6418,6 +6428,7 @@
                 document.getElementById('navPriority').value = item.priority;
                 document.getElementById('navTarget').value = item.target;
                 document.getElementById('navActive').checked = item.isActive;
+                document.getElementById('navDisplayMode').value = item.displayMode || 'fixed';
                 renderIconPicker(item.icon);
             } else {
                 document.getElementById('navModalTitle').innerHTML = '<i class="fa-solid fa-plus"></i> إضافة أيقونة';
@@ -6428,6 +6439,7 @@
                 document.getElementById('navPriority').value = 'high';
                 document.getElementById('navTarget').value = '_self';
                 document.getElementById('navActive').checked = true;
+                document.getElementById('navDisplayMode').value = 'fixed';
                 renderIconPicker('');
             }
 
@@ -6443,7 +6455,8 @@
                 type: document.getElementById('navType').value,
                 priority: document.getElementById('navPriority').value,
                 target: document.getElementById('navTarget').value,
-                isActive: document.getElementById('navActive').checked
+                isActive: document.getElementById('navActive').checked,
+                displayMode: document.getElementById('navDisplayMode').value
             };
 
             // Validation

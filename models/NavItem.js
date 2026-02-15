@@ -59,6 +59,13 @@ const NavItemSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    displayMode: {
+        type: String,
+        enum: ['fixed', 'rotating'],
+        default: 'fixed'
+        // fixed = بيظهر دايماً في مكانه
+        // rotating = بيتبدل عشوائياً مع أيقونات rotating تانية
     }
 }, {
     timestamps: true

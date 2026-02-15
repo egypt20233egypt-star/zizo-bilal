@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 // إضافة أيقونة جديدة
 router.post('/', async (req, res) => {
     try {
-        const { label, icon, href, target, type, priority, order, isActive } = req.body;
+        const { label, icon, href, target, type, priority, order, isActive, displayMode } = req.body;
 
         if (!label || !icon || !href) {
             return res.status(400).json({ error: 'label و icon و href مطلوبين' });
@@ -51,7 +51,8 @@ router.post('/', async (req, res) => {
             type: type || 'link',
             priority: priority || 'high',
             order: finalOrder,
-            isActive: isActive !== undefined ? isActive : true
+            isActive: isActive !== undefined ? isActive : true,
+            displayMode: displayMode || 'fixed'
         });
 
         await item.save();
@@ -102,7 +103,7 @@ router.put('/reorder', async (req, res) => {
 // تعديل أيقونة موجودة
 router.put('/:id', async (req, res) => {
     try {
-        const { label, icon, href, target, type, priority, order, isActive } = req.body;
+        const { label, icon, href, target, type, priority, order, isActive, displayMode } = req.body;
 
         // منع أيقونة بدون fa- prefix
         if (icon && !icon.startsWith('fa-')) {
@@ -119,7 +120,7 @@ router.put('/:id', async (req, res) => {
 
         const item = await NavItem.findByIdAndUpdate(
             req.params.id,
-            { label, icon, href, target, type, priority, order, isActive },
+            { label, icon, href, target, type, priority, order, isActive, displayMode },
             { new: true, runValidators: true }
         );
 

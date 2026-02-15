@@ -981,7 +981,7 @@
 
         /* More button + Overflow flyout */
         .bnav-more {
-            display: none;
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -1018,44 +1018,51 @@
         }
 
         .bnav-overflow {
-            position: absolute;
-            bottom: 100%;
+            position: fixed;
+            bottom: 60px;
             left: 50%;
-            transform: translateX(-50%) translateY(8px) scale(.95);
-            background: rgba(6, 11, 20, .96);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            transform: translateX(-50%) translateY(10px) scale(.95);
+            background: rgba(6, 11, 20, .97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(237, 186, 38, .15);
-            border-radius: 16px;
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 140px;
-            box-shadow: 0 -8px 30px rgba(0, 0, 0, .5);
+            border-radius: 20px;
+            padding: 16px 12px 12px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: min(320px, calc(100vw - 24px));
+            box-shadow: 0 -8px 40px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(237, 186, 38, .08);
             opacity: 0;
             pointer-events: none;
-            transition: all .15s cubic-bezier(.23, 1, .32, 1);
+            transition: all .2s cubic-bezier(.23, 1, .32, 1);
         }
 
         .bnav-overflow.show {
             opacity: 1;
-            transform: translateX(-50%) translateY(-6px) scale(1);
+            transform: translateX(-50%) translateY(0) scale(1);
             pointer-events: all;
         }
 
         .bnav-overflow .bnav-item {
-            flex-direction: row;
-            gap: 10px;
-            padding: 10px 16px;
-            border-radius: 12px;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 6px;
+            border-radius: 14px;
             max-width: none;
-            font-size: .8rem;
+            font-size: .7rem;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .04);
+        }
+
+        .bnav-overflow .bnav-item:hover {
+            background: rgba(237, 186, 38, .08);
+            border-color: rgba(237, 186, 38, .15);
         }
 
         .bnav-overflow .bnav-item i {
             margin-bottom: 0;
-            font-size: 1rem;
+            font-size: 1.15rem;
         }
 
         /* Responsive: hide items dynamically */
@@ -1070,10 +1077,6 @@
         @media (max-width: 500px) {
             .bnav-item[data-priority="low"] {
                 display: none;
-            }
-
-            .bnav-more {
-                display: flex;
             }
         }
 
@@ -1365,35 +1368,57 @@
         async function loadBottomNav() {
             try {
                 const res = await fetch('/api/public/nav');
-                const items = await res.json();
+                const allItems = await res.json();
                 const nav = document.getElementById('bottomNav');
-                if (!nav || !items.length) return;
+                if (!nav || !allItems.length) return;
                 nav.innerHTML = '';
-                let hasHiddenItems = false;
-                items.forEach(item => {
-                    if (item.type === 'center') {
-                        const div = document.createElement('div');
-                        div.className = 'bnav-center';
-                        const a = document.createElement('a');
-                        a.href = item.href;
-                        a.className = 'bnav-center-btn';
-                        a.title = item.label;
-                        if (item.target === '_blank') a.target = '_blank';
-                        a.innerHTML = `<i class="${item.icon}"></i>`;
-                        div.appendChild(a);
-                        nav.appendChild(div);
-                    } else {
-                        const a = document.createElement('a');
-                        a.href = item.href;
-                        a.className = 'bnav-item';
-                        a.setAttribute('data-priority', item.priority || 'high');
-                        if (item.target === '_blank') a.target = '_blank';
-                        a.innerHTML = `<i class="${item.icon}"></i><span>${item.label}</span>`;
-                        nav.appendChild(a);
-                        if (item.priority !== 'high') hasHiddenItems = true;
+
+                // === نظام الأيقونات العشوائية ===
+                const maxVisible = 4; // عدد الخانات الظاهرة (بدون المركزي و"المزيد")
+                const centerItem = allItems.find(i => i.type === 'center');
+                const linkItems = allItems.filter(i => i.type !== 'center');
+                const fixedItems = linkItems.filter(i => (i.displayMode || 'fixed') === 'fixed');
+                const rotatingItems = linkItems.filter(i => i.displayMode === 'rotating');
+
+                // Fisher-Yates shuffle للعشوائيين
+                for (let i = rotatingItems.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [rotatingItems[i], rotatingItems[j]] = [rotatingItems[j], rotatingItems[i]];
+                }
+
+                // حساب الخانات المتاحة
+                // لو الثابتين أكتر من maxVisible → الثابتين الأوائل (بالترتيب) يظهروا والباقي يختفي
+                const visibleFixed = fixedItems.slice(0, maxVisible);
+                const hiddenFixed = fixedItems.slice(maxVisible);
+
+                // الخانات الفاضية بعد الثابتين
+                const rotatingSlots = Math.max(0, maxVisible - visibleFixed.length);
+                const visibleRotating = rotatingItems.slice(0, rotatingSlots);
+                const hiddenRotating = rotatingItems.slice(rotatingSlots);
+
+                // دمج الظاهرين بالترتيب الأصلي
+                const visibleItems = [...visibleFixed, ...visibleRotating]
+                    .sort((a, b) => a.order - b.order);
+                const hiddenItems = [...hiddenFixed, ...hiddenRotating]
+                    .sort((a, b) => a.order - b.order);
+
+                // رسم الأيقونات الظاهرة
+                let centerRendered = false;
+                visibleItems.forEach((item, idx) => {
+                    // ضع المركزي في النص
+                    if (centerItem && !centerRendered && idx >= Math.floor(visibleItems.length / 2)) {
+                        renderCenterBtn(nav, centerItem);
+                        centerRendered = true;
                     }
+                    renderNavLink(nav, item);
                 });
-                if (hasHiddenItems) {
+                // لو المركزي مطلعش → حطه في الآخر
+                if (centerItem && !centerRendered) {
+                    renderCenterBtn(nav, centerItem);
+                }
+
+                // زرار "المزيد" لو فيه أيقونات مخفية
+                if (hiddenItems.length > 0) {
                     const btn = document.createElement('button');
                     btn.className = 'bnav-more';
                     btn.id = 'bnavMore';
@@ -1402,14 +1427,51 @@
                     const ov = document.createElement('div');
                     ov.className = 'bnav-overflow';
                     ov.id = 'bnavOverflow';
+                    hiddenItems.forEach(item => {
+                        const a = document.createElement('a');
+                        a.href = item.href;
+                        a.className = 'bnav-item';
+                        if (item.target === '_blank') a.target = '_blank';
+                        a.innerHTML = `<i class="${item.icon}"></i><span>${item.label}</span>`;
+                        a.addEventListener('click', () => {
+                            btn.classList.remove('open');
+                            ov.classList.remove('show');
+                        });
+                        ov.appendChild(a);
+                    });
                     btn.appendChild(ov);
                     nav.appendChild(btn);
                 }
-                buildOverflow();
-                window.addEventListener('resize', buildOverflow);
+
+                // Note: لا نستخدم buildOverflow() هنا لأن نظام الـ rotation بيتعامل مع المزيد مباشرة
             } catch (err) {
                 console.error('❌ Failed to load nav:', err);
             }
+        }
+
+        // Helper: رسم أيقونة عادية
+        function renderNavLink(nav, item) {
+            const a = document.createElement('a');
+            a.href = item.href;
+            a.className = 'bnav-item';
+            a.setAttribute('data-priority', item.priority || 'high');
+            if (item.target === '_blank') a.target = '_blank';
+            a.innerHTML = `<i class="${item.icon}"></i><span>${item.label}</span>`;
+            nav.appendChild(a);
+        }
+
+        // Helper: رسم الزر المركزي
+        function renderCenterBtn(nav, item) {
+            const div = document.createElement('div');
+            div.className = 'bnav-center';
+            const a = document.createElement('a');
+            a.href = item.href;
+            a.className = 'bnav-center-btn';
+            a.title = item.label;
+            if (item.target === '_blank') a.target = '_blank';
+            a.innerHTML = `<i class="${item.icon}"></i>`;
+            div.appendChild(a);
+            nav.appendChild(div);
         }
         function initNav() {
             const n = document.getElementById('navbar'), fabTop = document.getElementById('fabTop');

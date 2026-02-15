@@ -114,7 +114,7 @@ router.get('/nav', async (req, res) => {
         const NavItem = require('../models/NavItem');
         const items = await NavItem.find({ isActive: true })
             .sort({ order: 1 })
-            .select('label icon href target type priority order')
+            .select('label icon href target type priority order displayMode')
             .lean();
 
         navCache.set(items);
