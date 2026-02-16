@@ -330,6 +330,155 @@
         }
 
 
+        /* ============ Icon Picker v2 ============ */
+        .ip-tabs {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            scrollbar-width: none;
+        }
+
+        .ip-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .ip-cat-tab {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .04);
+            color: var(--text-secondary, #999);
+            font-size: .72rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all .2s;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .ip-cat-tab i {
+            font-size: .7rem;
+        }
+
+        .ip-cat-tab:hover {
+            background: rgba(237, 186, 38, .1);
+            border-color: rgba(237, 186, 38, .2);
+            color: #EDBA26;
+        }
+
+        .ip-cat-tab.active {
+            background: rgba(237, 186, 38, .15);
+            border-color: rgba(237, 186, 38, .4);
+            color: #EDBA26;
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(237, 186, 38, .15);
+        }
+
+        .ip-search {
+            width: 100%;
+            padding: 7px 12px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .04);
+            color: var(--text-primary, #eee);
+            font-size: .8rem;
+            font-family: 'Cairo', sans-serif;
+            margin-bottom: 10px;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+
+        .ip-search:focus {
+            border-color: rgba(237, 186, 38, .4);
+            box-shadow: 0 0 0 3px rgba(237, 186, 38, .1);
+        }
+
+        .ip-search::placeholder {
+            color: rgba(255, 255, 255, .3);
+        }
+
+        .ip-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 2px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(237, 186, 38, .2) transparent;
+        }
+
+        @media (max-width: 768px) {
+            .ip-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .ip-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        .ip-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .04);
+            cursor: pointer;
+            transition: all .2s cubic-bezier(.23, 1, .32, 1);
+            position: relative;
+        }
+
+        .ip-btn i {
+            color: #EDBA26;
+            font-size: 1.1rem;
+            transition: transform .2s;
+        }
+
+        .ip-btn:hover {
+            background: rgba(237, 186, 38, .12);
+            border-color: rgba(237, 186, 38, .25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(237, 186, 38, .15);
+        }
+
+        .ip-btn:hover i {
+            transform: scale(1.15);
+        }
+
+        .ip-btn.selected {
+            background: rgba(237, 186, 38, .2);
+            border-color: rgba(237, 186, 38, .5);
+            box-shadow: 0 0 0 2px rgba(237, 186, 38, .3), 0 4px 16px rgba(237, 186, 38, .2);
+        }
+
+        .ip-btn.selected::after {
+            content: '✓';
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 14px;
+            height: 14px;
+            background: #EDBA26;
+            color: #1a1a1a;
+            border-radius: 50%;
+            font-size: .55rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+        }
+
         body {
             font-family: 'Cairo', sans-serif;
             background: var(--bg-primary);
@@ -6210,32 +6359,111 @@
         let navItemsData = [];
         let editingNavId = null;
 
-        // أيقونات شائعة للـ Icon Picker
-        const popularIcons = [
-            'fa-house', 'fa-folder-open', 'fa-book-open', 'fa-book-quran',
-            'fa-user-tie', 'fa-mosque', 'fa-star', 'fa-heart',
-            'fa-magnifying-glass', 'fa-gear', 'fa-bell', 'fa-user',
-            'fa-calendar', 'fa-pen', 'fa-comment', 'fa-share',
-            'fa-circle-play', 'fa-headphones', 'fa-microphone', 'fa-video',
-            'fa-globe', 'fa-link', 'fa-bookmark', 'fa-clock',
-            'fa-moon', 'fa-sun', 'fa-hands-praying', 'fa-kaaba',
-            'fa-graduation-cap', 'fa-lightbulb', 'fa-trophy', 'fa-fire'
+        // أيقونات منظمة في categories — Icon Picker v2
+        const ICON_CATALOG = [
+            // 🕌 إسلامي (8)
+            { fa: 'fa-mosque', label: 'مسجد', cat: 'islamic' },
+            { fa: 'fa-kaaba', label: 'كعبة', cat: 'islamic' },
+            { fa: 'fa-book-quran', label: 'قرآن', cat: 'islamic' },
+            { fa: 'fa-hands-praying', label: 'دعاء', cat: 'islamic' },
+            { fa: 'fa-star-and-crescent', label: 'هلال', cat: 'islamic' },
+            { fa: 'fa-moon', label: 'قمر', cat: 'islamic' },
+            { fa: 'fa-sun', label: 'شمس', cat: 'islamic' },
+            { fa: 'fa-dove', label: 'سلام', cat: 'islamic' },
+            // 📚 تعليمي (7)
+            { fa: 'fa-graduation-cap', label: 'تخرج', cat: 'edu' },
+            { fa: 'fa-book-open', label: 'كتاب', cat: 'edu' },
+            { fa: 'fa-book', label: 'مرجع', cat: 'edu' },
+            { fa: 'fa-lightbulb', label: 'فكرة', cat: 'edu' },
+            { fa: 'fa-user-graduate', label: 'طالب', cat: 'edu' },
+            { fa: 'fa-file-lines', label: 'مادة', cat: 'edu' },
+            { fa: 'fa-chalkboard', label: 'درس', cat: 'edu' },
+            // 🎬 وسائط (7)
+            { fa: 'fa-circle-play', label: 'تشغيل', cat: 'media' },
+            { fa: 'fa-headphones', label: 'سماع', cat: 'media' },
+            { fa: 'fa-microphone', label: 'ميكروفون', cat: 'media' },
+            { fa: 'fa-video', label: 'فيديو', cat: 'media' },
+            { fa: 'fa-rss', label: 'بودكاست', cat: 'media' },
+            { fa: 'fa-volume-high', label: 'صوت', cat: 'media' },
+            { fa: 'fa-image', label: 'صورة', cat: 'media' },
+            // 🔗 تنقل (7)
+            { fa: 'fa-house', label: 'رئيسية', cat: 'nav' },
+            { fa: 'fa-folder-open', label: 'أقسام', cat: 'nav' },
+            { fa: 'fa-magnifying-glass', label: 'بحث', cat: 'nav' },
+            { fa: 'fa-compass', label: 'بوصلة', cat: 'nav' },
+            { fa: 'fa-globe', label: 'عالم', cat: 'nav' },
+            { fa: 'fa-link', label: 'رابط', cat: 'nav' },
+            { fa: 'fa-layer-group', label: 'طبقات', cat: 'nav' },
+            // 💬 تواصل (6)
+            { fa: 'fa-comment', label: 'تعليق', cat: 'social' },
+            { fa: 'fa-share-nodes', label: 'مشاركة', cat: 'social' },
+            { fa: 'fa-paper-plane', label: 'إرسال', cat: 'social' },
+            { fa: 'fa-envelope', label: 'بريد', cat: 'social' },
+            { fa: 'fa-phone', label: 'هاتف', cat: 'social' },
+            { fa: 'fa-comments', label: 'محادثة', cat: 'social' },
+            // ⭐ تفاعل (7)
+            { fa: 'fa-heart', label: 'حب', cat: 'interact' },
+            { fa: 'fa-star', label: 'نجمة', cat: 'interact' },
+            { fa: 'fa-bookmark', label: 'حفظ', cat: 'interact' },
+            { fa: 'fa-fire', label: 'رائج', cat: 'interact' },
+            { fa: 'fa-trophy', label: 'جائزة', cat: 'interact' },
+            { fa: 'fa-bell', label: 'تنبيه', cat: 'interact' },
+            { fa: 'fa-chart-simple', label: 'تصنيف', cat: 'interact' },
+            // 🛠️ أدوات (8)
+            { fa: 'fa-gear', label: 'إعدادات', cat: 'tools' },
+            { fa: 'fa-user', label: 'مستخدم', cat: 'tools' },
+            { fa: 'fa-user-tie', label: 'شيخ', cat: 'tools' },
+            { fa: 'fa-pen', label: 'تعديل', cat: 'tools' },
+            { fa: 'fa-clock', label: 'وقت', cat: 'tools' },
+            { fa: 'fa-calendar', label: 'تقويم', cat: 'tools' },
+            { fa: 'fa-wand-magic-sparkles', label: 'سحر', cat: 'tools' },
+            { fa: 'fa-qrcode', label: 'QR', cat: 'tools' }
         ];
+
+        const ICON_CATS = [
+            { key: 'all', label: 'الكل', icon: 'fa-icons' },
+            { key: 'islamic', label: 'إسلامي', icon: 'fa-mosque' },
+            { key: 'edu', label: 'تعليمي', icon: 'fa-graduation-cap' },
+            { key: 'media', label: 'وسائط', icon: 'fa-circle-play' },
+            { key: 'nav', label: 'تنقل', icon: 'fa-compass' },
+            { key: 'social', label: 'تواصل', icon: 'fa-comment' },
+            { key: 'interact', label: 'تفاعل', icon: 'fa-star' },
+            { key: 'tools', label: 'أدوات', icon: 'fa-gear' }
+        ];
+
+        let iconPickerCat = 'all';
+        let iconPickerSearch = '';
 
         function renderIconPicker(selectedIcon) {
             const grid = document.getElementById('iconGrid');
             if (!grid) return;
-            grid.innerHTML = popularIcons.map(icon => {
-                const fullClass = 'fa-solid ' + icon;
-                const isSelected = selectedIcon === fullClass;
-                return `<button type="button" onclick="selectNavIcon('${fullClass}')"
-                    style="width:38px;height:38px;background:${isSelected ? 'rgba(237,186,38,.3)' : 'rgba(255,255,255,.05)'};border:1px solid ${isSelected ? 'rgba(237,186,38,.5)' : 'rgba(255,255,255,.1)'};border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;"
-                    onmouseover="this.style.background='rgba(237,186,38,.2)'"
-                    onmouseout="this.style.background='${isSelected ? 'rgba(237,186,38,.3)' : 'rgba(255,255,255,.05)'}'"
-                    title="${icon}">
-                    <i class="${fullClass}" style="color:#EDBA26;font-size:1.1rem;"></i>
-                </button>`;
-            }).join('');
+
+            // مسح inline styles القديمة عشان مفيش conflict
+            grid.removeAttribute('style');
+            grid.style.cssText = '';
+
+            // فلترة
+            let icons = ICON_CATALOG;
+            if (iconPickerCat !== 'all') icons = icons.filter(i => i.cat === iconPickerCat);
+            if (iconPickerSearch) {
+                const q = iconPickerSearch.toLowerCase();
+                icons = icons.filter(i => i.label.includes(q) || i.fa.includes(q));
+            }
+
+            // Category tabs
+            const tabsHtml = ICON_CATS.map(c => `<button type="button" class="ip-cat-tab${iconPickerCat === c.key ? ' active' : ''}" onclick="iconPickerCat='${c.key}';renderIconPicker('${selectedIcon || ''}')"><i class="fa-solid ${c.icon}"></i><span>${c.label}</span></button>`).join('');
+
+            // Search
+            const searchHtml = `<input type="text" class="ip-search" placeholder="🔍 ابحث عن أيقونة..." value="${iconPickerSearch}" oninput="iconPickerSearch=this.value;renderIconPicker('${selectedIcon || ''}')" />`;
+
+            // Grid
+            const gridHtml = icons.length ? icons.map(ic => {
+                const fullClass = 'fa-solid ' + ic.fa;
+                const isSel = selectedIcon === fullClass;
+                return `<button type="button" class="ip-btn${isSel ? ' selected' : ''}" onclick="selectNavIcon('${fullClass}')" title="${ic.label} (${ic.fa})"><i class="fa-solid ${ic.fa}"></i></button>`;
+            }).join('') : '<div style="grid-column:1/-1;text-align:center;color:var(--text-secondary);padding:16px;font-size:.85rem;">مفيش نتائج 😅</div>';
+
+            grid.innerHTML = `<div class="ip-tabs">${tabsHtml}</div>${searchHtml}<div class="ip-grid">${gridHtml}</div>`;
         }
 
         function selectNavIcon(iconClass) {
