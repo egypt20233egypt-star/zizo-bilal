@@ -185,5 +185,33 @@ const popularIcons = [
 
 ---
 
+---
+
+## 🧠 المرحلة 6: Smart Section Resolver (v4.7)
+
+### اللي اتعمل:
+| # | الوصف | الملفات |
+|---|-------|---------| 
+| 44 | دمج 3 dictionaries → `KNOWN_SECTIONS` واحد (SSOT) | `website.html` |
+| 44 | إنشاء `SectionResolver` (3-tier priority + sanitization + auto-color) | `website.html` |
+| 44 | إصلاح undefined key bug في `_autoColor` + `getNextCardColor` | `website.html` |
+| 44 | إضافة 12 قسم جديد بأسماء عربية (points, source, wrong, right...) | `website.html` |
+
+### البنية:
+```
+lesson._sectionLabels (أولوية 1) → KNOWN_SECTIONS (أولوية 2) → Auto-Generate (أولوية 3)
+```
+
+### خطة الأفكار المبتكرة (5 أفكار):
+| المرحلة | الميزة | الحالة |
+|---------|--------|--------|
+| Phase 3 | 🧪 Auto-Discovery Logger (Discovery Levels + Export JSON + `_suggestIcon`) | ✅ |
+| Phase 4 | 🎯 Smart Section Ordering (SECTION_PRIORITY تنازلي 100=أعلى) | ✅ |
+| Phase 5 | 📥 Batch Import | ⏳ |
+| Phase 6 | 📊 Section Usage Stats | ⏳ |
+| Phase 7 | 🔄 Section Sync (Admin ↔ Website) | 🔴 |
+
+---
+
 *الملف ده بتاع مشروع زيزو وبلال — القلب السليم* ✌️
-*آخر تحديث: v4.5-premium-nav*
+*آخر تحديث: v4.7-smart-resolver*

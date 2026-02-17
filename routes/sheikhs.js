@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Sheikh = require('../models/Sheikh');
 
-// الحصول على كل الشيوخ + عدد دروسهم
+// الحصول على كل المشايخ + عدد دروسهم
 router.get('/', async (req, res) => {
     try {
         const sheikhs = await Sheikh.find().lean();

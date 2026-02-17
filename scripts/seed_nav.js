@@ -51,7 +51,7 @@ const defaultItems = [
         isActive: true
     },
     {
-        label: 'الشيوخ',
+        label: 'المشايخ',
         icon: 'fa-solid fa-user-tie',
         href: '#sheikhs',
         target: '_self',

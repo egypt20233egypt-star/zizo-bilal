@@ -548,6 +548,8 @@
                     renderLessonsGrid(lessons);
                     // Auto-select first lesson (most recent)
                     selectLessonByIndex(0);
+                    // 🧪 Auto-Discovery Report بعد تحميل كل الدروس
+                    setTimeout(() => SectionResolver.printDiscoveryReport(), 500);
                 }
             } catch (error) {
                 console.error('Error loading lessons:', error);
@@ -604,134 +606,338 @@
             `;
         }
 
-        // ============ 📖 قاموس ترجمة الأقسام (Section Labels Map) ============
-        const SECTION_LABELS = {
-            // الأقسام الأساسية
-            metadata: { name: 'بيانات الدرس', icon: '📋' },
-            overview: { name: 'نظرة عامة', icon: '📋' },
-            podcast: { name: 'البودكاست', icon: '🎙️' },
-            characters: { name: 'الشخصيات', icon: '👥' },
-            quranHadith: { name: 'الآيات والأحاديث', icon: '📖' },
-            fiqh: { name: 'الأحكام الفقهية', icon: '🕌' },
-            questions: { name: 'الأسئلة', icon: '❓' },
-            benefits: { name: 'الفوائد', icon: '💎' },
-            stories: { name: 'القصص', icon: '📚' },
-            analysis: { name: 'التحليل', icon: '🔍' },
-            // الأقسام الجديدة (13+ قسم)
-            lessonMap: { name: 'خريطة الدرس', icon: '🗺️' },
-            mainPoints: { name: 'النقاط الرئيسية', icon: '📌' },
-            comprehensiveSummary: { name: 'الملخص الشامل', icon: '📋' },
-            rulings: { name: 'ميزان الأحكام', icon: '⚖️' },
-            fatawa: { name: 'الفتاوى والمسائل', icon: '❓' },
-            kidsCorner: { name: 'بستان الأطفال', icon: '🎨' },
-            practicalApplications: { name: 'التطبيقات العملية', icon: '🎯' },
-            terminology: { name: 'شرح المصطلحات', icon: '📖' },
-            scholarQuotes: { name: 'أقوال العلماء', icon: '📜' },
-            realLifeScenarios: { name: 'ربط بالواقع', icon: '🌍' },
-            etiquettes: { name: 'الآداب والسلوكيات', icon: '🎩' },
-            mindMap: { name: 'الخريطة الذهنية', icon: '🧠' },
-            flashcards: { name: 'بطاقات الحفظ', icon: '🃏' },
-            socialMedia: { name: 'للسوشيال ميديا', icon: '📱' },
-            commonMistakes: { name: 'أخطاء شائعة', icon: '⚠️' },
-            ideas: { name: 'الأفكار الرئيسية', icon: '💡' },
-            advice: { name: 'النصائح العملية', icon: '🎯' },
-            prosAndCons: { name: 'الإيجابي والسلبي', icon: '💎' },
-            // أقسام زيزو الخاصة
-            suggestions: { name: 'اقتراحات ومقترحات', icon: '💡' },
-            opinion: { name: 'الرأي والتحليل', icon: '👁️' },
-            proTips: { name: 'لمسة احترافية', icon: '👔' },
-            innovation: { name: 'ركن الابتكار', icon: '🚀' },
-            strategy: { name: 'الاستراتيجية والخطط', icon: '♟️' },
-            bestPractice: { name: 'الأفضل والأحسن', icon: '🏆' },
-            smartInsights: { name: 'لمسات ذكية', icon: '🧠' },
-            flexibility: { name: 'المرونة والبدائل', icon: '🔄' },
-            dynamicFlow: { name: 'الديناميكية والتطور', icon: '🌊' },
-            conclusion: { name: 'الخلاصة', icon: '🏁' },
-            // أقسام اكتُشفت من الـ JSON
-            bookmarks: { name: 'العلامات المرجعية', icon: '🔖' },
-            weeklyPlan: { name: 'خطة الأسبوع', icon: '📆' },
-            visualization: { name: 'مشهد تخيلي', icon: '🎬' },
-            beforeAfter: { name: 'قبل وبعد', icon: '🔄' },
-            progressLadder: { name: 'سلم التدرج', icon: '🪜' },
-            badges: { name: 'شارات الإنجاز', icon: '🏆' },
-            imaginaryDialogues: { name: 'حوارات متخيلة', icon: '💬' },
-            habitLink: { name: 'ربط بالعادات', icon: '🔗' },
-            funStats: { name: 'إحصائيات ممتعة', icon: '📊' },
-            faqs: { name: 'الأسئلة الشائعة', icon: '❓' },
-            relatedTopics: { name: 'مواضيع مرتبطة', icon: '🔗' },
-            references: { name: 'روابط ومراجع', icon: '📚' },
-            timeline: { name: 'التسلسل الزمني', icon: '📅' },
-            // أقسام اكتُشفت من API v3.6
-            practicalApplication: { name: 'التطبيق العملي', icon: '🏆' },
-            commonMistakes: { name: 'أخطاء شائعة', icon: '⚠️' },
+        // ============ 🏗️ Smart Section Resolver — DRY + SSOT + Auto ============
+        // 📌 مصدر واحد: name + icon + color في مكان واحد لكل قسم
+        const KNOWN_SECTIONS = {
+            // ═══ الأقسام الأساسية ═══
+            metadata: { name: 'بيانات الدرس', icon: '📋', color: 'amber' },
+            overview: { name: 'نظرة عامة', icon: '📋', color: 'amber' },
+            podcast: { name: 'البودكاست', icon: '🎙️', color: 'blue' },
+            characters: { name: 'الشخصيات', icon: '👥', color: 'purple' },
+            quranHadith: { name: 'الآيات والأحاديث', icon: '📖', color: 'amber' },
+            quran: { name: 'القرآن الكريم', icon: '📖', color: 'amber' },
+            fiqh: { name: 'الأحكام الفقهية', icon: '🕌', color: 'amber' },
+            questions: { name: 'الأسئلة', icon: '❓', color: 'green' },
+            benefits: { name: 'الفوائد', icon: '💎', color: 'green' },
+            stories: { name: 'القصص', icon: '📚', color: 'pink' },
+            analysis: { name: 'التحليل', icon: '🔍', color: 'blue' },
+            // ═══ أقسام ديناميكية (13+) ═══
+            lessonMap: { name: 'خريطة الدرس', icon: '🗺️', color: 'blue' },
+            mainPoints: { name: 'النقاط الرئيسية', icon: '📌', color: 'green' },
+            comprehensiveSummary: { name: 'الملخص الشامل', icon: '📋', color: 'teal' },
+            rulings: { name: 'ميزان الأحكام', icon: '⚖️', color: 'red' },
+            fatawa: { name: 'الفتاوى والمسائل', icon: '❓', color: 'red' },
+            kidsCorner: { name: 'بستان الأطفال', icon: '🎨', color: 'pink' },
+            practicalApplications: { name: 'التطبيقات العملية', icon: '🎯', color: 'teal' },
+            practicalApplication: { name: 'التطبيق العملي', icon: '🏆', color: 'teal' },
+            terminology: { name: 'شرح المصطلحات', icon: '📖', color: 'purple' },
+            scholarQuotes: { name: 'أقوال العلماء', icon: '📜', color: 'gold' },
+            realLifeScenarios: { name: 'ربط بالواقع', icon: '🌍', color: 'teal' },
+            realLifeApplications: { name: 'ربط بالواقع', icon: '🌍', color: 'teal' },
+            etiquettes: { name: 'الآداب والسلوكيات', icon: '🎩', color: 'purple' },
+            mindMap: { name: 'الخريطة الذهنية', icon: '🧠', color: 'blue' },
+            flashcards: { name: 'بطاقات الحفظ', icon: '🃏', color: 'amber' },
+            socialMedia: { name: 'للسوشيال ميديا', icon: '📱', color: 'blue' },
+            commonMistakes: { name: 'أخطاء شائعة', icon: '⚠️', color: 'red' },
+            ideas: { name: 'الأفكار الرئيسية', icon: '💡', color: 'green' },
+            advice: { name: 'النصائح العملية', icon: '🎯', color: 'teal' },
+            prosAndCons: { name: 'الإيجابي والسلبي', icon: '💎', color: 'purple' },
+            // ═══ أقسام خاصة ═══
+            suggestions: { name: 'اقتراحات ومقترحات', icon: '💡', color: 'green' },
+            opinion: { name: 'الرأي والتحليل', icon: '👁️', color: 'teal' },
+            proTips: { name: 'لمسة احترافية', icon: '👔', color: 'blue' },
+            innovation: { name: 'ركن الابتكار', icon: '🚀', color: 'purple' },
+            strategy: { name: 'الاستراتيجية والخطط', icon: '♟️', color: 'blue' },
+            bestPractice: { name: 'الأفضل والأحسن', icon: '🏆', color: 'gold' },
+            smartInsights: { name: 'لمسات ذكية', icon: '🧠', color: 'purple' },
+            flexibility: { name: 'المرونة والبدائل', icon: '🔄', color: 'teal' },
+            dynamicFlow: { name: 'الديناميكية والتطور', icon: '🌊', color: 'blue' },
+            conclusion: { name: 'الخلاصة', icon: '🏁', color: 'gold' },
+            // ═══ أقسام مكتشفة ═══
+            bookmarks: { name: 'العلامات المرجعية', icon: '🔖', color: 'gold' },
+            weeklyPlan: { name: 'خطة الأسبوع', icon: '📆', color: 'green' },
+            visualization: { name: 'مشهد تخيلي', icon: '🎬', color: 'pink' },
+            beforeAfter: { name: 'قبل وبعد', icon: '🔄', color: 'purple' },
+            progressLadder: { name: 'سلم التدرج', icon: '🪜', color: 'blue' },
+            badges: { name: 'شارات الإنجاز', icon: '🏆', color: 'gold' },
+            imaginaryDialogues: { name: 'حوارات متخيلة', icon: '💬', color: 'teal' },
+            habitLink: { name: 'ربط بالعادات', icon: '🔗', color: 'green' },
+            funStats: { name: 'إحصائيات ممتعة', icon: '📊', color: 'blue' },
+            faqs: { name: 'الأسئلة الشائعة', icon: '❓', color: 'purple' },
+            relatedTopics: { name: 'مواضيع مرتبطة', icon: '🔗', color: 'teal' },
+            references: { name: 'روابط ومراجع', icon: '📚', color: 'blue' },
+            timeline: { name: 'التسلسل الزمني', icon: '📅', color: 'amber' },
+            quranVerses: { name: 'آيات قرآنية', icon: '📖', color: 'amber' },
+            hadithCollection: { name: 'الأحاديث', icon: '📜', color: 'gold' },
+            practicalSteps: { name: 'خطوات عملية', icon: '👣', color: 'teal' },
+            visualMetaphor: { name: 'استعارة بصرية', icon: '🖼️', color: 'pink' },
+            keyTakeaways: { name: 'النقاط الرئيسية', icon: '🔑', color: 'purple' },
+            // ═══ أقسام مكتشفة من دروس جديدة ═══
+            points: { name: 'النقاط', icon: '📌', color: 'green' },
+            source: { name: 'المصدر', icon: '📚', color: 'blue' },
+            wrong: { name: 'الخطأ', icon: '❌', color: 'red' },
+            right: { name: 'الصواب', icon: '✅', color: 'green' },
+            situation: { name: 'الموقف', icon: '📍', color: 'amber' },
+            answer: { name: 'الإجابة', icon: '💬', color: 'green' },
+            action: { name: 'الفعل', icon: '🎯', color: 'teal' },
+            mistake: { name: 'الخطأ الشائع', icon: '⚠️', color: 'red' },
+            name: { name: 'الاسم', icon: '🏷️', color: 'blue' },
+            keyTopics: { name: 'المواضيع الرئيسية', icon: '🔑', color: 'purple' },
+            keyPoints: { name: 'النقاط الأساسية', icon: '📌', color: 'green' },
+            correction: { name: 'التصحيح', icon: '✏️', color: 'green' },
+            keyT: { name: 'النقاط الرئيسية', icon: '🔑', color: 'purple' },
         };
 
-        // ============ 🌈 قاموس ألوان الأقسام (Section Colors Map) ============
-        const SECTION_COLORS = {
-            // الأقسام الأساسية
-            overview: 'amber',
-            podcast: 'blue',
-            characters: 'purple',
-            quranHadith: 'amber',
-            quran: 'amber',
-            fiqh: 'amber',
-            questions: 'green',
-            benefits: 'green',
-            stories: 'pink',
-            analysis: 'blue',
-            // أقسام ديناميكية
-            socialMedia: 'blue',
-            kidsCorner: 'pink',
-            scholarQuotes: 'gold',
-            rulings: 'red',
-            fatawa: 'red',
-            practicalApplications: 'teal',
-            practicalApplication: 'teal',
-            commonMistakes: 'red',
-            terminology: 'purple',
-            progressLadder: 'blue',
-            badges: 'gold',
-            imaginaryDialogues: 'teal',
-            habitLink: 'green',
-            funStats: 'blue',
-            faqs: 'purple',
-            relatedTopics: 'teal',
-            references: 'blue',
-            timeline: 'amber',
-            weeklyPlan: 'green',
-            visualization: 'pink',
-            beforeAfter: 'purple',
-            bookmarks: 'gold',
-            realLifeApplications: 'teal',
-            innovation: 'purple',
-            proTips: 'blue',
-            opinion: 'teal',
-            conclusion: 'gold',
-        };
+        // ============ 🎨 الألوان المسموحة (Allowlist) ============
+        const ALLOWED_COLORS = ['blue', 'green', 'purple', 'pink', 'amber', 'teal', 'gold', 'red'];
 
-        // ============ 🎨 نظام الألوان الديناميكي (Dynamic Card Colors) ============
-        const CARD_COLORS = ['blue', 'green', 'purple', 'pink', 'amber', 'teal', 'gold', 'red'];
-        let cardColorIndex = 0; // Global counter for card colors
+        // ============ 🧠 SectionResolver — نقطة دخول واحدة (DRY + SSOT + Sanitized) ============
+        const SectionResolver = {
+            _cache: {}, // cache للأداء
 
-        // دالة للحصول على اللون التالي
-        function getNextCardColor(sectionKey) {
-            // استثناء: القرآن يفضل بلون amber دائماً
-            if (sectionKey === 'quran' || sectionKey === 'quranHadith' || sectionKey === 'ayat') {
-                return 'amber';
+            // 🎯 الدالة الرئيسية — resolve(lesson, key) → {name, icon, color}
+            resolve(lesson, key) {
+                const cacheKey = (lesson?._id || '') + ':' + key;
+                if (this._cache[cacheKey]) return this._cache[cacheKey];
+
+                const result = {
+                    name: this._resolveName(lesson, key),
+                    icon: this._resolveIcon(lesson, key),
+                    color: this._resolveColor(lesson, key),
+                };
+                this._cache[cacheKey] = result;
+                return result;
+            },
+
+            // طبقة 1: JSON._sectionLabels → طبقة 2: KNOWN_SECTIONS → طبقة 3: Auto
+            _resolveName(lesson, key) {
+                // 1️⃣ من الـ JSON نفسه (مع sanitization)
+                const jsonLabel = lesson?._sectionLabels?.[key]?.name;
+                if (jsonLabel && typeof jsonLabel === 'string') {
+                    return jsonLabel.trim().substring(0, 50);
+                }
+                // 2️⃣ من القاموس الثابت (fallback للقديم)
+                if (KNOWN_SECTIONS[key]?.name) return KNOWN_SECTIONS[key].name;
+                // 3️⃣ Auto-format ذكي
+                return this._autoFormatName(key);
+            },
+
+            _resolveIcon(lesson, key) {
+                // 1️⃣ من JSON (سماح emoji فقط)
+                const jsonIcon = lesson?._sectionLabels?.[key]?.icon;
+                if (jsonIcon && typeof jsonIcon === 'string' && this._isValidIcon(jsonIcon)) {
+                    return jsonIcon;
+                }
+                // 2️⃣ من القاموس → 3️⃣ default
+                return KNOWN_SECTIONS[key]?.icon || '✨';
+            },
+
+            _resolveColor(lesson, key) {
+                // 1️⃣ من JSON (allowlist فقط)
+                const jsonColor = lesson?._sectionLabels?.[key]?.color;
+                if (jsonColor && ALLOWED_COLORS.includes(jsonColor)) {
+                    return jsonColor;
+                }
+                // 2️⃣ من القاموس → 3️⃣ auto hash
+                return KNOWN_SECTIONS[key]?.color || this._autoColor(key);
+            },
+
+            // ✨ تحويل camelCase لعنوان مقروء
+            _autoFormatName(key) {
+                return key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, c => c.toUpperCase())
+                    .trim();
+            },
+
+            // 🎨 لون ديناميكي ثابت لكل key (hash-based)
+            _autoColor(key) {
+                if (!key) return ALLOWED_COLORS[0];
+                let hash = 0;
+                for (let i = 0; i < key.length; i++) {
+                    hash = key.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return ALLOWED_COLORS[Math.abs(hash) % ALLOWED_COLORS.length];
+            },
+
+            // ✅ أيقونة صالحة = emoji أو FA class
+            _isValidIcon(icon) {
+                // سماح emoji (أي حرف فوق U+2000) أو FontAwesome pattern
+                if (/^fa-(solid|regular|brands) fa-[a-z0-9-]+$/.test(icon)) return true;
+                if (icon.length <= 4 && /[^\x00-\x7F]/.test(icon)) return true;
+                return false;
+            },
+
+            // ترجمة مفتاح فرعي
+            translateSubKey(key) {
+                return KNOWN_SUB_KEYS[key] || this._autoFormatName(key);
+            },
+
+            // تنظيف الكاش (عند تحميل درس جديد)
+            clearCache() {
+                this._cache = {};
+            },
+
+            // ============ 🧪 Auto-Discovery Logger ============
+            _discoveryLog: {},  // { key: { count, lessons[], firstSeen } }
+
+            logDiscovery(key, lessonTitle) {
+                if (KNOWN_SECTIONS[key]) return; // معروف → مش محتاج log
+                if (!this._discoveryLog[key]) {
+                    this._discoveryLog[key] = { count: 0, lessons: [], firstSeen: Date.now() };
+                }
+                this._discoveryLog[key].count++;
+                if (lessonTitle && !this._discoveryLog[key].lessons.includes(lessonTitle)) {
+                    this._discoveryLog[key].lessons.push(lessonTitle);
+                }
+            },
+
+            // 📊 تقرير الاكتشاف (Discovery Levels — ألوان حسب عدد الظهور)
+            printDiscoveryReport() {
+                const unknowns = Object.keys(this._discoveryLog);
+                if (unknowns.length === 0) {
+                    console.log('%c✅ كل الأقسام معروفة — مفيش أقسام جديدة!', 'color: #3FD47B; font-weight: bold');
+                    return;
+                }
+                console.group('%c🧪 Auto-Discovery Report', 'color: #FFD700; font-size: 14px; font-weight: bold');
+                console.warn(`⚠️ ${unknowns.length} قسم جديد غير معروف:`);
+                unknowns.forEach(key => {
+                    const d = this._discoveryLog[key];
+                    // Discovery Levels: أحمر (10+) / برتقالي (3+) / أخضر (1-2)
+                    const color = d.count >= 10 ? '#ff4444' : d.count >= 3 ? '#ffaa00' : '#44ff44';
+                    const level = d.count >= 10 ? '🔴 CRITICAL' : d.count >= 3 ? '🟡 WARN' : '🟢 INFO';
+                    console.log(
+                        `%c  ${level} %c"${key}"%c → ظهر ${d.count} مرة في: ${d.lessons.join('، ')}`,
+                        `color: ${color}; font-weight: bold`,
+                        'color: #E0E0E0; font-weight: bold',
+                        'color: #AAAAAA'
+                    );
+                });
+                console.log('%c💡 ضيفهم في KNOWN_SECTIONS عشان يظهروا بالعربي!', 'color: #64B5F6');
+                console.groupEnd();
+            },
+
+            // 📤 Export JSON جاهز للإضافة في KNOWN_SECTIONS
+            exportDiscoveryJSON() {
+                const unknowns = Object.keys(this._discoveryLog);
+                if (unknowns.length === 0) {
+                    console.log('✅ مفيش أقسام جديدة للتصدير');
+                    return {};
+                }
+                const exported = {};
+                unknowns.forEach(key => {
+                    exported[key] = {
+                        name: this._autoFormatName(key),
+                        icon: this._suggestIcon(key),
+                        color: this._autoColor(key)
+                    };
+                });
+                console.group('%c📤 Export Ready — انسخ وألصق في KNOWN_SECTIONS:', 'color: #64B5F6; font-weight: bold');
+                console.log(JSON.stringify(exported, null, 2));
+                console.groupEnd();
+                return exported;
+            },
+
+            // 🎯 اقتراح أيقونة ذكية (keyword-based)
+            _suggestIcon(key) {
+                const k = key.toLowerCase();
+                if (/quran|verse|ayah|ayat/.test(k)) return '📖';
+                if (/hadith|prophet|sunnah/.test(k)) return '📜';
+                if (/dua|prayer|duaa/.test(k)) return '🤲';
+                if (/story|character|narrative/.test(k)) return '👥';
+                if (/benefit|fayda|reward/.test(k)) return '💎';
+                if (/question|quiz|test/.test(k)) return '❓';
+                if (/action|step|practical/.test(k)) return '🎯';
+                if (/warning|mistake|error|wrong/.test(k)) return '⚠️';
+                if (/kid|child|toddler/.test(k)) return '🎨';
+                if (/tip|advice|insight/.test(k)) return '💡';
+                if (/summary|overview|conclusion/.test(k)) return '📋';
+                if (/timeline|history|date/.test(k)) return '📅';
+                return '✨';
+            },
+
+            // ============ 🎯 Smart Section Ordering ============
+            // Priority Score (تنازلي: الأعلى رقم = الأعلى أهمية)
+            sortSectionKeys(keys) {
+                return [...keys].sort((a, b) => {
+                    const scoreA = SECTION_PRIORITY[a] ?? 0;
+                    const scoreB = SECTION_PRIORITY[b] ?? 0;
+                    return scoreB - scoreA; // تنازلي = الأعلى أولاً
+                });
             }
-            // باقي الكروت: ألوان متناوبة
-            const color = CARD_COLORS[cardColorIndex % CARD_COLORS.length];
-            cardColorIndex++;
-            return color;
-        }
+        };
 
-        // دالة لإعادة تعيين العداد (تُستدعى عند تحميل درس جديد)
+        // ============ 🎯 SECTION_PRIORITY — ترتيب الأقسام حسب الأهمية ============
+        // الأعلى رقم = الأعلى أهمية (أول حاجة تظهر)
+        const SECTION_PRIORITY = {
+            // 🥇 الطبقة 1: القرآن والسنة (90-100)
+            quranHadith: 100,
+            quranVerses: 95,
+            quran: 95,
+            hadithCollection: 90,
+            // 🥈 الطبقة 2: الملخص والنقاط (70-89)
+            overview: 85,
+            keyTakeaways: 80,
+            keyPoints: 78,
+            mainPoints: 76,
+            points: 74,
+            ideas: 72,
+            // 🥉 الطبقة 3: الشخصيات والقصص (50-69)
+            characters: 65,
+            stories: 60,
+            timeline: 55,
+            // الطبقة 4: الفوائد والأحكام (30-49)
+            benefits: 48,
+            fiqh: 46,
+            rulings: 44,
+            practicalSteps: 42,
+            practicalApplications: 40,
+            practicalApplication: 40,
+            advice: 38,
+            etiquettes: 36,
+            commonMistakes: 34,
+            // الطبقة 5: التفاعلي (20-29)
+            questions: 28,
+            kidsCorner: 26,
+            badges: 24,
+            flashcards: 22,
+            // الطبقة 6: التكميلي (5-19)
+            analysis: 18,
+            podcast: 16,
+            socialMedia: 14,
+            faqs: 12,
+            references: 10,
+            relatedTopics: 8,
+            bookmarks: 6,
+        };
+
+        // 🔧 Developer UX — أمر واحد يطبع حالة النظام كلها
+        window.__sectionsReport = function () {
+            console.group('%c📊 Sections System Report', 'color: #FFD700; font-size: 16px; font-weight: bold');
+            console.log(`📚 KNOWN_SECTIONS: ${Object.keys(KNOWN_SECTIONS).length} قسم معروف`);
+            console.log(`🎯 SECTION_PRIORITY: ${Object.keys(SECTION_PRIORITY).length} قسم مرتب`);
+            SectionResolver.printDiscoveryReport();
+            SectionResolver.exportDiscoveryJSON();
+            console.groupEnd();
+        };
+
+        // ⬇️ backward-compatible aliases (عشان الكود القديم ميتكسرش)
+        const SECTION_LABELS = KNOWN_SECTIONS;
+        const SECTION_COLORS = new Proxy({}, {
+            get: (_, key) => KNOWN_SECTIONS[key]?.color || SectionResolver._autoColor(key)
+        });
+
+        // دالة للحصول على اللون (backward-compatible)
+        function getNextCardColor(sectionKey) {
+            if (!sectionKey) return ALLOWED_COLORS[0];
+            return KNOWN_SECTIONS[sectionKey]?.color || SectionResolver._autoColor(sectionKey);
+        }
         function resetCardColors() {
-            cardColorIndex = 0;
+            SectionResolver.clearCache();
         }
 
-        // ============ 📖 قاموس ترجمة المحتوى الداخلي (Sub-Key Labels) ============
-        const SUB_KEY_LABELS = {
+        // ============ 📖 قاموس ترجمة المحتوى الداخلي (KNOWN_SUB_KEYS) ============
+        const KNOWN_SUB_KEYS = {
             ageRange: 'الفئة العمرية',
             learningOutcome: 'ماذا يتعلم الطفل',
             activity: 'النشاط',
@@ -921,6 +1127,11 @@
             // مفاتيح من commonMistakes
             severity: 'الخطورة',
             reason: 'السبب',
+            // مفاتيح من test_dynamic_import.json
+            tafsir: 'التفسير',
+            step: 'الخطوة',
+            metadata: 'البيانات',
+            ageRange: 'الفئة العمرية',
             // مفاتيح من socialMedia
             tweet: 'تغريدة',
             whatsappStatus: 'حالة واتساب',
@@ -953,6 +1164,8 @@
             text: 'النص',
             duration: 'المدة',
         };
+        // ⬇️ backward-compatible alias
+        const SUB_KEY_LABELS = KNOWN_SUB_KEYS;
 
         function renderLessonsGrid(lessons) {
             const grid = document.getElementById('lessonsGrid');
@@ -1056,19 +1269,25 @@
                 sections.push({ id: 'analysis', icon: '🔍', name: 'التحليل' });
             }
 
-            // Add dynamic/custom sections to navigation (مع الترجمة العربية)
-            for (const [key, value] of Object.entries(lesson)) {
-                if (knownKeys.includes(key)) continue;
-                if (value === null || value === undefined) continue;
-                if (Array.isArray(value) && value.length === 0) continue;
-                if (typeof value === 'object' && Object.keys(value).length === 0) continue;
+            // Add dynamic/custom sections to navigation (مع Smart Section Resolver + Smart Ordering)
+            const dynamicKeys = Object.keys(lesson).filter(key => {
+                if (knownKeys.includes(key)) return false;
+                const value = lesson[key];
+                if (value === null || value === undefined) return false;
+                if (Array.isArray(value) && value.length === 0) return false;
+                if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+                return true;
+            });
 
-                // استخدام القاموس العربي + أيقونة افتراضية لو مش موجود
-                const sectionInfo = SECTION_LABELS[key];
-                const label = sectionInfo ? sectionInfo.name : key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
-                const icon = sectionInfo ? sectionInfo.icon : '✨';
-                if (!sectionInfo) console.warn(`⚠️ قسم جديد مش في القاموس: "${key}" - ضيفه في SECTION_LABELS`);
-                sections.push({ id: key, icon: icon, name: label });
+            // 🎯 Smart Section Ordering — ترتيب حسب الأهمية
+            const sortedKeys = SectionResolver.sortSectionKeys(dynamicKeys);
+
+            for (const key of sortedKeys) {
+                // 🧠 SectionResolver — 3 طبقات: JSON → KNOWN → Auto
+                const info = SectionResolver.resolve(lesson, key);
+                // 🧪 Auto-Discovery Logger
+                SectionResolver.logDiscovery(key, lesson.title || 'بدون عنوان');
+                sections.push({ id: key, icon: info.icon, name: info.name });
             }
 
             nav.innerHTML = sections.map((s, i) => `
@@ -1138,15 +1357,23 @@
                 // Metadata fields
                 'sheikhId', 'categoryId', 'selectedCategoryId', 'sectionId',
                 // Enriched fields from Public API
-                'sheikhName', 'sheikhImage', 'categoryName', 'categoryIcon', 'categoryColor'];
+                'sheikhName', 'sheikhImage', 'categoryName', 'categoryIcon', 'categoryColor',
+                // Smart Section Resolver metadata
+                '_sectionLabels'];
 
-            for (const [key, value] of Object.entries(lesson)) {
-                if (knownKeys.includes(key)) continue;
-                if (value === null || value === undefined) continue;
-                if (Array.isArray(value) && value.length === 0) continue;
-                if (typeof value === 'object' && Object.keys(value).length === 0) continue;
+            // 🎯 Smart Section Ordering — نفس الترتيب اللي في الـ Nav
+            const dynamicContentKeys = Object.keys(lesson).filter(key => {
+                if (knownKeys.includes(key)) return false;
+                const value = lesson[key];
+                if (value === null || value === undefined) return false;
+                if (Array.isArray(value) && value.length === 0) return false;
+                if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+                return true;
+            });
+            const sortedContentKeys = SectionResolver.sortSectionKeys(dynamicContentKeys);
 
-                html += renderDynamicSection(key, value);
+            for (const key of sortedContentKeys) {
+                html += renderDynamicSection(key, lesson[key], lesson);
             }
 
             // ============ FALLBACK: لو مفيش محتوى خالص ============
@@ -1227,9 +1454,9 @@
             }[m]));
         }
 
-        // ترجمة المفتاح الداخلي للعربي
+        // ترجمة المفتاح الداخلي للعربي (يستخدم SectionResolver)
         function translateKey(key) {
-            return SUB_KEY_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+            return SectionResolver.translateSubKey(key);
         }
 
         // عرض أي قيمة بشكل ذكي (recursive)
@@ -1304,11 +1531,11 @@
                 '</div>';
         }
 
-        function renderDynamicSection(key, data) {
-            // استخدام القاموس العربي للعنوان والأيقونة
-            const sectionInfo = SECTION_LABELS[key];
-            const label = sectionInfo ? sectionInfo.name : key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
-            const icon = sectionInfo ? sectionInfo.icon : '✨';
+        function renderDynamicSection(key, data, lesson = null) {
+            // 🧠 SectionResolver — 3 طبقات: JSON → KNOWN → Auto
+            const info = SectionResolver.resolve(lesson, key);
+            const label = info.name;
+            const icon = info.icon;
 
             let contentHtml = '';
 

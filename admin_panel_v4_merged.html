@@ -3550,7 +3550,7 @@
                 </div>
                 <div class="stat-card">
                     <h3 id="sheikhsCount">0</h3>
-                    <p><i class="fa-solid fa-user"></i> الشيوخ</p>
+                    <p><i class="fa-solid fa-user"></i> المشايخ</p>
                 </div>
                 <div class="stat-card">
                     <h3 id="lessonsCount">0</h3>
@@ -3566,7 +3566,7 @@
                     Master Input</button>
                 <button class="tab" onclick="showTab('sections')"><i class="fa-solid fa-book-open"></i> أقسام
                     الدروس</button>
-                <button class="tab" onclick="showTab('sheikhs')"><i class="fa-solid fa-user"></i> الشيوخ</button>
+                <button class="tab" onclick="showTab('sheikhs')"><i class="fa-solid fa-user"></i> المشايخ</button>
                 <button class="tab" onclick="showTab('lessons')"><i class="fa-solid fa-book-quran"></i> الدروس</button>
                 <button class="tab" onclick="showTab('addLesson')"><i class="fa-solid fa-plus"></i> إضافة درس</button>
                 <button class="tab" onclick="showTab('navItems')"><i class="fa-solid fa-bars"></i> شريط التنقل</button>
@@ -3723,7 +3723,7 @@
 
             <!-- Sheikhs Panel -->
             <div id="sheikhs" class="panel">
-                <h2><i class="fa-solid fa-user"></i> إدارة الشيوخ</h2>
+                <h2><i class="fa-solid fa-user"></i> إدارة المشايخ</h2>
                 <div class="form-group">
                     <label>اسم الشيخ</label>
                     <div style="display:flex; gap:10px">
@@ -5257,7 +5257,7 @@
 
         // ============ Copy & Move Lesson ============
 
-        // دالة مشتركة لملء selects الشيوخ والأقسام (DRY)
+        // دالة مشتركة لملء selects المشايخ والأقسام (DRY)
         async function loadSelectsForModal(sheikhSelectId, catSelectId, sheikhDefault, catDefault) {
             const sheikhSelect = document.getElementById(sheikhSelectId);
             sheikhSelect.innerHTML = `<option value="">${sheikhDefault}</option>`;

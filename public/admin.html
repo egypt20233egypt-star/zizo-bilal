@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,7 +63,8 @@
       transition: all 0.3s;
     }
 
-    .tab:hover, .tab.active {
+    .tab:hover,
+    .tab.active {
       background: var(--gold);
       color: var(--dark);
     }
@@ -95,7 +97,9 @@
       color: var(--gold);
     }
 
-    input, textarea, select {
+    input,
+    textarea,
+    select {
       width: 100%;
       padding: 12px;
       border: 1px solid var(--gold);
@@ -161,9 +165,20 @@
       margin-right: 10px;
     }
 
-    .badge-success { background: #2ecc71; color: white; }
-    .badge-warning { background: #f39c12; color: white; }
-    .badge-draft { background: #95a5a6; color: white; }
+    .badge-success {
+      background: #2ecc71;
+      color: white;
+    }
+
+    .badge-warning {
+      background: #f39c12;
+      color: white;
+    }
+
+    .badge-draft {
+      background: #95a5a6;
+      color: white;
+    }
 
     .stats {
       display: grid;
@@ -204,7 +219,9 @@
       margin-bottom: 30px;
     }
 
-    .hidden { display: none !important; }
+    .hidden {
+      display: none !important;
+    }
 
     .message {
       padding: 15px;
@@ -212,10 +229,18 @@
       margin-bottom: 20px;
     }
 
-    .message-success { background: rgba(46, 204, 113, 0.2); border: 1px solid #2ecc71; }
-    .message-error { background: rgba(231, 76, 60, 0.2); border: 1px solid #e74c3c; }
+    .message-success {
+      background: rgba(46, 204, 113, 0.2);
+      border: 1px solid #2ecc71;
+    }
+
+    .message-error {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid #e74c3c;
+    }
   </style>
 </head>
+
 <body>
 
   <!-- Login Form -->
@@ -248,7 +273,7 @@
         </div>
         <div class="stat-card">
           <h3 id="sheikhsCount">0</h3>
-          <p>الشيوخ</p>
+          <p>المشايخ</p>
         </div>
         <div class="stat-card">
           <h3 id="lessonsCount">0</h3>
@@ -258,7 +283,7 @@
 
       <div class="tabs">
         <button class="tab active" onclick="showTab('sections')">📚 الأقسام</button>
-        <button class="tab" onclick="showTab('sheikhs')">👤 الشيوخ</button>
+        <button class="tab" onclick="showTab('sheikhs')">👤 المشايخ</button>
         <button class="tab" onclick="showTab('lessons')">📖 الدروس</button>
         <button class="tab" onclick="showTab('addLesson')">➕ إضافة درس</button>
       </div>
@@ -266,13 +291,14 @@
       <!-- Sections Panel -->
       <div id="sections" class="panel active">
         <h2>إدارة الأقسام</h2>
-        <button class="btn btn-primary" onclick="seedSections()" style="margin-bottom:20px">🌱 إضافة الأقسام الافتراضية</button>
+        <button class="btn btn-primary" onclick="seedSections()" style="margin-bottom:20px">🌱 إضافة الأقسام
+          الافتراضية</button>
         <div id="sectionsList"></div>
       </div>
 
       <!-- Sheikhs Panel -->
       <div id="sheikhs" class="panel">
-        <h2>إدارة الشيوخ</h2>
+        <h2>إدارة المشايخ</h2>
         <div class="form-group">
           <label>اسم الشيخ</label>
           <input type="text" id="sheikhName" placeholder="مثال: الشيخ الشعراوي">
@@ -328,7 +354,7 @@
           body: JSON.stringify({ username, password })
         });
         const data = await res.json();
-        
+
         if (data.token) {
           localStorage.setItem('token', data.token);
           token = data.token;
@@ -364,7 +390,7 @@
       const res = await fetch(`${API}/api/sections`);
       const sections = await res.json();
       document.getElementById('sectionsCount').textContent = sections.length;
-      
+
       const list = document.getElementById('sectionsList');
       list.innerHTML = sections.map(s => `
         <div class="list-item">
@@ -386,7 +412,7 @@
       const res = await fetch(`${API}/api/sheikhs`);
       const sheikhs = await res.json();
       document.getElementById('sheikhsCount').textContent = sheikhs.length;
-      
+
       const list = document.getElementById('sheikhsList');
       list.innerHTML = sheikhs.map(s => `
         <div class="list-item">
@@ -397,7 +423,7 @@
 
       // Update sheikh select
       const select = document.getElementById('lessonSheikh');
-      select.innerHTML = '<option value="">اختر الشيخ</option>' + 
+      select.innerHTML = '<option value="">اختر الشيخ</option>' +
         sheikhs.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
     }
 
@@ -424,7 +450,7 @@
       const res = await fetch(`${API}/api/lessons`);
       const lessons = await res.json();
       document.getElementById('lessonsCount').textContent = lessons.length;
-      
+
       const list = document.getElementById('lessonsList');
       list.innerHTML = lessons.length ? lessons.map(l => `
         <div class="list-item">
@@ -473,4 +499,5 @@
     }
   </script>
 </body>
+
 </html>

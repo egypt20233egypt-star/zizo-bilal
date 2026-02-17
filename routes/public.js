@@ -42,12 +42,12 @@ router.get('/landing', async (req, res) => {
             });
         }
 
-        // ═══ 3. الشيوخ + عدد دروسهم ═══
+        // ═══ 3. المشايخ + عدد دروسهم ═══
         const sheikhs = await Sheikh.find({ isActive: true })
             .select('name image')
             .lean();
 
-        // بناء map لأسماء الشيوخ (sheikhId = String في Lesson)
+        // بناء map لأسماء المشايخ (sheikhId = String في Lesson)
         const sheikhMap = {};
         for (let sheikh of sheikhs) {
             sheikh.lessonCount = await Lesson.countDocuments({
@@ -136,7 +136,7 @@ async function enrichLessons(lessons) {
     const sheikhIds = [...new Set(lessons.map(l => l.sheikhId).filter(Boolean))];
     const categoryIds = [...new Set(lessons.map(l => l.categoryId).filter(Boolean))];
 
-    // 2. جلب الشيوخ والأقسام دفعة واحدة (أسرع من populate)
+    // 2. جلب المشايخ والأقسام دفعة واحدة (أسرع من populate)
     const [sheikhs, categories] = await Promise.all([
         Sheikh.find({ _id: { $in: sheikhIds } }).select('name image').lean(),
         Category.find({ _id: { $in: categoryIds } }).select('name icon color').lean()
@@ -201,7 +201,7 @@ router.get('/lessons', async (req, res) => {
             Lesson.countDocuments(filter)
         ]);
 
-        // إثراء بأسماء الشيوخ والأقسام
+        // إثراء بأسماء المشايخ والأقسام
         const enriched = await enrichLessons(lessons);
 
         const result = {
