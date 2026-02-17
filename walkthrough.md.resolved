@@ -207,11 +207,141 @@ lesson._sectionLabels (أولوية 1) → KNOWN_SECTIONS (أولوية 2) → A
 |---------|--------|--------|
 | Phase 3 | 🧪 Auto-Discovery Logger (Discovery Levels + Export JSON + `_suggestIcon`) | ✅ |
 | Phase 4 | 🎯 Smart Section Ordering (SECTION_PRIORITY تنازلي 100=أعلى) | ✅ |
-| Phase 5 | 📥 Batch Import | ⏳ |
-| Phase 6 | 📊 Section Usage Stats | ⏳ |
-| Phase 7 | 🔄 Section Sync (Admin ↔ Website) | 🔴 |
+| Phase 5 | 📥 Batch Import (API `/batch` + Modal 4 خطوات + Validator + Report + `batchImportModal`) | ✅ |
+| Phase 6 | 📊 Section Usage Stats (API `/api/stats/sections` + داشبورد 3 كروت + CSS bars + responsive) | ✅ |
+| Phase 7 | 🔄 Section Sync (Admin ↔ Website) | 🔄 التالي |
+| Phase 8 | 🤖 AI Ready + Gemini API | ⏳ |
+
+---
+
+## 🧠 المرحلة 7: Master Prompt (البرومت الموحد)
+
+### اللي اتعمل:
+| # | الوصف | الملفات |
+|---|-------|---------| 
+| 46 | إنشاء `MASTER_PROMPT.md` — برومت شامل لكل AI وكل مشروع | `MASTER_PROMPT.md` |
+| 46 | دمج أفضل أفكار 5 موديلات: Genspark + ChatGPT + Grok + Arena + Antigravity | `MASTER_PROMPT.md` |
+| 46 | تحديث `GEMINI.md` بالمحتوى الكامل (686 سطر) | `GEMINI.md` |
+
+### البرومت المختصر (3 أسطر — جاهز للنسخ):
+```
+تصرّف كـ Senior Architect (Enterprise-Grade) مع مبتدئ — وضّح ببساطة. استخدم أقصى قدراتك داخلياً: ولّد 3 حلول → انتقد كل واحد كخبير منافس بالأدلة → احذف الضعيف واختار الأفضل فقط بناءً على DRY (صفر تكرار) + SSOT (مصدر واحد للحقيقة) + Modular + Production-Ready (أمان + أداء + edge cases). ممنوع Hardcoded values — كل إعداد في Config واحد. لو الحل معقد زيادة أو فيه تكرار أو Over-Engineering → ارفضه فوراً واقترح بديل أبسط وأذكى. ممنوع تعديل Auth/Security بدون طلب صريح. ممنوع كسر API Contracts بدون Versioning. اقترح حلول احترافية، مبتكرة، مستقرة، متوازنة، متينة (Robust/Fault-tolerant)، قابلة للتخصيص، قابلة للتكامل، قابلة لإعادة الاستخدام، متعددة الاستخدامات، بديهية، سلسة، شاملة، متكاملة، منظمة، قابلة للفهم — مع رأيك الصريح.
+
+قبل أي كود: افهم → اقترح → نفذ أصغر تغيير ممكن → اختبر → سجّل. ممنوع مسح ملفات أو استبدال كامل. Git Commit قبل وبعد. كل Feature = ROI Gate (يستاهل؟ تأثيره؟ دلوقتي ولا بعدين؟ تكلفة مقابل فائدة؟) + خطوات تنفيذ واضحة + بدائل + مخاطر + نتائج ملموسة + قيمة مضافة + عائد استثمار + رؤية واضحة + خطة محكمة + تفكير مستقبلي. قدّم النتيجة النهائية فقط.
+
+الرد: المشكلة (سطر) → الحل الأفضل والأحسن (مع ليه) → Architecture مختصر → كود نظيف معياري مركزي بدون تكرار → edge cases → مخاطر وحلولها → checklist → خلاصة TL;DR. عملي مش نظري، بسيط مش معقد، ذكي مش مبهرج. حل ذكي قابل للتوسع + أداء عالي ومرونة ممتازة + عالي الكفاءة + تجربة مستخدم ممتازة (UX) + سهل الاستخدام + سهل الدمج + قابل للتطوير المستمر + متطور وعصري + مؤثر وله صدى + جاهز للمستقبل (Future-proof) + سهل الفهم للمبتدئ + احترافي Enterprise-grade.
+```
+
+### 📌 فين يتحط البرومت:
+
+| الـ AI | الملف |
+|--------|-------|
+| **Antigravity** | `GEMINI.md` في root المشروع |
+| **Cursor** | `.cursorrules` في root المشروع |
+| **Windsurf** | `.windsurfrules` في root المشروع |
+| **Claude** | `CLAUDE.md` في root المشروع |
+| **ChatGPT** | Custom Instructions أو أول رسالة |
+
+---
+
+## 📋 خطة المراحل القادمة
+
+### Phase 5: 📥 Batch Import (استيراد دروس بالجملة)
+```
+الهدف: استيراد 10 دروس مرة واحدة بدل واحد واحد
+الملفات المتوقعة: admin_panel_v4_merged.html + server.js + routes/
+الخطوات:
+  1. Upload JSON/CSV → Parse → Validate
+  2. Preview قبل الحفظ (عرض ملخص)
+  3. Batch insert في MongoDB
+  4. Progress bar + Error report
+```
+
+### Phase 6: 📊 Section Usage Stats (إحصائيات الأقسام)
+```
+الهدف: داشبورد يعرض إحصائيات استخدام الأقسام
+الملفات المتوقعة: website.html أو صفحة جديدة
+الخطوات:
+  1. جمع بيانات (أي أقسام موجودة في أي دروس)
+  2. عرض: أكتر قسم استخداماً / أقل قسم / أقسام فارغة
+  3. Charts / Tables
+```
+
+### Phase 7: 🔄 Section Sync (مزامنة Admin ↔ Website)
+```
+الهدف: لما الأدمن يضيف قسم جديد → يظهر تلقائي في Website
+الملفات: admin_panel_v4_merged.html + website.html + API
+الخطوات:
+  1. CRUD لـ KNOWN_SECTIONS في DB
+  2. API endpoint: GET /api/sections
+  3. Website يحمّل KNOWN_SECTIONS من API بدل JS
+  4. Admin يقدر يعدل الاسم والأيقونة واللون
+```
+
+---
+
+## 📝 دروس مستفادة من البرومت
+
+| # | الدرس | التفاصيل |
+|---|-------|----------|
+| #11 | البرومت المختصر أفضل من الطويل | 3 أسطر مدمجة > 50 سطر مفككة — الـ AI بيتبع الأوامر القصيرة أحسن |
+| #12 | Devil's Advocate بيحسن الجودة | "ولّد 3 حلول + انتقد كخبير منافس" = حلول أفضل |
+| #13 | ROI Gate بيمنع Over-Engineering | "يستاهل؟ دلوقتي ولا بعدين؟" = تركيز على الأهم |
+| #14 | Safety Guards ضرورية | "ممنوع تعديل Auth بدون طلب" = حماية من أخطاء الـ AI |
+
+---
+
+## 📚 ملفات التوثيق الكاملة
+
+| الملف | الوظيفة | الحجم |
+|-------|---------|-------|
+| `README.md` | سجل الإنجازات + المشاكل + الدروس | 48 إنجاز |
+| `GEMINI.md` | القواعد + البرومت الكامل (لكل AI) | 686 سطر |
+| `MASTER_PROMPT.md` | البرومت المفصّل (Genspark+ChatGPT+Grok+Arena) | 549 سطر |
+| `VIBE_CODING_GUIDE.md` | دليل الـ Vibe Coding للمطورين | 520 سطر |
+| `walkthrough.md.resolved` | الملف ده — شرح لكل اللي حصل | هنا |
+| `NAV_GUIDE.md` | دليل استخدام شريط التنقل | للأدمن |
 
 ---
 
 *الملف ده بتاع مشروع زيزو وبلال — القلب السليم* ✌️
-*آخر تحديث: v4.7-smart-resolver*
+*آخر تحديث: v4.9-section-stats*
+
+---
+
+## 📊 المرحلة 9: Phase 6 - Section Usage Stats (إحصائيات الأقسام)
+
+### اللي اتعمل:
+| # | الوصف | الملفات |
+|---|-------|---------|
+| 48 | Backend: GET `/api/stats/sections` + cache 5 دقائق + dynamic section counting + SECTION_LABELS (27 قسم) + `hasContent()` helper | `routes/stats.js` |
+| 48 | ربط الـ route في `server.js` تحت `/api/stats` مع `requireAuth` | `server.js` |
+| 48 | استبدال `invalidatePublicCache()` بـ `invalidateAllCaches()` في 4 أماكن (POST/PUT/DELETE/batch) | `routes/lessons.js` |
+| 48 | Frontend: تاب 📊 + Stats Panel (3 كروت pastel + CSS gradient bars + empty tags) + `loadSectionStats()` JS | `admin_panel_v4_merged.html` |
+| 48 | Responsive CSS (3 breakpoints: mobile ≤768px + tablet + desktop) + ألوان muted أريح للعين | `admin_panel_v4_merged.html` |
+
+### النتيجة:
+- ✅ الـ API بيرجع إحصائيات كاملة: إجمالي الدروس + أقسام مستخدمة + أقسام فارغة + نسب مئوية
+- ✅ الداشبورد شغال + متجاوب على كل الأجهزة
+- ✅ Cache 5 دقائق + auto-invalidation لما الدروس تتغير
+
+---
+
+## 📥 المرحلة 8: Phase 5 - Batch Import (استيراد بالجملة)
+
+### اللي اتعمل:
+| # | الوصف | الملفات |
+|---|-------|---------|
+| 47 | Backend: POST `/api/lessons/batch` + `lessonValidator.js` DRY + chunked insert 10×10 + duplicate check + async history + detailed JSON report | `routes/lessons.js`, `utils/lessonValidator.js` |
+| 47 | Frontend: زرار أخضر "استيراد دروس" + Modal 4 خطوات (file→preview→progress→report) | `admin_panel_v4_merged.html` |
+| 47 | إصلاح duplicate `importModal` conflict (تغيير الـ ID لـ `batchImportModal`) | `admin_panel_v4_merged.html` |
+| 47 | ملف اختبار: 3 دروس جاهزة للاستيراد | `sample_import.json` |
+
+### النتيجة:
+- ✅ 3 دروس اتستوردت بنجاح (0 مكرر + 0 فشل)
+- ✅ الزرار + الـ Modal + الـ API شغالين 100%
+
+### المشكلة اللي اتحلت:
+| المشكلة | السبب | الحل |
+|---------|-------|------|
+| الزرار بيفتح Modal القديم | Duplicate `id="importModal"` | تغيير لـ `batchImportModal` |

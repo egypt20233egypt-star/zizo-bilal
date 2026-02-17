@@ -91,6 +91,7 @@ app.use('/api/sections', requireAuth, require('./routes/sections')); // Section 
 app.use('/api/sheikhs', requireAuth, require('./routes/sheikhs')); // Sheikhs API
 app.use('/api/categories', requireAuth, require('./routes/categories')); // Categories API (هرمي)
 app.use('/api/nav-items', requireAuth, require('./routes/navItems')); // Nav Items API (Bottom Nav)
+app.use('/api/stats', requireAuth, require('./routes/stats')); // 📊 Section Usage Stats API
 
 // Public API routes (بدون auth - للصفحة الرئيسية)
 app.use('/api/public', require('./routes/public'));

@@ -3570,6 +3570,8 @@
                 <button class="tab" onclick="showTab('lessons')"><i class="fa-solid fa-book-quran"></i> الدروس</button>
                 <button class="tab" onclick="showTab('addLesson')"><i class="fa-solid fa-plus"></i> إضافة درس</button>
                 <button class="tab" onclick="showTab('navItems')"><i class="fa-solid fa-bars"></i> شريط التنقل</button>
+                <button class="tab" onclick="showTab('sectionStats')"><i class="fa-solid fa-chart-bar"></i> 📊
+                    إحصائيات</button>
                 <button class="tab" onclick="showTab('preview')"><i class="fa-solid fa-eye"></i> معاينة</button>
             </div>
 
@@ -3751,9 +3753,13 @@
             <!-- Lessons Panel -->
             <div id="lessons" class="panel">
                 <h2><i class="fa-solid fa-book-quran"></i> الدروس المضافة</h2>
-                <div style="margin-bottom: 1rem;">
+                <div style="margin-bottom: 1rem; display: flex; gap: 10px; flex-wrap: wrap;">
                     <button class="btn btn-primary" onclick="openNewLessonEditor()">
                         <i class="fa-solid fa-plus"></i> إضافة درس جديد
+                    </button>
+                    <button class="btn" onclick="document.getElementById('batchImportModal').style.display='flex'"
+                        style="background: linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding: 10px 20px; border-radius: 12px; cursor:pointer;">
+                        <i class="fa-solid fa-file-import"></i> 📥 استيراد دروس
                     </button>
                 </div>
                 <div id="lessonsList"></div>
@@ -4005,6 +4011,255 @@
                 </div>
             </div>
 
+            <!-- 📊 Section Stats Panel -->
+            <style>
+                /* 📊 Stats Panel — Responsive + Eye-Friendly */
+                .stats-panel-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1.5rem;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                }
+
+                .stats-panel-header h2 {
+                    margin: 0;
+                    font-size: 1.3rem;
+                    color: var(--text-primary);
+                }
+
+                .stats-refresh-btn {
+                    background: rgba(108, 92, 231, 0.15);
+                    color: var(--accent);
+                    border: 1px solid rgba(108, 92, 231, 0.25);
+                    padding: 8px 20px;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-family: 'Cairo', sans-serif;
+                    font-size: 0.9rem;
+                    transition: all 0.3s;
+                }
+
+                .stats-refresh-btn:hover {
+                    background: rgba(108, 92, 231, 0.25);
+                    border-color: rgba(108, 92, 231, 0.4);
+                }
+
+                .stats-cards {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 16px;
+                    margin-bottom: 1.8rem;
+                }
+
+                .stat-card-v2 {
+                    background: var(--bg-elevated);
+                    border: 1px solid var(--border);
+                    border-radius: 14px;
+                    padding: 22px 16px;
+                    text-align: center;
+                    transition: border-color 0.3s, transform 0.2s;
+                }
+
+                .stat-card-v2:hover {
+                    border-color: var(--border-hover);
+                    transform: translateY(-2px);
+                }
+
+                .stat-card-v2 .stat-num {
+                    font-size: 2rem;
+                    font-weight: 700;
+                    margin-bottom: 6px;
+                }
+
+                .stat-card-v2 .stat-label {
+                    color: var(--text-secondary);
+                    font-size: 0.85rem;
+                }
+
+                .stat-card-v2 .stat-label i {
+                    margin-left: 4px;
+                }
+
+                .stats-section-box {
+                    background: var(--bg-elevated);
+                    border: 1px solid var(--border);
+                    border-radius: 14px;
+                    padding: 1.3rem;
+                    margin-bottom: 1.2rem;
+                }
+
+                .stats-section-box h3 {
+                    margin: 0 0 1rem;
+                    font-size: 1rem;
+                    color: var(--text-primary);
+                    font-weight: 600;
+                }
+
+                .stats-bar-row {
+                    margin-bottom: 12px;
+                }
+
+                .stats-bar-row:last-child {
+                    margin-bottom: 0;
+                }
+
+                .stats-bar-info {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 4px;
+                    font-size: 0.85rem;
+                }
+
+                .stats-bar-info .bar-label {
+                    color: var(--text-primary);
+                    font-weight: 500;
+                }
+
+                .stats-bar-info .bar-count {
+                    color: var(--text-muted);
+                }
+
+                .stats-bar-track {
+                    background: rgba(255, 255, 255, 0.04);
+                    border-radius: 6px;
+                    height: 22px;
+                    overflow: hidden;
+                }
+
+                .stats-bar-fill {
+                    height: 100%;
+                    border-radius: 6px;
+                    transition: width 0.8s cubic-bezier(.23, 1, .32, 1);
+                    min-width: 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    padding: 0 7px;
+                }
+
+                .stats-bar-fill span {
+                    color: rgba(255, 255, 255, 0.85);
+                    font-size: 0.7rem;
+                    font-weight: 600;
+                }
+
+                .empty-tag {
+                    display: inline-block;
+                    background: rgba(255, 255, 255, 0.05);
+                    color: var(--text-secondary);
+                    padding: 5px 12px;
+                    border-radius: 16px;
+                    font-size: 0.82rem;
+                    border: 1px solid var(--border);
+                    margin: 3px;
+                    transition: all 0.2s;
+                }
+
+                .empty-tag:hover {
+                    background: rgba(255, 255, 255, 0.08);
+                    border-color: var(--border-hover);
+                }
+
+                /* Responsive */
+                @media (max-width: 768px) {
+                    .stats-cards {
+                        grid-template-columns: 1fr;
+                        gap: 10px;
+                    }
+
+                    .stat-card-v2 {
+                        padding: 16px 12px;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        text-align: right;
+                    }
+
+                    .stat-card-v2 .stat-num {
+                        font-size: 1.5rem;
+                        margin-bottom: 0;
+                        min-width: 50px;
+                    }
+
+                    .stat-card-v2 .stat-label {
+                        font-size: 0.8rem;
+                    }
+
+                    .stats-section-box {
+                        padding: 1rem;
+                    }
+
+                    .stats-bar-info {
+                        font-size: 0.8rem;
+                    }
+
+                    .stats-bar-track {
+                        height: 18px;
+                    }
+                }
+
+                @media (min-width: 769px) and (max-width: 1024px) {
+                    .stats-cards {
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 12px;
+                    }
+
+                    .stat-card-v2 {
+                        padding: 18px 14px;
+                    }
+
+                    .stat-card-v2 .stat-num {
+                        font-size: 1.7rem;
+                    }
+                }
+            </style>
+
+            <div id="sectionStats" class="panel">
+                <div class="stats-panel-header">
+                    <h2><i class="fa-solid fa-chart-bar"></i> إحصائيات الأقسام</h2>
+                    <button class="stats-refresh-btn" onclick="loadSectionStats()">
+                        <i class="fa-solid fa-rotate"></i> تحديث
+                    </button>
+                </div>
+
+                <!-- Stat Cards -->
+                <div class="stats-cards">
+                    <div class="stat-card-v2">
+                        <div class="stat-num" style="color:#a29bfe;" id="statTotalLessons">—</div>
+                        <div class="stat-label"><i class="fa-solid fa-book-quran"></i> إجمالي الدروس</div>
+                    </div>
+                    <div class="stat-card-v2">
+                        <div class="stat-num" style="color:#55efc4;" id="statUsedSections">—</div>
+                        <div class="stat-label"><i class="fa-solid fa-check-circle"></i> أقسام مستخدمة</div>
+                    </div>
+                    <div class="stat-card-v2">
+                        <div class="stat-num" style="color:#ffeaa7;" id="statEmptySections">—</div>
+                        <div class="stat-label"><i class="fa-solid fa-inbox"></i> أقسام فارغة</div>
+                    </div>
+                </div>
+
+                <!-- Bar Chart -->
+                <div class="stats-section-box">
+                    <h3><i class="fa-solid fa-ranking-star"></i> الأقسام الأكثر استخداماً</h3>
+                    <div id="sectionBarsContainer">
+                        <p style="color:var(--text-muted); text-align:center; padding:20px;">اضغط "تحديث" لجلب
+                            الإحصائيات...</p>
+                    </div>
+                </div>
+
+                <!-- Empty Sections -->
+                <div class="stats-section-box">
+                    <h3 style="color:var(--text-secondary);"><i class="fa-solid fa-inbox"></i> أقسام فارغة</h3>
+                    <div id="emptySectionsContainer">
+                        <p style="color:var(--text-muted); text-align:center; padding:10px;">اضغط "تحديث" لجلب
+                            البيانات...</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Preview Panel -->
             <div id="preview" class="panel">
                 <h2><i class="fa-solid fa-eye"></i> معاينة الموقع</h2>
@@ -4223,6 +4478,80 @@
             if (tabId === 'preview') updatePreviewSelect();
             if (tabId === 'categories') loadCategories(currentParentId);
             if (tabId === 'navItems') loadNavItems();
+            if (tabId === 'sectionStats') loadSectionStats();
+        }
+
+        // ============ 📊 Section Usage Stats (Phase 6) ============
+        let _statsLoaded = false;
+        async function loadSectionStats() {
+            const barsEl = document.getElementById('sectionBarsContainer');
+            const emptyEl = document.getElementById('emptySectionsContainer');
+
+            barsEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</p>';
+
+            try {
+                const res = await fetch('/api/stats/sections');
+                if (!res.ok) throw new Error('فشل جلب الإحصائيات');
+                const stats = await res.json();
+
+                // ─────── 1. Update Cards ───────
+                document.getElementById('statTotalLessons').textContent = stats.totalLessons;
+                document.getElementById('statUsedSections').textContent = stats.usedSections;
+                document.getElementById('statEmptySections').textContent = stats.emptySections;
+
+                // ─────── 2. Render Bar Chart (soft muted colors) ───────
+                if (!stats.sections || stats.sections.length === 0) {
+                    barsEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">لا توجد بيانات</p>';
+                } else {
+                    const maxCount = stats.sections[0].count;
+                    // Soft muted gradients — أريح للعين
+                    const barColors = [
+                        'linear-gradient(90deg, rgba(162,155,254,0.7), rgba(162,155,254,0.35))',
+                        'linear-gradient(90deg, rgba(85,239,196,0.6), rgba(85,239,196,0.3))',
+                        'linear-gradient(90deg, rgba(255,234,167,0.6), rgba(255,234,167,0.3))',
+                        'linear-gradient(90deg, rgba(116,185,255,0.6), rgba(116,185,255,0.3))',
+                        'linear-gradient(90deg, rgba(250,177,160,0.6), rgba(250,177,160,0.3))',
+                        'linear-gradient(90deg, rgba(223,230,233,0.5), rgba(223,230,233,0.25))',
+                        'linear-gradient(90deg, rgba(129,236,236,0.5), rgba(129,236,236,0.25))',
+                        'linear-gradient(90deg, rgba(253,203,110,0.5), rgba(253,203,110,0.25))'
+                    ];
+
+                    barsEl.innerHTML = stats.sections.slice(0, 15).map((s, i) => {
+                        const widthPct = Math.max(6, (s.count / maxCount) * 100);
+                        const color = barColors[i % barColors.length];
+                        return `
+                            <div class="stats-bar-row">
+                                <div class="stats-bar-info">
+                                    <span class="bar-label">${s.label}</span>
+                                    <span class="bar-count">${s.count} درس (${s.percentage}%)</span>
+                                </div>
+                                <div class="stats-bar-track">
+                                    <div class="stats-bar-fill" style="background:${color}; width:${widthPct}%;">
+                                        <span>${s.count}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                // ─────── 3. Render Empty Sections ───────
+                if (!stats.emptyKeys || stats.emptyKeys.length === 0) {
+                    emptyEl.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:10px;"><i class="fa-solid fa-check-circle" style="color:#55efc4"></i> كل الأقسام المعروفة مستخدمة</p>';
+                } else {
+                    emptyEl.innerHTML = '<div style="display:flex; flex-wrap:wrap; gap:6px; padding:4px;">' +
+                        stats.emptyKeys.map(key =>
+                            `<span class="empty-tag">${key}</span>`
+                        ).join('') + '</div>';
+                }
+
+                _statsLoaded = true;
+                console.log('📊 Stats loaded:', stats.cached ? '(cached)' : '(fresh)');
+
+            } catch (err) {
+                console.error('❌ Stats error:', err);
+                barsEl.innerHTML = `<p style="color:var(--danger); text-align:center; padding:20px;"><i class="fa-solid fa-circle-exclamation"></i> خطأ: ${err.message}</p>`;
+            }
         }
 
         // ============ Sections ============
@@ -6863,6 +7192,218 @@
                 console.error('❌ Delete error:', err);
                 alert('❌ فشل الحذف');
             }
+        }
+    </script>
+
+    <!-- ============ Batch Import Modal ============ -->
+    <div id="batchImportModal"
+        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(4px);">
+        <div
+            style="background: var(--bg-elevated, #1a1a22); border-radius: 16px; padding: 2rem; width: 90%; max-width: 650px; max-height: 85vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 style="margin:0; color: #10b981;">📥 استيراد دروس بالجملة</h3>
+                <button onclick="closeImportModal()"
+                    style="background:none; border:none; color:#999; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+
+            <!-- Step 1: File Input -->
+            <div id="importStep1">
+                <label style="display:block; margin-bottom: 0.5rem; color: #ccc;">اختر ملف JSON:</label>
+                <input type="file" id="importFile" accept=".json"
+                    style="width:100%; padding:12px; background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); border-radius:12px; color:#fff; cursor:pointer;">
+                <p style="color:#666; font-size:0.85rem; margin-top:8px;">الحد الأقصى: 50 درس | الصيغة: <code
+                        style="color:#10b981;">{ "lessons": [{...}] }</code></p>
+            </div>
+
+            <!-- Step 2: Preview -->
+            <div id="importStep2" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h4 style="margin:0; color:#ddd;">📋 معاينة (<span id="previewCount">0</span> درس)</h4>
+                    <button onclick="resetImport()"
+                        style="background:none; border:1px solid #666; color:#999; padding:4px 12px; border-radius:8px; cursor:pointer; font-size:0.85rem;">🔄
+                        اختيار ملف آخر</button>
+                </div>
+                <div
+                    style="max-height:250px; overflow-y:auto; border:1px solid rgba(255,255,255,0.08); border-radius:10px;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:rgba(255,255,255,0.05);">
+                                <th style="padding:8px 12px; text-align:right; color:#999; font-size:0.85rem;">#</th>
+                                <th style="padding:8px 12px; text-align:right; color:#999; font-size:0.85rem;">العنوان
+                                </th>
+                                <th style="padding:8px 12px; text-align:right; color:#999; font-size:0.85rem;">الحالة
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTable"></tbody>
+                    </table>
+                </div>
+                <button id="confirmImportBtn" onclick="executeBatchImport()"
+                    style="width:100%; margin-top:1rem; padding:12px; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; border-radius:12px; font-size:1rem; cursor:pointer; font-weight:600;">✅
+                    تأكيد الاستيراد</button>
+            </div>
+
+            <!-- Step 3: Progress -->
+            <div id="importStep3" style="display:none; text-align:center; padding:2rem 0;">
+                <div
+                    style="width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; margin-bottom:1rem;">
+                    <div id="importProgressBar"
+                        style="height:100%; background:linear-gradient(90deg, #10b981, #059669); width:0%; transition: width 0.5s ease; border-radius:4px;">
+                    </div>
+                </div>
+                <p id="importProgressText" style="color:#999;">⏳ جاري الاستيراد...</p>
+            </div>
+
+            <!-- Step 4: Report -->
+            <div id="importStep4" style="display:none;">
+                <div id="importReport"
+                    style="padding:1.5rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                </div>
+                <button onclick="closeImportModal()"
+                    style="width:100%; margin-top:1rem; padding:12px; background:rgba(255,255,255,0.1); color:#fff; border:none; border-radius:12px; cursor:pointer;">✅
+                    إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Batch Import Script ============ -->
+    <script>
+        let importedLessonsData = [];
+
+        // Parse file on select
+        document.getElementById('importFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                if (!data.lessons || !Array.isArray(data.lessons)) {
+                    alert('❌ الملف غير صحيح — لازم يحتوي على { "lessons": [...] }');
+                    return;
+                }
+                if (data.lessons.length === 0) {
+                    alert('❌ الملف فاضي — مفيش دروس');
+                    return;
+                }
+                if (data.lessons.length > 50) {
+                    alert(`❌ الحد الأقصى 50 درس. الملف فيه ${data.lessons.length}`);
+                    return;
+                }
+
+                importedLessonsData = data.lessons;
+
+                // Show preview
+                document.getElementById('previewCount').textContent = importedLessonsData.length;
+                const tbody = document.getElementById('previewTable');
+                tbody.innerHTML = importedLessonsData.map((l, i) => `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:8px 12px; color:#666;">${i + 1}</td>
+                        <td style="padding:8px 12px; color:#eee;">${l.title || '<em style="color:#e74c3c;">بدون عنوان</em>'}</td>
+                        <td style="padding:8px 12px;"><span style="padding:2px 8px; border-radius:6px; font-size:0.8rem; background:${l.status === 'published' ? 'rgba(16,185,129,0.15);color:#10b981' : 'rgba(255,255,255,0.08);color:#999'}">${l.status || 'draft'}</span></td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('importStep1').style.display = 'none';
+                document.getElementById('importStep2').style.display = 'block';
+
+            } catch (err) {
+                alert('❌ خطأ في قراءة الملف: ' + err.message);
+            }
+        });
+
+        async function executeBatchImport() {
+            if (importedLessonsData.length === 0) return;
+
+            // Show progress
+            document.getElementById('importStep2').style.display = 'none';
+            document.getElementById('importStep3').style.display = 'block';
+
+            const bar = document.getElementById('importProgressBar');
+            const txt = document.getElementById('importProgressText');
+
+            bar.style.width = '30%';
+            txt.textContent = '📤 جاري الإرسال...';
+
+            try {
+                const res = await fetch('/api/lessons/batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lessons: importedLessonsData })
+                });
+
+                bar.style.width = '80%';
+                txt.textContent = '📊 جاري المعالجة...';
+
+                const result = await res.json();
+
+                bar.style.width = '100%';
+
+                setTimeout(() => {
+                    // Show report
+                    document.getElementById('importStep3').style.display = 'none';
+                    document.getElementById('importStep4').style.display = 'block';
+
+                    let html = `
+                        <h4 style="margin:0 0 1rem; color:#10b981;">📊 نتيجة الاستيراد</h4>
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:1rem;">
+                            <div style="text-align:center; padding:12px; background:rgba(16,185,129,0.1); border-radius:10px;">
+                                <div style="font-size:1.5rem; font-weight:700; color:#10b981;">${result.imported || 0}</div>
+                                <div style="font-size:0.8rem; color:#999;">✅ نجح</div>
+                            </div>
+                            <div style="text-align:center; padding:12px; background:rgba(245,158,11,0.1); border-radius:10px;">
+                                <div style="font-size:1.5rem; font-weight:700; color:#f59e0b;">${result.duplicates || 0}</div>
+                                <div style="font-size:0.8rem; color:#999;">⚠️ مكرر</div>
+                            </div>
+                            <div style="text-align:center; padding:12px; background:rgba(239,68,68,0.1); border-radius:10px;">
+                                <div style="font-size:1.5rem; font-weight:700; color:#ef4444;">${(result.invalid || 0) + (result.failed || 0)}</div>
+                                <div style="font-size:0.8rem; color:#999;">❌ فشل</div>
+                            </div>
+                        </div>
+                        <p style="color:#aaa; font-size:0.9rem;">${result.message || ''}</p>
+                    `;
+
+                    // Failed details
+                    if (result.details?.failed?.length > 0) {
+                        html += '<div style="margin-top:1rem;"><strong style="color:#ef4444;">❌ الفاشلة:</strong><ul style="color:#999; margin-top:4px;">';
+                        result.details.failed.forEach(f => html += `<li>${f.title || 'غير معروف'}: ${f.error}</li>`);
+                        html += '</ul></div>';
+                    }
+                    // Duplicates
+                    if (result.details?.duplicates?.length > 0) {
+                        html += `<div style="margin-top:0.5rem;"><strong style="color:#f59e0b;">⚠️ مكررة:</strong> <span style="color:#999;">${result.details.duplicates.join(' | ')}</span></div>`;
+                    }
+
+                    document.getElementById('importReport').innerHTML = html;
+
+                    // Reload lessons if any imported
+                    if (result.imported > 0 && typeof loadData === 'function') {
+                        setTimeout(() => loadData(), 1500);
+                    }
+
+                }, 500);
+
+            } catch (err) {
+                alert('❌ خطأ في الاستيراد: ' + err.message);
+                document.getElementById('importStep3').style.display = 'none';
+                document.getElementById('importStep2').style.display = 'block';
+            }
+        }
+
+        function resetImport() {
+            importedLessonsData = [];
+            document.getElementById('importFile').value = '';
+            document.getElementById('importStep2').style.display = 'none';
+            document.getElementById('importStep4').style.display = 'none';
+            document.getElementById('importStep1').style.display = 'block';
+            document.getElementById('importProgressBar').style.width = '0%';
+        }
+
+        function closeImportModal() {
+            document.getElementById('batchImportModal').style.display = 'none';
+            resetImport();
         }
     </script>
 

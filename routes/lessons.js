@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Lesson = require('../models/Lesson');
 const LessonHistory = require('../models/LessonHistory');
+const { validateLessonData } = require('../utils/lessonValidator');
 
 // ============ Cache Invalidation Helper ============
 function invalidatePublicCache() {
@@ -10,6 +11,130 @@ function invalidatePublicCache() {
         if (publicRouter.invalidateCache) publicRouter.invalidateCache();
     } catch (e) { /* silent */ }
 }
+function invalidateStatsCache() {
+    try {
+        const statsRouter = require('./stats');
+        if (statsRouter.invalidateStatsCache) statsRouter.invalidateStatsCache();
+    } catch (e) { /* silent */ }
+}
+function invalidateAllCaches() {
+    invalidatePublicCache();
+    invalidateStatsCache();
+}
+
+// ============ POST /batch — Batch Import (MUST be before /:id) ============
+const BATCH_LIMIT = 50;
+const CHUNK_SIZE = 10;
+
+router.post('/batch', async (req, res) => {
+    try {
+        const { lessons } = req.body;
+
+        // ─────── 1. Input Validation ───────
+        if (!Array.isArray(lessons) || lessons.length === 0) {
+            return res.status(400).json({ error: 'مفيش دروس في الملف' });
+        }
+        if (lessons.length > BATCH_LIMIT) {
+            return res.status(400).json({
+                error: `الحد الأقصى ${BATCH_LIMIT} درس في المرة`,
+                received: lessons.length
+            });
+        }
+
+        // ─────── 2. Validate All Lessons (no DB) ───────
+        const validLessons = [];
+        const invalidLessons = [];
+
+        for (let i = 0; i < lessons.length; i++) {
+            const result = validateLessonData({ ...lessons[i] }); // clone to avoid mutation
+            if (result.isValid) {
+                validLessons.push({ index: i, data: result.sanitized });
+            } else {
+                invalidLessons.push({ index: i, title: lessons[i].title || '', errors: result.errors });
+            }
+        }
+
+        // ─────── 3. Check Duplicates (1 query) ───────
+        const titles = validLessons.map(l => l.data.title);
+        const existingLessons = await Lesson.find({
+            title: { $in: titles }
+        }).select('title').lean();
+        const existingSet = new Set(existingLessons.map(l => l.title));
+
+        const toInsert = validLessons.filter(l => !existingSet.has(l.data.title));
+        const duplicates = validLessons.filter(l => existingSet.has(l.data.title));
+
+        if (toInsert.length === 0) {
+            return res.json({
+                message: invalidLessons.length > 0
+                    ? `${invalidLessons.length} درس غير صالح + ${duplicates.length} مكرر`
+                    : 'كل الدروس مكررة — مفيش جديد',
+                total: lessons.length,
+                imported: 0,
+                duplicates: duplicates.length,
+                invalid: invalidLessons.length,
+                failed: 0,
+                details: { success: [], duplicates: duplicates.map(l => l.data.title), invalid: invalidLessons, failed: [] }
+            });
+        }
+
+        // ─────── 4. Insert in Chunks (Promise.allSettled) ───────
+        const results = { success: [], failed: [] };
+
+        // Split into chunks of CHUNK_SIZE
+        for (let i = 0; i < toInsert.length; i += CHUNK_SIZE) {
+            const chunk = toInsert.slice(i, i + CHUNK_SIZE);
+
+            const chunkResults = await Promise.allSettled(
+                chunk.map(async ({ index, data }) => {
+                    const lesson = new Lesson(data);
+                    await lesson.save();
+
+                    // History (non-blocking)
+                    LessonHistory.saveVersion(
+                        lesson._id,
+                        lesson.toObject(),
+                        'batch-import',
+                        'استيراد بالجملة'
+                    ).catch(err => console.warn('⚠️ History:', err.message));
+
+                    return { index, id: lesson._id, title: lesson.title };
+                })
+            );
+
+            for (const result of chunkResults) {
+                if (result.status === 'fulfilled') {
+                    results.success.push(result.value);
+                } else {
+                    results.failed.push({ error: result.reason?.message || 'خطأ غير معروف' });
+                }
+            }
+        }
+
+        // ─────── 5. Invalidate Cache ───────
+        invalidateAllCaches();
+
+        // ─────── 6. Response ───────
+        res.json({
+            message: `✅ تم استيراد ${results.success.length} من ${lessons.length} درس`,
+            total: lessons.length,
+            imported: results.success.length,
+            duplicates: duplicates.length,
+            invalid: invalidLessons.length,
+            failed: results.failed.length,
+            details: {
+                success: results.success,
+                duplicates: duplicates.map(l => l.data.title),
+                invalid: invalidLessons,
+                failed: results.failed
+            }
+        });
+
+    } catch (err) {
+        console.error('❌ Batch import error:', err);
+        res.status(500).json({ error: 'خطأ في الاستيراد: ' + err.message });
+    }
+});
 
 // GET all lessons
 router.get('/', async (req, res) => {
@@ -153,7 +278,7 @@ router.post('/', async (req, res) => {
         // Save initial version
         await LessonHistory.saveVersion(lesson._id, lesson.toObject(), 'initial', 'الإصدار الأول');
 
-        invalidatePublicCache();
+        invalidateAllCaches();
         res.status(201).json(lesson);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -185,7 +310,7 @@ router.put('/:id', async (req, res) => {
             { new: true }
         );
 
-        invalidatePublicCache();
+        invalidateAllCaches();
         res.json(lesson);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -236,7 +361,7 @@ router.delete('/:id', async (req, res) => {
         }
         // Also delete history
         await LessonHistory.deleteMany({ lessonId: req.params.id });
-        invalidatePublicCache();
+        invalidateAllCaches();
         res.json({ message: 'Lesson deleted successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
