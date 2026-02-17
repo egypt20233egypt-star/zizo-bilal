@@ -4916,7 +4916,24 @@
                 status: publish ? 'published' : (document.getElementById('lessonStatus')?.value || 'draft'),
             };
 
-            // ⭐ جمع الأقسام الديناميكية
+            // ⭐⭐⭐ دمج أقسام الـ import المحفوظة (الإصلاح الجذري)
+            // حتى لو Section Registry فاضي (0 active sections)
+            if (pendingImportData) {
+                const skipKeys = ['title', 'subtitle', 'tags', 'metadata', 'category',
+                    'sheikhId', 'categoryId', 'status', 'rawContent', 'rawSource',
+                    '_id', 'createdAt', 'updatedAt', '__v'];
+                for (const [key, value] of Object.entries(pendingImportData)) {
+                    if (skipKeys.includes(key)) continue;
+                    if (value !== null && value !== undefined && value !== '') {
+                        data[key] = value;
+                    }
+                }
+                if (pendingImportData.tags) data.tags = pendingImportData.tags;
+                console.log('📦 Merged import data:', Object.keys(data).length, 'total keys');
+                pendingImportData = null;
+            }
+
+            // ⭐ جمع الأقسام الديناميكية (من section-editors لو موجودين)
             document.querySelectorAll('.section-editor').forEach(editor => {
                 const key = editor.dataset.key;
                 const jsonInput = editor.querySelector('.json-editor');
@@ -4933,6 +4950,12 @@
                     if (items.length > 0) data[key] = items;
                 }
             });
+
+            // ⭐ Auto-detect AI content — أي أقسام محتوى = aiAnalyzed
+            const metaKeys = ['title', 'subtitle', 'tags', 'sheikhId', 'categoryId',
+                'status', 'rawContent', 'rawSource', '_importSource', '_changeNote'];
+            const contentKeys = Object.keys(data).filter(k => !metaKeys.includes(k));
+            if (contentKeys.length > 0) data.aiAnalyzed = true;
 
             return data;
         }
@@ -5509,6 +5532,10 @@
             return sections;
         }
 
+        // ⭐ Global: يحفظ كل أقسام الـ import عشان collectLessonData() تقدر تجمعهم
+        // حتى لو Section Registry فاضي (0 active sections)
+        let pendingImportData = null;
+
         function applyImport() {
             if (!importedData) return;
 
@@ -5518,8 +5545,11 @@
             if (importedData.title) {
                 document.getElementById('lessonTitle').value = importedData.title;
             }
+            if (importedData.subtitle && document.getElementById('lessonSubtitle')) {
+                document.getElementById('lessonSubtitle').value = importedData.subtitle;
+            }
 
-            // Store full data in lessonContent as JSON
+            // Store full data in lessonContent as JSON (rawContent)
             document.getElementById('lessonContent').value = JSON.stringify(importedData, null, 2);
 
             // Set rawSource if provided
@@ -5527,8 +5557,17 @@
                 document.getElementById('lessonRawSource').value = rawSource;
             }
 
+            // ⭐⭐⭐ الإصلاح الجذري: تخزين كل أقسام الـ import
+            // لأن Section Registry ممكن يكون فاضي (0 active sections)
+            // فمنقدرش نعتمد على buildDynamicLessonForm + section-editors
+            pendingImportData = { ...importedData };
+            console.log('📦 Import data stored:', Object.keys(pendingImportData).length, 'keys');
+
+            // حاول تبني الفورم الديناميكي (لو في أقسام مسجلة)
+            buildDynamicLessonForm(importedData);
+
             closeImportModal();
-            alert('✅ تم استيراد المحتوى بنجاح! يمكنك الآن حفظ الدرس.');
+            alert('✅ تم استيراد المحتوى بنجاح!\n\n📌 الأقسام محفوظة — اضغط "حفظ" أو "نشر" لحفظ الدرس.');
         }
 
         // ============ Categories Management (الأقسام الهرمية) ============

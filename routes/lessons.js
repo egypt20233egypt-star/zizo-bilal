@@ -3,6 +3,14 @@ const router = express.Router();
 const Lesson = require('../models/Lesson');
 const LessonHistory = require('../models/LessonHistory');
 
+// ============ Cache Invalidation Helper ============
+function invalidatePublicCache() {
+    try {
+        const publicRouter = require('./public');
+        if (publicRouter.invalidateCache) publicRouter.invalidateCache();
+    } catch (e) { /* silent */ }
+}
+
 // GET all lessons
 router.get('/', async (req, res) => {
     try {
@@ -145,6 +153,7 @@ router.post('/', async (req, res) => {
         // Save initial version
         await LessonHistory.saveVersion(lesson._id, lesson.toObject(), 'initial', 'الإصدار الأول');
 
+        invalidatePublicCache();
         res.status(201).json(lesson);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -176,6 +185,7 @@ router.put('/:id', async (req, res) => {
             { new: true }
         );
 
+        invalidatePublicCache();
         res.json(lesson);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -226,6 +236,7 @@ router.delete('/:id', async (req, res) => {
         }
         // Also delete history
         await LessonHistory.deleteMany({ lessonId: req.params.id });
+        invalidatePublicCache();
         res.json({ message: 'Lesson deleted successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -495,14 +495,29 @@
 
     <script>
         // ============ Configuration ============
-        const API_URL = window.location.origin + '/api/lessons';
+        const API_URL = window.location.origin + '/api/public/lessons';
 
         let currentLesson = null;
         let allLessons = [];
 
         // ============ Initialize ============
         document.addEventListener('DOMContentLoaded', async function () {
-            await loadLessons();
+            // قراءة الـ query params من الـ URL
+            const params = new URLSearchParams(window.location.search);
+            const lessonId = params.get('lesson');
+            const sheikhId = params.get('sheikh');
+            const categoryId = params.get('category');
+
+            if (lessonId) {
+                // عرض درس واحد مباشرة
+                await loadSingleLesson(lessonId);
+            } else {
+                // عرض قائمة دروس (مع فلترة اختيارية)
+                const filters = {};
+                if (sheikhId) filters.sheikh = sheikhId;
+                if (categoryId) filters.category = categoryId;
+                await loadLessons(filters);
+            }
 
             // Hide loading screen
             setTimeout(() => {
@@ -513,12 +528,18 @@
             initSearch();
         });
 
-        // ============ Load Lessons from API ============
-        async function loadLessons() {
+        // ============ Load Lessons from Public API ============
+        async function loadLessons(filters = {}) {
             try {
-                // Get ALL lessons (not just published)
-                const response = await fetch(API_URL);
-                const lessons = await response.json();
+                // بناء الـ query string من الفلاتر
+                const params = new URLSearchParams(filters);
+                const url = params.toString() ? `${API_URL}?${params}` : API_URL;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                // الـ API الجديد بيرجع { lessons: [...], pagination: {...} }
+                const lessons = data.lessons || data;
                 allLessons = lessons;
 
                 if (lessons.length === 0) {
@@ -531,6 +552,35 @@
             } catch (error) {
                 console.error('Error loading lessons:', error);
                 showErrorState();
+            }
+        }
+
+        // ============ Load Single Lesson by ID ============
+        async function loadSingleLesson(id) {
+            try {
+                const response = await fetch(`${API_URL}/${id}`);
+                if (!response.ok) throw new Error('الدرس غير موجود');
+
+                const lesson = await response.json();
+                allLessons = [lesson];
+                currentLesson = lesson;
+
+                // عرض الدرس مباشرة (نفس نظام العرض الموجود)
+                renderLessonsGrid([lesson]);
+                selectLesson(lesson);
+
+                // تحديث العنوان
+                document.title = `${lesson.title} | منصة زيزو وبلال`;
+
+            } catch (error) {
+                console.error('Error loading lesson:', error);
+                document.getElementById('lessonsGrid').innerHTML = `
+                    <div class="card warning" style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                        <h3>❌ الدرس غير موجود</h3>
+                        <p style="color: var(--gray);">قد يكون الدرس محذوفاً أو غير منشور</p>
+                        <a href="/website" style="color: var(--gold); text-decoration: underline; margin-top: 15px; display: inline-block;">← العودة لقائمة الدروس</a>
+                    </div>
+                `;
             }
         }
 
@@ -969,7 +1019,11 @@
             // Known sections to skip when detecting dynamic ones
             const knownKeys = ['title', 'subtitle', 'tags', 'rawContent', 'rawSource', 'status', 'aiAnalyzed',
                 'overview', 'podcast', 'characters', 'quranHadith', 'fiqh',
-                'questions', 'benefits', 'stories', 'analysis', '_id', 'createdAt', 'updatedAt', '__v'];
+                'questions', 'benefits', 'stories', 'analysis', '_id', 'createdAt', 'updatedAt', '__v',
+                // Metadata fields
+                'sheikhId', 'categoryId', 'selectedCategoryId', 'sectionId',
+                // Enriched fields from Public API
+                'sheikhName', 'sheikhImage', 'categoryName', 'categoryIcon', 'categoryColor'];
 
             // Check available known sections
             sections.push({ id: 'lessons', icon: '📚', name: 'الدروس' });
@@ -1078,9 +1132,13 @@
 
             // ============ DYNAMIC SECTIONS (Custom/Unknown) ============
             // Render any additional sections not handled above
-            const knownKeys = ['title', 'subtitle', 'tags', 'rawContent', 'status', 'aiAnalyzed',
+            const knownKeys = ['title', 'subtitle', 'tags', 'rawContent', 'rawSource', 'status', 'aiAnalyzed',
                 'overview', 'podcast', 'characters', 'quranHadith', 'fiqh',
-                'questions', 'benefits', 'stories', 'analysis', '_id', 'createdAt', 'updatedAt', '__v'];
+                'questions', 'benefits', 'stories', 'analysis', '_id', 'createdAt', 'updatedAt', '__v',
+                // Metadata fields
+                'sheikhId', 'categoryId', 'selectedCategoryId', 'sectionId',
+                // Enriched fields from Public API
+                'sheikhName', 'sheikhImage', 'categoryName', 'categoryIcon', 'categoryColor'];
 
             for (const [key, value] of Object.entries(lesson)) {
                 if (knownKeys.includes(key)) continue;
@@ -1089,6 +1147,69 @@
                 if (typeof value === 'object' && Object.keys(value).length === 0) continue;
 
                 html += renderDynamicSection(key, value);
+            }
+
+            // ============ FALLBACK: لو مفيش محتوى خالص ============
+            if (!html.trim()) {
+                const shName = lesson.sheikhName || lesson.sheikhId || 'غير محدد';
+                const catName = lesson.categoryName || 'غير مصنف';
+                const catIcon = lesson.categoryIcon || 'fa-solid fa-folder';
+                const catColor = lesson.categoryColor || '#DAA520';
+                const isAnalyzed = lesson.aiAnalyzed ? true : false;
+
+                html = `
+                    <div class="section-card" style="border-right: 4px solid ${catColor}; margin: 20px 0; padding: 30px; background: var(--card-bg, #1a1a2e); border-radius: 16px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">🕌</div>
+                            <h2 style="color: var(--gold, #DAA520); margin-bottom: 8px; font-size: 1.5rem;">${lesson.title}</h2>
+                            <p style="color: var(--gray, #888); font-size: 1rem;">${lesson.subtitle || 'درس إسلامي'}</p>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0;">
+                            <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 1.5rem; margin-bottom: 8px;"><i class="fa-solid fa-user-tie" style="color: var(--gold, #DAA520);"></i></div>
+                                <div style="color: var(--gray, #888); font-size: 0.85rem;">الشيخ</div>
+                                <div style="color: #fff; font-weight: bold; margin-top: 4px;">${shName}</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 1.5rem; margin-bottom: 8px;"><i class="${catIcon}" style="color: ${catColor};"></i></div>
+                                <div style="color: var(--gray, #888); font-size: 0.85rem;">القسم</div>
+                                <div style="color: #fff; font-weight: bold; margin-top: 4px;">${catName}</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 1.5rem; margin-bottom: 8px;">${isAnalyzed ? '✅' : '⏳'}</div>
+                                <div style="color: var(--gray, #888); font-size: 0.85rem;">التحليل</div>
+                                <div style="color: #fff; font-weight: bold; margin-top: 4px;">${isAnalyzed ? 'تم التحليل' : 'لم يتم بعد'}</div>
+                            </div>
+                        </div>
+
+                        ${!isAnalyzed ? `
+                        <div style="text-align: center; margin-top: 24px; padding: 20px; background: rgba(218, 165, 32, 0.1); border-radius: 12px; border: 1px solid rgba(218, 165, 32, 0.2);">
+                            <p style="color: var(--gold, #DAA520); font-size: 1.1rem; margin-bottom: 12px;">
+                                <i class="fa-solid fa-robot"></i> هذا الدرس لم يتم تحليله بالذكاء الاصطناعي بعد
+                            </p>
+                            <p style="color: var(--gray, #888); font-size: 0.9rem; margin-bottom: 16px;">
+                                استخدم AI Master Input في لوحة الأدمن لتحليل الدرس وإنشاء المحتوى التعليمي
+                            </p>
+                            <a href="/admin/panel" style="display: inline-block; background: var(--gold, #DAA520); color: #000; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                                🔧 لوحة الأدمن
+                            </a>
+                        </div>
+                        ` : `
+                        <div style="text-align: center; margin-top: 24px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px;">
+                            <p style="color: var(--gray, #888);">
+                                <i class="fa-solid fa-info-circle"></i> لا يوجد محتوى إضافي لهذا الدرس
+                            </p>
+                        </div>
+                        `}
+                    </div>
+
+                    <div style="text-align: center; margin-top: 16px;">
+                        <a href="/website" style="color: var(--gold, #DAA520); text-decoration: none; font-size: 0.95rem;">
+                            <i class="fa-solid fa-arrow-right"></i> العودة لقائمة الدروس
+                        </a>
+                    </div>
+                `;
             }
 
             container.innerHTML = html;

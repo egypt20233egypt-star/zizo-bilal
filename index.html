@@ -1562,7 +1562,7 @@
             g.innerHTML = cats.slice(0, CFG.catLimit).map((c, i) => {
                 const cl = c.color || '#C9A961'; const fa = c.icon && c.icon.startsWith('fa');
                 const icon = fa ? `<i class="${c.icon}" style="color:${cl}"></i>` : (c.icon || ic[i] || '📁');
-                return `<div class="col-6 col-md-4 col-lg-2"><div class="gc cat-card" style="--card-glow:${cl}35" onclick="location.href='/website'"><div class="cat-icon-w" style="background:${cl}10;border-color:${cl}20">${icon}</div><div class="cat-name">${c.name}</div><div class="cat-cnt">${c.lessonCount || 0} درس</div></div></div>`;
+                return `<div class="col-6 col-md-4 col-lg-2"><div class="gc cat-card" style="--card-glow:${cl}35" onclick="location.href='/website?category=${c._id}'"><div class="cat-icon-w" style="background:${cl}10;border-color:${cl}20">${icon}</div><div class="cat-name">${c.name}</div><div class="cat-cnt">${c.lessonCount || 0} درس</div></div></div>`;
             }).join(''); animCards('#catGrid .gc');
         }
 
@@ -1572,7 +1572,7 @@
             if (!les.length) { g.innerHTML = '<p class="text-center" style="color:var(--text-2)">لا توجد دروس</p>'; return }
             g.innerHTML = les.slice(0, CFG.lesLimit).map(l => {
                 const d = new Date(l.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-                return `<div class="gc les-card" onclick="location.href='/website'"><div class="les-title"><i class="fa-solid fa-book-quran"></i>${l.title}</div><div class="les-meta"><span class="les-sheikh"><i class="fa-solid fa-user-tie"></i> ${l.sheikhName}</span><span class="les-date"><i class="fa-regular fa-calendar"></i> ${d}</span></div></div>`;
+                return `<div class="gc les-card" onclick="location.href='/website?lesson=${l._id}'"><div class="les-title"><i class="fa-solid fa-book-quran"></i>${l.title}</div><div class="les-meta"><span class="les-sheikh"><i class="fa-solid fa-user-tie"></i> ${l.sheikhName}</span><span class="les-date"><i class="fa-regular fa-calendar"></i> ${d}</span></div></div>`;
             }).join(''); animCards('#lesGrid .gc');
         }
 
@@ -1583,7 +1583,7 @@
             g.innerHTML = sh.slice(0, CFG.shLimit).map(s => {
                 const img = s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a3a2a&color=C9A961&size=140&font-size=0.38&bold=true`;
                 const fb = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=1a3a2a&color=C9A961&size=140`;
-                return `<div class="col-6 col-md-3"><div class="gc sh-card" onclick="location.href='/website'"><div class="sh-av-w"><img src="${img}" alt="${s.name}" class="sh-av" loading="lazy" onerror="this.src='${fb}'"></div><div class="sh-name">${s.name}</div><div class="sh-cnt"><i class="fa-solid fa-book"></i> ${s.lessonCount || 0} درس</div></div></div>`;
+                return `<div class="col-6 col-md-3"><div class="gc sh-card" onclick="location.href='/website?sheikh=${s._id}'"><div class="sh-av-w"><img src="${img}" alt="${s.name}" class="sh-av" loading="lazy" onerror="this.src='${fb}'"></div><div class="sh-name">${s.name}</div><div class="sh-cnt"><i class="fa-solid fa-book"></i> ${s.lessonCount || 0} درس</div></div></div>`;
             }).join(''); animCards('#shGrid .gc');
         }
 
