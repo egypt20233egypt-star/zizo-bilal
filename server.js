@@ -113,9 +113,14 @@ app.get('/admin/panel', requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'admin_panel_v4_merged.html'));
 });
 
-// Browse (تصفح المشايخ والدروس - عام)
+// Browse (تصفح المشايخ - عام)
 app.get('/browse', (req, res) => {
     res.sendFile(path.join(__dirname, 'browse.html'));
+});
+
+// Lessons (دروس شيخ محدد - عام)
+app.get('/lessons', (req, res) => {
+    res.sendFile(path.join(__dirname, 'lessons.html'));
 });
 
 app.get('/website', (req, res) => {
@@ -149,5 +154,6 @@ app.listen(PORT, () => {
     console.log(`📊 Admin: http://localhost:${PORT}/admin`);
     console.log(`🌐 Website: http://localhost:${PORT}/website`);
     console.log(`📖 Browse: http://localhost:${PORT}/browse`);
+    console.log(`📚 Lessons: http://localhost:${PORT}/lessons`);
     console.log(`🔌 API: http://localhost:${PORT}/api/lessons`);
 });

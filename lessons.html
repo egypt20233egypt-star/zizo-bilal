@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المشايخ الكرام — عِلْمٌ يُنْتَفَعُ بِهِ</title>
-    <meta name="description" content="تصفح المشايخ الكرام ودروسهم — منصة عِلْمٌ يُنْتَفَعُ بِهِ">
+    <title>دروس الشيخ — عِلْمٌ يُنْتَفَعُ بِهِ</title>
+    <meta name="description" content="دروس الشيخ — منصة عِلْمٌ يُنْتَفَعُ بِهِ">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -14,8 +14,8 @@
 
     <style>
         /* ═══════════════════════════════
-       Browse Page — Self-contained
-       Dark + Gold theme
+       Lessons Page — Self-contained
+       Dark + Gold theme (same as browse)
     ═══════════════════════════════ */
         :root {
             --gold: #EDBA26;
@@ -61,16 +61,6 @@
             border-radius: 3px;
         }
 
-        /* ═══ Views ═══ */
-        .view {
-            display: none;
-            animation: fadeIn .35s ease;
-        }
-
-        .view.active {
-            display: block;
-        }
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -104,6 +94,16 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            flex: 1;
+        }
+
+        .page-header .lessons-count {
+            font-size: .85rem;
+            color: var(--text-2);
+            background: var(--gold-dim);
+            padding: .25rem .75rem;
+            border-radius: 20px;
+            white-space: nowrap;
         }
 
         .btn-back {
@@ -127,36 +127,15 @@
 
         /* ═══ Container ═══ */
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 0 1rem;
-        }
-
-        /* ═══ Hero ═══ */
-        .hero {
-            text-align: center;
-            padding: 2rem 1rem 1.5rem;
-        }
-
-        .hero h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: .5rem;
-            background: linear-gradient(135deg, var(--gold), #F5D245);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            color: var(--text-2);
-            font-size: 1rem;
         }
 
         /* ═══ Search ═══ */
         .search-wrap {
             max-width: 500px;
-            margin: 0 auto 1.5rem;
+            margin: 1rem auto 1.5rem;
             position: relative;
         }
 
@@ -190,72 +169,78 @@
             font-size: .9rem;
         }
 
-        /* ═══ Sheikh Grid ═══ */
-        .sheikh-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 1.25rem;
+        /* ═══ Lessons List ═══ */
+        .lessons-wrap {
             padding-bottom: 2rem;
         }
 
-        .sheikh-card {
+        .lesson-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, .06);
-            border-radius: var(--radius);
-            padding: 1.5rem 1rem;
-            text-align: center;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: .75rem;
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
             transition: all var(--transition);
+            animation: fadeIn .35s ease;
         }
 
-        .sheikh-card:hover {
-            transform: translateY(-6px);
+        .lesson-card:hover {
             border-color: var(--gold-border);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+            transform: translateX(-4px);
             background: var(--card-hover);
         }
 
-        /* Avatar */
-        .sheikh-avatar {
-            width: 88px;
-            height: 88px;
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-            overflow: hidden;
-            border: 3px solid rgba(237, 186, 38, .3);
+        .lesson-num {
+            min-width: 32px;
+            height: 32px;
+            background: var(--gold-dim);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--gold-dim);
-            font-size: 2rem;
+            font-size: .85rem;
+            font-weight: 700;
             color: var(--gold);
-            font-weight: 700;
+            flex-shrink: 0;
         }
 
-        .sheikh-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .lesson-info {
+            flex: 1;
+            min-width: 0;
         }
 
-        .sheikh-name {
-            font-size: 1.05rem;
-            font-weight: 700;
+        .lesson-title {
+            font-size: 1rem;
+            font-weight: 600;
             color: var(--text-1);
-            margin-bottom: .4rem;
+            margin-bottom: .25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .sheikh-count {
-            font-size: .82rem;
-            color: var(--gold);
-            opacity: .8;
+        .lesson-meta {
+            display: flex;
+            gap: .75rem;
+            font-size: .78rem;
+            color: var(--text-3);
         }
 
-        .sheikh-count i {
-            margin-left: .3rem;
+        .lesson-meta i {
+            margin-left: .25rem;
         }
 
-        /* ═══ Lessons removed — now in lessons.html ═══ */
+        .lesson-arrow {
+            color: var(--text-3);
+            font-size: .8rem;
+            flex-shrink: 0;
+        }
 
         /* ═══ Empty / Error / Loading ═══ */
         .state-msg {
@@ -367,19 +352,8 @@
 
         /* ═══ Responsive ═══ */
         @media (max-width: 600px) {
-            .sheikh-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 1rem;
-            }
-
-            .hero h1 {
-                font-size: 1.6rem;
-            }
-
-            .sheikh-avatar {
-                width: 72px;
-                height: 72px;
-                font-size: 1.6rem;
+            .page-header h1 {
+                font-size: 1rem;
             }
         }
     </style>
@@ -387,34 +361,34 @@
 
 <body>
 
-    <!-- ══════════════ SCREEN 1: SHEIKHS ══════════════ -->
-    <section id="view-sheikhs" class="view active">
-        <div class="hero">
-            <h1>🕌 المشايخ الكرام</h1>
-            <p>اختر شيخك المفضل واستمع لدروسه</p>
+    <!-- ══════════════ PAGE HEADER ══════════════ -->
+    <div class="page-header">
+        <button class="btn-back" id="btnBack" aria-label="رجوع">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+        <h1 id="pageTitle">📚 دروس الشيخ</h1>
+        <span class="lessons-count" id="lessonsCount" style="display:none;"></span>
+    </div>
+
+    <!-- ══════════════ CONTENT ══════════════ -->
+    <div class="container">
+        <div class="search-wrap">
+            <i class="fas fa-search icon"></i>
+            <input type="text" id="searchLessons" placeholder="ابحث في الدروس...">
         </div>
 
-        <div class="container">
-            <div class="search-wrap">
-                <i class="fas fa-search icon"></i>
-                <input type="text" id="searchSheikhs" placeholder="ابحث عن شيخ...">
-            </div>
-
-            <div id="sheikhsGrid" class="sheikh-grid">
-                <!-- تُملأ بالـ JS -->
-            </div>
+        <div id="lessonsList" class="lessons-wrap">
+            <!-- تُملأ بالـ JS -->
         </div>
-    </section>
-
-    <!-- ══════════════ SCREEN 2: LESSONS — moved to lessons.html ══════════════ -->
+    </div>
 
     <!-- ══════════════ BOTTOM NAV ══════════════ -->
     <nav class="bottom-nav" aria-label="التنقل الرئيسي">
-        <a href="/website" class="nav-item">
+        <a href="/" class="nav-item">
             <i class="fas fa-home"></i>
             <span>الرئيسية</span>
         </a>
-        <a href="/browse" class="nav-item active">
+        <a href="/browse" class="nav-item">
             <i class="fas fa-user-tie"></i>
             <span>المشايخ</span>
         </a>
@@ -433,77 +407,111 @@
     <!-- ══════════════ JAVASCRIPT ══════════════ -->
     <script>
         // ═══════════ State ═══════════
-        let allSheikhs = [];
+        let allLessons = [];
+        const params = new URLSearchParams(location.search);
+        const sheikhId = params.get('sheikh');
+        const sheikhNameFromUrl = params.get('name') ? decodeURIComponent(params.get('name')) : null;
 
-        // ═══════════ SVG Avatar Placeholder ═══════════
-        function avatarPlaceholder(name) {
-            const initial = name ? name.charAt(0) : '؟';
-            const palette = ['%233b82f6', '%2310b981', '%238b5cf6', '%23ec4899', '%23f59e0b', '%2314b8a6', '%236366f1', '%23ef4444'];
-            const c = palette[(name || '').length % palette.length];
-            return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='${c}' width='100' height='100' rx='50'/%3E%3Ctext x='50' y='55' fill='white' font-size='42' text-anchor='middle' dy='.1em' font-family='Tajawal,sans-serif' font-weight='700'%3E${encodeURIComponent(initial)}%3C/text%3E%3C/svg%3E`;
-        }
-
-        // ═══════════ Load Sheikhs ═══════════
-        async function loadSheikhs() {
-            const grid = document.getElementById('sheikhsGrid');
-            grid.innerHTML = '<div class="state-msg"><div class="spinner"></div><p>جاري تحميل المشايخ...</p></div>';
-
-            try {
-                const res = await fetch('/api/public/sheikhs');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-
-                const data = await res.json();
-                allSheikhs = data.sheikhs || data || [];
-
-                renderSheikhs(allSheikhs);
-            } catch (err) {
-                console.error('❌ Load sheikhs:', err);
-                grid.innerHTML = `
-          <div class="state-msg" style="grid-column:1/-1;">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>خطأ في تحميل المشايخ</p>
-            <button class="retry-btn" onclick="loadSheikhs()"><i class="fas fa-redo"></i> إعادة المحاولة</button>
-          </div>`;
+        // ═══════════ Back Button (Claude fix: fallback to /browse) ═══════════
+        document.getElementById('btnBack').addEventListener('click', () => {
+            if (document.referrer && window.history.length > 1) {
+                history.back();
+            } else {
+                location.href = '/browse';
             }
-        }
+        });
 
-        // ═══════════ Render Sheikhs ═══════════
-        function renderSheikhs(sheikhs) {
-            const grid = document.getElementById('sheikhsGrid');
-
-            if (!sheikhs.length) {
-                grid.innerHTML = `
-          <div class="state-msg" style="grid-column:1/-1;">
-            <i class="fas fa-user-slash"></i>
-            <p>لا يوجد مشايخ حالياً</p>
-          </div>`;
+        // ═══════════ Load Lessons ═══════════
+        async function loadLessons() {
+            if (!sheikhId) {
+                document.getElementById('pageTitle').textContent = '⚠️ لم يتم تحديد شيخ';
+                document.getElementById('lessonsList').innerHTML = `
+                    <div class="state-msg">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>لم يتم تحديد شيخ</p>
+                        <a href="/browse" class="retry-btn"><i class="fas fa-arrow-right"></i> رجوع للمشايخ</a>
+                    </div>`;
                 return;
             }
 
-            grid.innerHTML = sheikhs.map(s => {
-                const imgSrc = s.image || avatarPlaceholder(s.name);
-                const fallback = avatarPlaceholder(s.name);
-                const encodedName = encodeURIComponent(s.name);
-                return `
-          <div class="sheikh-card" onclick="location.href='/lessons?sheikh=${s._id}&name=${encodedName}'">
-            <div class="sheikh-avatar">
-              <img src="${imgSrc}" alt="${s.name}" onerror="this.src='${fallback}'">
-            </div>
-            <div class="sheikh-name">${s.name}</div>
-            <div class="sheikh-count"><i class="fas fa-book"></i> ${s.lessonCount || 0} درس</div>
-          </div>`;
-            }).join('');
+            // Set title immediately from URL param if available
+            if (sheikhNameFromUrl) {
+                document.getElementById('pageTitle').textContent = `📚 دروس ${sheikhNameFromUrl}`;
+                document.title = `دروس ${sheikhNameFromUrl} — عِلْمٌ يُنْتَفَعُ بِهِ`;
+            }
+
+            const list = document.getElementById('lessonsList');
+            list.innerHTML = '<div class="state-msg"><div class="spinner"></div><p>جاري تحميل الدروس...</p></div>';
+
+            try {
+                // Claude fix: limit=500 بدل 100 عشان ميفوتش دروس
+                const res = await fetch(`/api/public/lessons?sheikh=${sheikhId}&limit=500`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const data = await res.json();
+                allLessons = data.lessons || [];
+
+                // Update sheikh name from first lesson if not in URL
+                if (!sheikhNameFromUrl && allLessons.length > 0 && allLessons[0].sheikhName) {
+                    const name = allLessons[0].sheikhName;
+                    document.getElementById('pageTitle').textContent = `📚 دروس ${name}`;
+                    document.title = `دروس ${name} — عِلْمٌ يُنْتَفَعُ بِهِ`;
+                }
+
+                // Show count badge
+                const countEl = document.getElementById('lessonsCount');
+                countEl.textContent = `${allLessons.length} درس`;
+                countEl.style.display = 'inline';
+
+                renderLessons(allLessons);
+            } catch (err) {
+                console.error('❌ Load lessons:', err);
+                list.innerHTML = `
+                    <div class="state-msg">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>خطأ في تحميل الدروس</p>
+                        <button class="retry-btn" onclick="loadLessons()"><i class="fas fa-redo"></i> إعادة المحاولة</button>
+                    </div>`;
+            }
         }
 
-        // ═══════════ Search Sheikhs ═══════════
-        document.getElementById('searchSheikhs').addEventListener('input', function () {
+        // ═══════════ Render Lessons ═══════════
+        function renderLessons(lessons) {
+            const list = document.getElementById('lessonsList');
+
+            if (!lessons.length) {
+                list.innerHTML = `
+                    <div class="state-msg">
+                        <i class="fas fa-book-open"></i>
+                        <p>لا توجد دروس حالياً لهذا الشيخ</p>
+                        <p style="font-size:.85rem;color:var(--text-3);margin-top:.5rem;">سيتم إضافة دروس قريباً إن شاء الله</p>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = lessons.map((l, i) => `
+                <div class="lesson-card" onclick="location.href='/website?lesson=${l._id}'">
+                    <div class="lesson-num">${i + 1}</div>
+                    <div class="lesson-info">
+                        <div class="lesson-title">${l.title}</div>
+                        <div class="lesson-meta">
+                            ${l.categoryName ? `<span><i class="fas fa-folder"></i>${l.categoryName}</span>` : ''}
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-left lesson-arrow"></i>
+                </div>
+            `).join('');
+        }
+
+        // ═══════════ Search Lessons ═══════════
+        document.getElementById('searchLessons').addEventListener('input', function () {
             const q = this.value.trim().toLowerCase();
-            if (!q) return renderSheikhs(allSheikhs);
-            renderSheikhs(allSheikhs.filter(s => s.name.toLowerCase().includes(q)));
+            if (!q) return renderLessons(allLessons);
+            renderLessons(allLessons.filter(l => l.title.toLowerCase().includes(q)));
         });
 
         // ═══════════ Init ═══════════
-        document.addEventListener('DOMContentLoaded', loadSheikhs);
+        document.addEventListener('DOMContentLoaded', loadLessons);
     </script>
 </body>
 
