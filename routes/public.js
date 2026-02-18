@@ -99,6 +99,33 @@ router.get('/landing', async (req, res) => {
     }
 });
 
+// ============ GET /api/public/sheikhs ============
+// كل المشايخ النشطين + عدد دروسهم (بدون auth - لصفحة التصفح)
+router.get('/sheikhs', async (req, res) => {
+    try {
+        const sheikhs = await Sheikh.find({ isActive: true })
+            .select('name image bio')
+            .lean();
+
+        // حساب عدد الدروس لكل شيخ (sheikhId = String)
+        for (let sheikh of sheikhs) {
+            sheikh.lessonCount = await Lesson.countDocuments({
+                sheikhId: sheikh._id.toString(),
+                status: 'published'
+            });
+        }
+
+        // ترتيب حسب عدد الدروس (الأكثر أولاً)
+        sheikhs.sort((a, b) => b.lessonCount - a.lessonCount);
+
+        res.json({ sheikhs });
+
+    } catch (error) {
+        console.error('❌ Public Sheikhs Error:', error);
+        res.status(500).json({ error: 'خطأ في جلب المشايخ' });
+    }
+});
+
 // ============ GET /api/public/nav ============
 // أيقونات الشريط السفلي (بدون auth - للصفحة الرئيسية)
 const navCache = require('../utils/navCache');

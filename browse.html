@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تصفح المشايخ والدروس — عِلْمٌ يُنْتَفَعُ بِهِ</title>
+    <meta name="description" content="تصفح دروس المشايخ الكرام — منصة عِلْمٌ يُنْتَفَعُ بِهِ">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ═══════════════════════════════
+       Browse Page — Self-contained
+       Dark + Gold theme
+    ═══════════════════════════════ */
+        :root {
+            --gold: #EDBA26;
+            --gold-dim: rgba(237, 186, 38, .15);
+            --gold-border: rgba(237, 186, 38, .25);
+            --bg-1: #0a0a1a;
+            --bg-2: #1a1a2e;
+            --card-bg: rgba(255, 255, 255, .04);
+            --card-hover: rgba(255, 255, 255, .08);
+            --text-1: #f0f0f0;
+            --text-2: rgba(255, 255, 255, .6);
+            --text-3: rgba(255, 255, 255, .4);
+            --radius: 16px;
+            --transition: .3s cubic-bezier(.23, 1, .32, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            color: var(--text-1);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ═══ Scrollbar ═══ */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-border);
+            border-radius: 3px;
+        }
+
+        /* ═══ Views ═══ */
+        .view {
+            display: none;
+            animation: fadeIn .35s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        /* ═══ Page Header ═══ */
+        .page-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: 1rem 1.25rem;
+            background: rgba(10, 10, 26, .92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--gold-border);
+        }
+
+        .page-header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold), #F5D245);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-back {
+            background: var(--gold-dim);
+            border: none;
+            color: var(--gold);
+            font-size: 1rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background var(--transition);
+        }
+
+        .btn-back:hover {
+            background: rgba(237, 186, 38, .25);
+        }
+
+        /* ═══ Container ═══ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* ═══ Hero ═══ */
+        .hero {
+            text-align: center;
+            padding: 2rem 1rem 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: .5rem;
+            background: linear-gradient(135deg, var(--gold), #F5D245);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: var(--text-2);
+            font-size: 1rem;
+        }
+
+        /* ═══ Search ═══ */
+        .search-wrap {
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+            position: relative;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: .85rem 1rem .85rem 2.8rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 12px;
+            color: var(--text-1);
+            font-size: .95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border var(--transition);
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--gold-border);
+        }
+
+        .search-wrap input::placeholder {
+            color: var(--text-3);
+        }
+
+        .search-wrap .icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-3);
+            font-size: .9rem;
+        }
+
+        /* ═══ Sheikh Grid ═══ */
+        .sheikh-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.25rem;
+            padding-bottom: 2rem;
+        }
+
+        .sheikh-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: var(--radius);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .sheikh-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--gold-border);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+            background: var(--card-hover);
+        }
+
+        /* Avatar */
+        .sheikh-avatar {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            overflow: hidden;
+            border: 3px solid rgba(237, 186, 38, .3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gold-dim);
+            font-size: 2rem;
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .sheikh-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sheikh-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-1);
+            margin-bottom: .4rem;
+        }
+
+        .sheikh-count {
+            font-size: .82rem;
+            color: var(--gold);
+            opacity: .8;
+        }
+
+        .sheikh-count i {
+            margin-left: .3rem;
+        }
+
+        /* ═══ Lessons List ═══ */
+        .lessons-wrap {
+            padding-bottom: 2rem;
+        }
+
+        .lessons-stats {
+            text-align: center;
+            color: var(--text-2);
+            font-size: .9rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .lesson-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: .75rem;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: all var(--transition);
+        }
+
+        .lesson-card:hover {
+            border-color: var(--gold-border);
+            transform: translateX(-4px);
+            background: var(--card-hover);
+        }
+
+        .lesson-num {
+            min-width: 32px;
+            height: 32px;
+            background: var(--gold-dim);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+
+        .lesson-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .lesson-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-1);
+            margin-bottom: .25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .lesson-meta {
+            display: flex;
+            gap: .75rem;
+            font-size: .78rem;
+            color: var(--text-3);
+        }
+
+        .lesson-meta i {
+            margin-left: .25rem;
+        }
+
+        .lesson-arrow {
+            color: var(--text-3);
+            font-size: .8rem;
+            flex-shrink: 0;
+        }
+
+        /* ═══ Empty / Error / Loading ═══ */
+        .state-msg {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-2);
+        }
+
+        .state-msg i {
+            font-size: 3rem;
+            color: var(--gold);
+            opacity: .35;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .state-msg p {
+            font-size: 1.05rem;
+        }
+
+        .state-msg .retry-btn {
+            margin-top: 1rem;
+            padding: .6rem 1.5rem;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            color: var(--gold);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: .9rem;
+            transition: background var(--transition);
+        }
+
+        .state-msg .retry-btn:hover {
+            background: rgba(237, 186, 38, .25);
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 1rem;
+            border: 4px solid var(--gold-dim);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ═══ Bottom Nav ═══ */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 26, .95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, .06);
+            display: flex;
+            justify-content: space-around;
+            padding: .6rem 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .2rem;
+            text-decoration: none;
+            color: var(--text-3);
+            font-size: .7rem;
+            padding: .4rem .8rem;
+            border-radius: 8px;
+            transition: color var(--transition);
+        }
+
+        .nav-item i {
+            font-size: 1.3rem;
+        }
+
+        .nav-item.active {
+            color: var(--gold);
+        }
+
+        .nav-item:hover:not(.disabled) {
+            color: var(--gold);
+        }
+
+        .nav-item.disabled {
+            opacity: .3;
+            pointer-events: none;
+        }
+
+        .nav-item .badge-soon {
+            position: absolute;
+            top: -2px;
+            right: -4px;
+            background: rgba(237, 186, 38, .25);
+            color: var(--gold);
+            font-size: .5rem;
+            padding: .1rem .35rem;
+            border-radius: 4px;
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (max-width: 600px) {
+            .sheikh-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .sheikh-avatar {
+                width: 72px;
+                height: 72px;
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══════════════ SCREEN 1: SHEIKHS ══════════════ -->
+    <section id="view-sheikhs" class="view active">
+        <div class="hero">
+            <h1>🕌 المشايخ الكرام</h1>
+            <p>اختر شيخك المفضل واستمع لدروسه</p>
+        </div>
+
+        <div class="container">
+            <div class="search-wrap">
+                <i class="fas fa-search icon"></i>
+                <input type="text" id="searchSheikhs" placeholder="ابحث عن شيخ...">
+            </div>
+
+            <div id="sheikhsGrid" class="sheikh-grid">
+                <!-- تُملأ بالـ JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ SCREEN 2: LESSONS ══════════════ -->
+    <section id="view-lessons" class="view">
+        <div class="page-header">
+            <button class="btn-back" onclick="showSheikhs()" aria-label="رجوع">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h1 id="lessonPageTitle">دروس الشيخ</h1>
+        </div>
+
+        <div class="container">
+            <div class="search-wrap" style="margin-top:1rem;">
+                <i class="fas fa-search icon"></i>
+                <input type="text" id="searchLessons" placeholder="ابحث في الدروس...">
+            </div>
+
+            <div class="lessons-stats" id="lessonsStats"></div>
+
+            <div id="lessonsList" class="lessons-wrap">
+                <!-- تُملأ بالـ JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ BOTTOM NAV ══════════════ -->
+    <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+        <a href="/website" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="/browse" class="nav-item active">
+            <i class="fas fa-user-tie"></i>
+            <span>المشايخ</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item disabled" style="position:relative;">
+            <i class="fas fa-star"></i>
+            <span>ذهبي</span>
+            <span class="badge-soon">قريباً</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item disabled" style="position:relative;">
+            <i class="fas fa-robot"></i>
+            <span>شات</span>
+            <span class="badge-soon">قريباً</span>
+        </a>
+    </nav>
+
+    <!-- ══════════════ JAVASCRIPT ══════════════ -->
+    <script>
+        // ═══════════ State ═══════════
+        let allSheikhs = [];
+        let currentSheikh = null;
+        let allLessons = [];
+
+        // ═══════════ SVG Avatar Placeholder ═══════════
+        function avatarPlaceholder(name) {
+            const initial = name ? name.charAt(0) : '؟';
+            const palette = ['%233b82f6', '%2310b981', '%238b5cf6', '%23ec4899', '%23f59e0b', '%2314b8a6', '%236366f1', '%23ef4444'];
+            const c = palette[(name || '').length % palette.length];
+            return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='${c}' width='100' height='100' rx='50'/%3E%3Ctext x='50' y='55' fill='white' font-size='42' text-anchor='middle' dy='.1em' font-family='Tajawal,sans-serif' font-weight='700'%3E${encodeURIComponent(initial)}%3C/text%3E%3C/svg%3E`;
+        }
+
+        // ═══════════ Switch Views ═══════════
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function showSheikhs() {
+            showView('view-sheikhs');
+        }
+
+        // ═══════════ Load Sheikhs ═══════════
+        async function loadSheikhs() {
+            const grid = document.getElementById('sheikhsGrid');
+            grid.innerHTML = '<div class="state-msg"><div class="spinner"></div><p>جاري تحميل المشايخ...</p></div>';
+
+            try {
+                const res = await fetch('/api/public/sheikhs');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const data = await res.json();
+                allSheikhs = data.sheikhs || data || [];
+
+                renderSheikhs(allSheikhs);
+            } catch (err) {
+                console.error('❌ Load sheikhs:', err);
+                grid.innerHTML = `
+          <div class="state-msg" style="grid-column:1/-1;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>خطأ في تحميل المشايخ</p>
+            <button class="retry-btn" onclick="loadSheikhs()"><i class="fas fa-redo"></i> إعادة المحاولة</button>
+          </div>`;
+            }
+        }
+
+        // ═══════════ Render Sheikhs ═══════════
+        function renderSheikhs(sheikhs) {
+            const grid = document.getElementById('sheikhsGrid');
+
+            if (!sheikhs.length) {
+                grid.innerHTML = `
+          <div class="state-msg" style="grid-column:1/-1;">
+            <i class="fas fa-user-slash"></i>
+            <p>لا يوجد مشايخ حالياً</p>
+          </div>`;
+                return;
+            }
+
+            grid.innerHTML = sheikhs.map(s => {
+                const imgSrc = s.image || avatarPlaceholder(s.name);
+                const fallback = avatarPlaceholder(s.name);
+                return `
+          <div class="sheikh-card" onclick="openSheikh('${s._id}','${s.name.replace(/'/g, "\\'")}')">
+            <div class="sheikh-avatar">
+              <img src="${imgSrc}" alt="${s.name}" onerror="this.src='${fallback}'">
+            </div>
+            <div class="sheikh-name">${s.name}</div>
+            <div class="sheikh-count"><i class="fas fa-book"></i> ${s.lessonCount || 0} درس</div>
+          </div>`;
+            }).join('');
+        }
+
+        // ═══════════ Search Sheikhs ═══════════
+        document.getElementById('searchSheikhs').addEventListener('input', function () {
+            const q = this.value.trim().toLowerCase();
+            if (!q) return renderSheikhs(allSheikhs);
+            renderSheikhs(allSheikhs.filter(s => s.name.toLowerCase().includes(q)));
+        });
+
+        // ═══════════ Open Sheikh → Load Lessons ═══════════
+        async function openSheikh(sheikhId, sheikhName) {
+            currentSheikh = { id: sheikhId, name: sheikhName };
+            document.getElementById('lessonPageTitle').textContent = `📚 دروس ${sheikhName}`;
+            document.getElementById('searchLessons').value = '';
+            showView('view-lessons');
+
+            const list = document.getElementById('lessonsList');
+            list.innerHTML = '<div class="state-msg"><div class="spinner"></div><p>جاري تحميل الدروس...</p></div>';
+            document.getElementById('lessonsStats').textContent = '';
+
+            try {
+                // استخدام الـ API الموجود أصلاً: /api/public/lessons?sheikh=ID
+                const res = await fetch(`/api/public/lessons?sheikh=${sheikhId}&limit=100`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const data = await res.json();
+                allLessons = data.lessons || [];
+
+                document.getElementById('lessonsStats').textContent = `${allLessons.length} درس`;
+                renderLessons(allLessons);
+            } catch (err) {
+                console.error('❌ Load lessons:', err);
+                list.innerHTML = `
+          <div class="state-msg">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>خطأ في تحميل الدروس</p>
+            <button class="retry-btn" onclick="openSheikh('${sheikhId}','${sheikhName.replace(/'/g, "\\'")}')"><i class="fas fa-redo"></i> إعادة المحاولة</button>
+          </div>`;
+            }
+        }
+
+        // ═══════════ Render Lessons ═══════════
+        function renderLessons(lessons) {
+            const list = document.getElementById('lessonsList');
+
+            if (!lessons.length) {
+                list.innerHTML = `
+          <div class="state-msg">
+            <i class="fas fa-book-open"></i>
+            <p>لا توجد دروس حالياً</p>
+            <p style="font-size:.85rem;color:var(--text-3);margin-top:.5rem;">سيتم إضافة دروس قريباً إن شاء الله</p>
+          </div>`;
+                return;
+            }
+
+            list.innerHTML = lessons.map((l, i) => `
+        <div class="lesson-card" onclick="openLesson('${l._id}')">
+          <div class="lesson-num">${i + 1}</div>
+          <div class="lesson-info">
+            <div class="lesson-title">${l.title}</div>
+            <div class="lesson-meta">
+              ${l.categoryName ? `<span><i class="fas fa-folder"></i>${l.categoryName}</span>` : ''}
+              ${l.sheikhName ? `<span><i class="fas fa-user-tie"></i>${l.sheikhName}</span>` : ''}
+            </div>
+          </div>
+          <i class="fas fa-chevron-left lesson-arrow"></i>
+        </div>
+      `).join('');
+        }
+
+        // ═══════════ Search Lessons ═══════════
+        document.getElementById('searchLessons').addEventListener('input', function () {
+            const q = this.value.trim().toLowerCase();
+            if (!q) return renderLessons(allLessons);
+            renderLessons(allLessons.filter(l => l.title.toLowerCase().includes(q)));
+        });
+
+        // ═══════════ Open Lesson ═══════════
+        function openLesson(lessonId) {
+            window.location.href = `/website?lesson=${lessonId}`;
+        }
+
+        // ═══════════ Init ═══════════
+        document.addEventListener('DOMContentLoaded', loadSheikhs);
+    </script>
+</body>
+
+</html>
