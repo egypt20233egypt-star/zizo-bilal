@@ -4217,6 +4217,457 @@
                 }
             </style>
 
+            <!-- ============ Sections Management Panel (Phase 7) ============ -->
+            <style>
+                /* ═══ Phase 7: Sections Management Premium UI ═══ */
+                .sec-mgmt-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .sec-stats-row {
+                    display: flex;
+                    gap: 12px;
+                    flex-wrap: wrap;
+                }
+
+                .sec-stat-chip {
+                    background: rgba(255, 255, 255, 0.06);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 12px;
+                    padding: 10px 18px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.95rem;
+                }
+
+                .sec-stat-chip .num {
+                    font-weight: 700;
+                    font-size: 1.2rem;
+                }
+
+                .sec-stat-chip.total {
+                    color: #60a5fa;
+                }
+
+                .sec-stat-chip.active {
+                    color: #34d399;
+                }
+
+                .sec-stat-chip.inactive {
+                    color: #fbbf24;
+                }
+
+                .sec-toolbar {
+                    display: flex;
+                    gap: 12px;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    margin-bottom: 1.5rem;
+                }
+
+                .sec-search {
+                    flex: 1;
+                    min-width: 200px;
+                    padding: 10px 16px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    background: rgba(255, 255, 255, 0.05);
+                    color: var(--text);
+                    font-size: 0.95rem;
+                    font-family: inherit;
+                }
+
+                .sec-search:focus {
+                    outline: none;
+                    border-color: #60a5fa;
+                    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+                }
+
+                .sec-filter-btn {
+                    padding: 8px 16px;
+                    border-radius: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    background: rgba(255, 255, 255, 0.04);
+                    color: var(--text);
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-family: inherit;
+                    font-size: 0.85rem;
+                }
+
+                .sec-filter-btn:hover,
+                .sec-filter-btn.active {
+                    background: rgba(96, 165, 250, 0.15);
+                    border-color: #60a5fa;
+                    color: #60a5fa;
+                }
+
+                .sec-add-btn {
+                    padding: 10px 20px;
+                    border-radius: 12px;
+                    border: none;
+                    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                    color: #fff;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-family: inherit;
+                    transition: all 0.3s;
+                }
+
+                .sec-add-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+                }
+
+                /* Cards Grid */
+                .sec-cards-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                    gap: 16px;
+                }
+
+                .sec-card {
+                    background: rgba(255, 255, 255, 0.04);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 16px;
+                    padding: 20px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .sec-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 4px;
+                    border-radius: 16px 16px 0 0;
+                }
+
+                .sec-card:hover {
+                    transform: translateY(-4px);
+                    border-color: rgba(255, 255, 255, 0.2);
+                    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+                }
+
+                .sec-card.inactive {
+                    opacity: 0.5;
+                }
+
+                .sec-card .sec-icon {
+                    font-size: 2rem;
+                    margin-bottom: 8px;
+                }
+
+                .sec-card .sec-label {
+                    font-size: 1.05rem;
+                    font-weight: 600;
+                    color: var(--text);
+                    margin-bottom: 4px;
+                }
+
+                .sec-card .sec-key {
+                    font-size: 0.8rem;
+                    color: rgba(255, 255, 255, 0.4);
+                    font-family: 'Courier New', monospace;
+                }
+
+                .sec-card .sec-category-badge {
+                    display: inline-block;
+                    padding: 3px 10px;
+                    border-radius: 20px;
+                    font-size: 0.75rem;
+                    margin-top: 8px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+
+                .sec-card-actions {
+                    display: flex;
+                    gap: 8px;
+                    margin-top: 12px;
+                    padding-top: 12px;
+                    border-top: 1px solid rgba(255, 255, 255, 0.06);
+                }
+
+                .sec-card-actions button {
+                    flex: 1;
+                    padding: 6px 0;
+                    border-radius: 8px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background: rgba(255, 255, 255, 0.03);
+                    color: var(--text);
+                    cursor: pointer;
+                    font-size: 0.8rem;
+                    font-family: inherit;
+                    transition: all 0.2s;
+                }
+
+                .sec-card-actions button:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                }
+
+                .sec-card-actions .sec-toggle-btn:hover {
+                    color: #fbbf24;
+                }
+
+                .sec-card-actions .sec-edit-btn:hover {
+                    color: #60a5fa;
+                }
+
+                .sec-card-actions .sec-delete-btn:hover {
+                    color: #f87171;
+                }
+
+                /* Color stripe styles */
+                .sec-card[data-color='blue']::before {
+                    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+                }
+
+                .sec-card[data-color='green']::before {
+                    background: linear-gradient(90deg, #22c55e, #34d399);
+                }
+
+                .sec-card[data-color='purple']::before {
+                    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+                }
+
+                .sec-card[data-color='pink']::before {
+                    background: linear-gradient(90deg, #ec4899, #f472b6);
+                }
+
+                .sec-card[data-color='amber']::before {
+                    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+                }
+
+                .sec-card[data-color='teal']::before {
+                    background: linear-gradient(90deg, #14b8a6, #2dd4bf);
+                }
+
+                .sec-card[data-color='gold']::before {
+                    background: linear-gradient(90deg, #d4a017, #f5c542);
+                }
+
+                .sec-card[data-color='red']::before {
+                    background: linear-gradient(90deg, #ef4444, #f87171);
+                }
+
+                /* Edit Modal */
+                .sec-modal-overlay {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(4px);
+                    z-index: 9999;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .sec-modal-overlay.show {
+                    display: flex;
+                }
+
+                .sec-modal {
+                    background: var(--card-bg, #1e293b);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 20px;
+                    padding: 28px;
+                    width: 90%;
+                    max-width: 500px;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                }
+
+                .sec-modal h3 {
+                    margin: 0 0 1.5rem;
+                    font-size: 1.3rem;
+                }
+
+                .sec-modal .form-row {
+                    margin-bottom: 1rem;
+                }
+
+                .sec-modal .form-row label {
+                    display: block;
+                    margin-bottom: 6px;
+                    font-size: 0.9rem;
+                    color: rgba(255, 255, 255, 0.7);
+                }
+
+                .sec-modal .form-row input,
+                .sec-modal .form-row select {
+                    width: 100%;
+                    padding: 10px 14px;
+                    border-radius: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    background: rgba(255, 255, 255, 0.05);
+                    color: var(--text);
+                    font-size: 0.95rem;
+                    font-family: inherit;
+                    box-sizing: border-box;
+                }
+
+                .sec-color-picker {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+
+                .sec-color-swatch {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 10px;
+                    border: 2px solid transparent;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .sec-color-swatch:hover {
+                    transform: scale(1.1);
+                }
+
+                .sec-color-swatch.selected {
+                    border-color: #fff;
+                    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+                }
+
+                .sec-modal-actions {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 1.5rem;
+                }
+
+                .sec-modal-actions button {
+                    flex: 1;
+                    padding: 12px;
+                    border-radius: 12px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-family: inherit;
+                    font-size: 0.95rem;
+                    transition: all 0.2s;
+                }
+
+                .sec-save-btn {
+                    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                    color: #fff;
+                }
+
+                .sec-save-btn:hover {
+                    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+                }
+
+                .sec-cancel-btn {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: var(--text);
+                }
+
+                @media (max-width: 768px) {
+                    .sec-cards-grid {
+                        grid-template-columns: 1fr 1fr;
+                        gap: 10px;
+                    }
+
+                    .sec-card {
+                        padding: 14px;
+                    }
+
+                    .sec-stat-chip {
+                        padding: 8px 12px;
+                        font-size: 0.85rem;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .sec-cards-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+            </style>
+
+            <div id="sections" class="panel">
+                <div class="sec-mgmt-header">
+                    <h2><i class="fa-solid fa-book-open" style="color:#60a5fa;"></i> إدارة أقسام الدروس</h2>
+                    <div class="sec-stats-row">
+                        <div class="sec-stat-chip total"><span class="num" id="secTotal">0</span> إجمالي</div>
+                        <div class="sec-stat-chip active"><span class="num" id="secActive">0</span> نشط</div>
+                        <div class="sec-stat-chip inactive"><span class="num" id="secInactive">0</span> معطل</div>
+                    </div>
+                </div>
+
+                <div class="sec-toolbar">
+                    <input class="sec-search" type="text" id="secSearch" placeholder="🔍 بحث بالاسم أو الـ Key..."
+                        oninput="filterSections()">
+                    <button class="sec-filter-btn active" onclick="filterByCategory('all')">الكل</button>
+                    <button class="sec-filter-btn" onclick="filterByCategory('أساسي')">أساسي</button>
+                    <button class="sec-filter-btn" onclick="filterByCategory('ديناميكي')">ديناميكي</button>
+                    <button class="sec-filter-btn" onclick="filterByCategory('خاص')">خاص</button>
+                    <button class="sec-filter-btn" onclick="filterByCategory('مكتشف')">مكتشف</button>
+                    <button class="sec-add-btn" onclick="openSectionModal()"><i class="fa-solid fa-plus"></i> قسم
+                        جديد</button>
+                </div>
+
+                <div id="secCardsGrid" class="sec-cards-grid">
+                    <div class="alert">جاري تحميل الأقسام...</div>
+                </div>
+            </div>
+
+            <!-- Section Edit/Add Modal -->
+            <div class="sec-modal-overlay" id="secModalOverlay">
+                <div class="sec-modal">
+                    <h3 id="secModalTitle">✏️ تعديل القسم</h3>
+                    <input type="hidden" id="secEditId">
+                    <div class="form-row">
+                        <label>🔑 Key (اسم إنجليزي فريد)</label>
+                        <input type="text" id="secEditKey" placeholder="مثال: myNewSection" dir="ltr">
+                    </div>
+                    <div class="form-row">
+                        <label>📝 الاسم بالعربي</label>
+                        <input type="text" id="secEditLabel" placeholder="مثال: القسم الجديد">
+                    </div>
+                    <div class="form-row">
+                        <label>✨ الأيقونة</label>
+                        <input type="text" id="secEditIcon" placeholder="📖"
+                            style="font-size:1.5rem; text-align:center;">
+                    </div>
+                    <div class="form-row">
+                        <label>🎨 اللون</label>
+                        <div class="sec-color-picker" id="secColorPicker"></div>
+                    </div>
+                    <div class="form-row">
+                        <label>📁 الفئة</label>
+                        <select id="secEditCategory">
+                            <option value="أساسي">أساسي</option>
+                            <option value="ديناميكي">ديناميكي</option>
+                            <option value="خاص">خاص</option>
+                            <option value="مكتشف">مكتشف</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>🔢 الترتيب</label>
+                        <input type="number" id="secEditOrder" value="0">
+                    </div>
+                    <div class="sec-modal-actions">
+                        <button class="sec-save-btn" onclick="saveSectionEdit()">💾 حفظ</button>
+                        <button class="sec-cancel-btn" onclick="closeSectionModal()">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+
             <div id="sectionStats" class="panel">
                 <div class="stats-panel-header">
                     <h2><i class="fa-solid fa-chart-bar"></i> إحصائيات الأقسام</h2>
@@ -4438,23 +4889,8 @@
     </div>
 
     <script>
-        // ============ Auth Check ============
-        async function checkAuth() {
-            try {
-                const res = await fetch('/api/admin/check');
-                const data = await res.json();
-
-                if (!data.loggedIn) {
-                    window.location.href = '/admin';
-                    return;
-                }
-
-                document.getElementById('username').textContent = data.username || 'Admin';
-            } catch (error) {
-                console.error('Auth check error:', error);
-                window.location.href = '/admin';
-            }
-        }
+        // ✅ checkAuth() معرّفة في مكان واحد فقط (سطر ~5248)
+        // 🔄 وبتتنادى من DOMContentLoaded (نهاية الملف)
 
         // ============ Tab Navigation ============
         // showTab = scroll-to-section (كل الأقسام ظاهرة - الزرار بينقلك للقسم)
@@ -4479,6 +4915,7 @@
             if (tabId === 'categories') loadCategories(currentParentId);
             if (tabId === 'navItems') loadNavItems();
             if (tabId === 'sectionStats') loadSectionStats();
+            if (tabId === 'sections') loadSectionsManagement();
         }
 
         // ============ 📊 Section Usage Stats (Phase 6) ============
@@ -4556,12 +4993,19 @@
 
         // ============ Sections ============
         let sections = [];
+        let allSectionsData = []; // كل الأقسام (للفلترة)
+        let currentCategoryFilter = 'all';
+
+        // الألوان المتاحة + ألوان CSS
+        const SEC_COLORS = {
+            blue: '#3b82f6', green: '#22c55e', purple: '#8b5cf6', pink: '#ec4899',
+            amber: '#f59e0b', teal: '#14b8a6', gold: '#d4a017', red: '#ef4444'
+        };
 
         async function loadSections() {
             try {
                 const res = await fetch('/api/sections/variables');
                 const data = await res.json();
-
                 sections = data.sections || [];
                 document.getElementById('sectionsCount').textContent = data.count || 0;
 
@@ -4573,30 +5017,210 @@
                         <div style="font-size: 0.9rem; margin-top: 0.5rem;">${sec.description || ''}</div>
                     </div>
                 `).join('');
-
-                // Display in sections management tab
-                const res2 = await fetch('/api/sections/all', {
-                    credentials: 'include'
-                });
-                const allSections = await res2.json();
-
-                document.getElementById('sectionsList').innerHTML = allSections.map(s => `
-                    <div class="list-item">
-                        <span>${s.icon} ${s.labelAr} <small style="color:#999;">(${s.sectionKey})</small></span>
-                        <span class="badge ${s.isActive ? 'badge-success' : 'badge-warning'}">
-                            ${s.isActive ? 'نشط' : 'معطل'}
-                        </span>
-                        <button class="btn btn-danger" onclick="deleteSection('${s._id}')">حذف</button>
-                    </div>
-                `).join('') || '<p>لا توجد أقسام</p>';
-
             } catch (error) {
                 console.error('Error loading sections:', error);
-                document.getElementById('availableSections').innerHTML = `
-                    <div class="alert" style="background: rgba(231,76,60,0.2); border-color: #e74c3c;">
-                        ❌ فشل تحميل الأقسام
+            }
+        }
+
+        // ============ Sections Management (Phase 7 Premium UI) ============
+        async function loadSectionsManagement() {
+            const grid = document.getElementById('secCardsGrid');
+            if (!grid) { console.error('secCardsGrid NOT FOUND!'); return; }
+            grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem;"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</p>';
+            try {
+                let sections = [];
+
+                // 🔄 Try admin endpoint first, fallback to public
+                try {
+                    const res = await fetch('/api/sections/all', { credentials: 'include' });
+                    console.log('📡 sections/all status:', res.status);
+                    if (res.ok) {
+                        const data = await res.json();
+                        console.log('📡 sections/all data:', data);
+                        sections = Array.isArray(data) ? data : (data.sections || []);
+
+                        // Update stats from admin endpoint
+                        if (!Array.isArray(data) && data.total !== undefined) {
+                            document.getElementById('secTotal').textContent = data.total;
+                            document.getElementById('secActive').textContent = data.active || 0;
+                            document.getElementById('secInactive').textContent = data.inactive || 0;
+                        }
+                    } else {
+                        console.warn('⚠️ sections/all returned', res.status, '- trying public fallback...');
+                        throw new Error('Admin endpoint failed');
+                    }
+                } catch (adminErr) {
+                    // 🔄 Fallback: use public /api/sections
+                    console.log('📡 Falling back to /api/sections (public)...');
+                    const pubRes = await fetch('/api/sections');
+                    if (pubRes.ok) {
+                        const pubData = await pubRes.json();
+                        sections = pubData.sections || [];
+                        console.log('📡 Public sections loaded:', sections.length);
+                    }
+                }
+
+                allSectionsData = sections;
+
+                // Update stats if not already set
+                const activeCount = sections.filter(s => s.isActive !== false).length;
+                const el = (id) => document.getElementById(id);
+                if (el('secTotal')) el('secTotal').textContent = sections.length;
+                if (el('secActive')) el('secActive').textContent = activeCount;
+                if (el('secInactive')) el('secInactive').textContent = sections.length - activeCount;
+                if (el('sectionsCount')) el('sectionsCount').textContent = sections.length;
+
+                console.log('📊 allSectionsData length:', sections.length);
+                renderSectionCards(sections);
+            } catch (err) {
+                console.error('❌ Error loading sections:', err);
+                grid.innerHTML = '<div class="alert" style="background:rgba(231,76,60,0.2);border-color:#e74c3c;">❌ فشل تحميل الأقسام: ' + err.message + '</div>';
+            }
+        }
+
+        function renderSectionCards(sectionsToRender) {
+            const grid = document.getElementById('secCardsGrid');
+            if (!sectionsToRender.length) {
+                grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem;">لا توجد أقسام مطابقة</p>';
+                return;
+            }
+            grid.innerHTML = sectionsToRender.map(s => `
+                <div class="sec-card ${s.isActive ? '' : 'inactive'}" data-color="${s.color || 'blue'}">
+                    <div class="sec-icon">${s.icon || '✨'}</div>
+                    <div class="sec-label">${s.labelAr}</div>
+                    <div class="sec-key">${s.sectionKey}</div>
+                    <span class="sec-category-badge" style="color:${SEC_COLORS[s.color] || '#60a5fa'};border-color:${SEC_COLORS[s.color] || '#60a5fa'}40;background:${SEC_COLORS[s.color] || '#60a5fa'}15;">
+                        ${s.category || 'أساسي'}
+                    </span>
+                    <div class="sec-card-actions">
+                        <button class="sec-edit-btn" onclick='openSectionModal(${JSON.stringify(s).replace(/'/g, "&#39;")})'><i class="fa-solid fa-pen"></i> تعديل</button>
+                        <button class="sec-toggle-btn" onclick="toggleSection('${s._id}', ${s.isActive})"><i class="fa-solid fa-${s.isActive ? 'eye-slash' : 'eye'}"></i> ${s.isActive ? 'تعطيل' : 'تفعيل'}</button>
+                        <button class="sec-delete-btn" onclick="deleteSection('${s._id}')"><i class="fa-solid fa-trash"></i></button>
                     </div>
-                `;
+                </div>
+            `).join('');
+        }
+
+        function filterSections() {
+            const query = document.getElementById('secSearch').value.trim().toLowerCase();
+            let filtered = allSectionsData;
+            if (currentCategoryFilter !== 'all') {
+                filtered = filtered.filter(s => s.category === currentCategoryFilter);
+            }
+            if (query) {
+                filtered = filtered.filter(s =>
+                    s.labelAr.toLowerCase().includes(query) ||
+                    s.sectionKey.toLowerCase().includes(query)
+                );
+            }
+            renderSectionCards(filtered);
+        }
+
+        function filterByCategory(cat) {
+            currentCategoryFilter = cat;
+            document.querySelectorAll('.sec-filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            filterSections();
+        }
+
+        // Modal
+        function openSectionModal(section = null) {
+            const overlay = document.getElementById('secModalOverlay');
+            document.getElementById('secModalTitle').textContent = section ? '✏️ تعديل القسم' : '➕ قسم جديد';
+            document.getElementById('secEditId').value = section ? section._id : '';
+            document.getElementById('secEditKey').value = section ? section.sectionKey : '';
+            document.getElementById('secEditKey').disabled = !!section; // مينفعش يعدل الـ key
+            document.getElementById('secEditLabel').value = section ? section.labelAr : '';
+            document.getElementById('secEditIcon').value = section ? section.icon : '✨';
+            document.getElementById('secEditCategory').value = section ? (section.category || 'أساسي') : 'أساسي';
+            document.getElementById('secEditOrder').value = section ? (section.order || 0) : 0;
+
+            // Color Picker
+            const selectedColor = section ? (section.color || 'blue') : 'blue';
+            document.getElementById('secColorPicker').innerHTML = Object.entries(SEC_COLORS).map(([name, hex]) => `
+                <div class="sec-color-swatch ${name === selectedColor ? 'selected' : ''}" 
+                     style="background:${hex};" 
+                     data-color="${name}"
+                     onclick="selectSecColor('${name}')">
+                </div>
+            `).join('');
+
+            overlay.classList.add('show');
+        }
+
+        function closeSectionModal() {
+            document.getElementById('secModalOverlay').classList.remove('show');
+        }
+
+        function selectSecColor(colorName) {
+            document.querySelectorAll('.sec-color-swatch').forEach(s => s.classList.remove('selected'));
+            document.querySelector(`.sec-color-swatch[data-color="${colorName}"]`).classList.add('selected');
+        }
+
+        async function saveSectionEdit() {
+            const id = document.getElementById('secEditId').value;
+            const body = {
+                sectionKey: document.getElementById('secEditKey').value.trim(),
+                labelAr: document.getElementById('secEditLabel').value.trim(),
+                icon: document.getElementById('secEditIcon').value.trim() || '✨',
+                color: document.querySelector('.sec-color-swatch.selected')?.dataset.color || 'blue',
+                category: document.getElementById('secEditCategory').value,
+                order: parseInt(document.getElementById('secEditOrder').value) || 0
+            };
+
+            if (!body.sectionKey || !body.labelAr) {
+                alert('الـ Key والاسم العربي مطلوبين!');
+                return;
+            }
+
+            try {
+                const url = id ? `/api/sections/${id}` : '/api/sections';
+                const method = id ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'خطأ');
+
+                closeSectionModal();
+                loadSectionsManagement();
+                loadSections(); // تحديث الـ AI tab كمان
+            } catch (err) {
+                alert('❌ ' + err.message);
+            }
+        }
+
+        async function toggleSection(id, currentState) {
+            try {
+                const res = await fetch(`/api/sections/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ isActive: !currentState })
+                });
+                if (!res.ok) throw new Error('فشل التبديل');
+                loadSectionsManagement();
+                loadSections();
+            } catch (err) {
+                alert('❌ ' + err.message);
+            }
+        }
+
+        async function deleteSection(id) {
+            if (!confirm('هل أنت متأكد من تعطيل هذا القسم؟')) return;
+            try {
+                const res = await fetch(`/api/sections/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('فشل الحذف');
+                loadSectionsManagement();
+                loadSections();
+            } catch (err) {
+                alert('❌ ' + err.message);
             }
         }
 
@@ -6641,6 +7265,8 @@
             await loadSheikhs();
             await loadLessons();
             await loadCategoryPickerTree();
+            // 🔄 Phase 7: تحميل إدارة الأقسام تلقائي
+            loadSectionsManagement();
         });
     </script>
 

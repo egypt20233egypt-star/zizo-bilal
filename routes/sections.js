@@ -13,19 +13,65 @@ function requireAuth(req, res, next) {
 }
 
 // ============================================
-// PUBLIC Routes (للموقع العام)
+// 🗄️ Cache Configuration (5 دقائق)
+// ============================================
+const CACHE_TTL = 5 * 60 * 1000;
+let sectionsCache = { data: null, timestamp: null };
+
+function invalidateSectionsCache() {
+    sectionsCache = { data: null, timestamp: null };
+    console.log('🗑️ Sections cache invalidated');
+}
+
+// ============================================
+// 🔄 Mapping Layer (ERNIE idea) 
+// تحويل DB format → SectionResolver format
+// ============================================
+function mapDbToResolver(dbSections) {
+    const result = {};
+    dbSections.forEach(s => {
+        result[s.sectionKey] = {
+            name: s.labelAr,
+            icon: s.icon,
+            color: s.color || 'blue'
+        };
+    });
+    return result;
+}
+
+// ============================================
+// PUBLIC Routes (للموقع العام — بدون Auth)
 // ============================================
 
 /**
  * GET /api/sections
- * جلب الأقسام النشطة فقط (للـ website.html)
+ * جلب الأقسام النشطة بصيغة SectionResolver (للـ website.html)
+ * مع Cache 5 دقائق
  */
 router.get('/', async (req, res) => {
     try {
+        // Cache check
+        const now = Date.now();
+        if (sectionsCache.data && (now - sectionsCache.timestamp) < CACHE_TTL) {
+            return res.json(sectionsCache.data);
+        }
+
         const sections = await SectionRegistry.find({ isActive: true })
-            .sort({ order: 1 })
-            .select('sectionKey labelAr icon schemaHint order');
-        res.json(sections);
+            .sort({ order: -1, sectionKey: 1 })
+            .select('sectionKey labelAr icon color category order')
+            .lean();
+
+        // رجّع بصيغتين: 
+        // 1. resolverFormat — جاهز لـ SectionResolver في website.html
+        // 2. sections — array كامل للتفاصيل
+        const responseData = {
+            count: sections.length,
+            resolverFormat: mapDbToResolver(sections),
+            sections: sections
+        };
+
+        sectionsCache = { data: responseData, timestamp: now };
+        res.json(responseData);
     } catch (error) {
         console.error('❌ Get Sections Error:', error);
         res.status(500).json({ error: 'فشل جلب الأقسام' });
@@ -40,7 +86,7 @@ router.get('/', async (req, res) => {
 router.get('/variables', async (req, res) => {
     try {
         const sections = await SectionRegistry.find({ isActive: true })
-            .sort({ order: 1 })
+            .sort({ order: -1 })
             .select('sectionKey labelAr icon description schemaHint');
 
         res.json({
@@ -69,8 +115,17 @@ router.get('/variables', async (req, res) => {
  */
 router.get('/all', requireAuth, async (req, res) => {
     try {
-        const sections = await SectionRegistry.find({}).sort({ order: 1 });
-        res.json(sections);
+        const sections = await SectionRegistry.find({})
+            .sort({ order: -1, sectionKey: 1 })
+            .lean();
+
+        const active = sections.filter(s => s.isActive).length;
+        res.json({
+            total: sections.length,
+            active: active,
+            inactive: sections.length - active,
+            sections: sections
+        });
     } catch (error) {
         console.error('❌ Get All Sections Error:', error);
         res.status(500).json({ error: 'فشل جلب الأقسام' });
@@ -83,7 +138,7 @@ router.get('/all', requireAuth, async (req, res) => {
  */
 router.post('/', requireAuth, async (req, res) => {
     try {
-        const { sectionKey, labelAr, icon, description, schemaHint, order } = req.body;
+        const { sectionKey, labelAr, icon, color, category, description, schemaHint, order } = req.body;
 
         // تحقق من الحقول المطلوبة
         if (!sectionKey || !labelAr) {
@@ -105,18 +160,21 @@ router.post('/', requireAuth, async (req, res) => {
             sectionKey,
             labelAr,
             icon: icon || '✨',
+            color: color || 'blue',
+            category: category || 'أساسي',
             description: description || '',
             schemaHint: schemaHint || 'mixed',
             order: order || 0
         });
 
         await section.save();
+        invalidateSectionsCache();
         console.log(`✅ Section added: ${sectionKey} (${labelAr})`);
         res.status(201).json(section);
 
     } catch (error) {
         console.error('❌ Add Section Error:', error);
-        res.status(500).json({ error: 'فشل إضافة القسم' });
+        res.status(500).json({ error: 'فشل إضافة القسم: ' + error.message });
     }
 });
 
@@ -126,11 +184,18 @@ router.post('/', requireAuth, async (req, res) => {
  */
 router.put('/:id', requireAuth, async (req, res) => {
     try {
-        const { labelAr, icon, description, schemaHint, isActive, order } = req.body;
+        const allowedFields = ['labelAr', 'icon', 'color', 'category', 'description', 'schemaHint', 'isActive', 'order'];
+        const updates = {};
+
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                updates[field] = req.body[field];
+            }
+        });
 
         const section = await SectionRegistry.findByIdAndUpdate(
             req.params.id,
-            { labelAr, icon, description, schemaHint, isActive, order },
+            updates,
             { new: true, runValidators: true }
         );
 
@@ -138,22 +203,22 @@ router.put('/:id', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'القسم مش موجود' });
         }
 
+        invalidateSectionsCache();
         console.log(`✅ Section updated: ${section.sectionKey}`);
         res.json(section);
 
     } catch (error) {
         console.error('❌ Update Section Error:', error);
-        res.status(500).json({ error: 'فشل تعديل القسم' });
+        res.status(500).json({ error: 'فشل تعديل القسم: ' + error.message });
     }
 });
 
 /**
  * DELETE /api/sections/:id
- * حذف قسم (أو تعطيله)
+ * Soft delete — تعطيل القسم بدل حذفه
  */
 router.delete('/:id', requireAuth, async (req, res) => {
     try {
-        // Soft delete - نعمله inactive بدل ما نحذفه
         const section = await SectionRegistry.findByIdAndUpdate(
             req.params.id,
             { isActive: false },
@@ -164,6 +229,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'القسم مش موجود' });
         }
 
+        invalidateSectionsCache();
         console.log(`🗑️ Section deactivated: ${section.sectionKey}`);
         res.json({ success: true, message: `تم تعطيل القسم "${section.labelAr}"` });
 
@@ -174,3 +240,4 @@ router.delete('/:id', requireAuth, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.invalidateSectionsCache = invalidateSectionsCache;

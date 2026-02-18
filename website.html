@@ -691,6 +691,38 @@
         // ============ 🎨 الألوان المسموحة (Allowlist) ============
         const ALLOWED_COLORS = ['blue', 'green', 'purple', 'pink', 'amber', 'teal', 'gold', 'red'];
 
+        // ============ 🌐 Phase 7: Hybrid Section Loading (API → Hardcoded Fallback) ============
+        const _disabledKeys = new Set(); // أقسام معطلة من الأدمن
+
+        async function loadKnownSections() {
+            try {
+                const res = await fetch('/api/sections');
+                if (!res.ok) throw new Error('API returned ' + res.status);
+                const data = await res.json();
+
+                if (data.resolverFormat && Object.keys(data.resolverFormat).length > 0) {
+                    // 1️⃣ تحديد الأقسام المعطلة (موجودة hardcoded بس مش في API)
+                    const apiKeys = new Set(Object.keys(data.resolverFormat));
+                    _disabledKeys.clear();
+                    for (const key of Object.keys(KNOWN_SECTIONS)) {
+                        if (!apiKeys.has(key)) {
+                            _disabledKeys.add(key); // قسم معطل → هيتجاهل في الـ render
+                        }
+                    }
+                    // 2️⃣ دمج/تحديث الأقسام النشطة من API
+                    Object.assign(KNOWN_SECTIONS, data.resolverFormat);
+                    if (_disabledKeys.size > 0) {
+                        console.log(`%c⚠️ أقسام معطلة (${_disabledKeys.size}): ${[..._disabledKeys].join(', ')}`, 'color: #fbbf24;');
+                    }
+                    console.log(`%c✅ Phase 7: ${data.count} قسم محمّل من API (sync كامل)`, 'color: #34d399; font-weight: bold;');
+                }
+            } catch (err) {
+                console.log('%c⚠️ API أقسام مش متاح — fallback للـ hardcoded', 'color: #fbbf24;');
+            }
+        }
+        // تحميل تلقائي عند فتح الصفحة
+        loadKnownSections();
+
         // ============ 🧠 SectionResolver — نقطة دخول واحدة (DRY + SSOT + Sanitized) ============
         const SectionResolver = {
             _cache: {}, // cache للأداء
@@ -1272,6 +1304,7 @@
             // Add dynamic/custom sections to navigation (مع Smart Section Resolver + Smart Ordering)
             const dynamicKeys = Object.keys(lesson).filter(key => {
                 if (knownKeys.includes(key)) return false;
+                if (_disabledKeys.has(key)) return false; // 🚫 Phase 7: قسم معطل من الأدمن
                 const value = lesson[key];
                 if (value === null || value === undefined) return false;
                 if (Array.isArray(value) && value.length === 0) return false;
@@ -1364,6 +1397,7 @@
             // 🎯 Smart Section Ordering — نفس الترتيب اللي في الـ Nav
             const dynamicContentKeys = Object.keys(lesson).filter(key => {
                 if (knownKeys.includes(key)) return false;
+                if (_disabledKeys.has(key)) return false; // 🚫 Phase 7: قسم معطل من الأدمن
                 const value = lesson[key];
                 if (value === null || value === undefined) return false;
                 if (Array.isArray(value) && value.length === 0) return false;

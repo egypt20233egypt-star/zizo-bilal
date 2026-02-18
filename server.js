@@ -87,7 +87,7 @@ app.use('/api/admin', require('./routes/auth'));
 
 // Protected API routes (محمية)
 app.use('/api/lessons', requireAuth, require('./routes/lessons'));
-app.use('/api/sections', requireAuth, require('./routes/sections')); // Section Registry API
+app.use('/api/sections', require('./routes/sections')); // Section Registry (Auth inside routes)
 app.use('/api/sheikhs', requireAuth, require('./routes/sheikhs')); // Sheikhs API
 app.use('/api/categories', requireAuth, require('./routes/categories')); // Categories API (هرمي)
 app.use('/api/nav-items', requireAuth, require('./routes/navItems')); // Nav Items API (Bottom Nav)
@@ -103,15 +103,18 @@ app.get('/', (req, res) => {
 
 // Admin v4.0 Routes
 app.get('/admin', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(path.join(__dirname, 'admin_v4.html')); // صفحة Login
 });
 
 // Admin Panel (محمي) - admin_panel_v4_merged.html فقط
 app.get('/admin/panel', requireAuth, (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(path.join(__dirname, 'admin_panel_v4_merged.html'));
 });
 
 app.get('/website', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(path.join(__dirname, 'website.html'));
 });
 
