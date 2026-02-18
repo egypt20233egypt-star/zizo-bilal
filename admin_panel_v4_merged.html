@@ -5275,15 +5275,51 @@
         }
 
         // ══════ وضع الترتيب (Toggle) ══════
-        function toggleOrderMode() {
+        async function toggleOrderMode() {
             orderModeEnabled = !orderModeEnabled;
             const btn = document.getElementById('orderToggleBtn');
             btn.classList.toggle('active', orderModeEnabled);
             btn.innerHTML = orderModeEnabled
                 ? '<i class="fa-solid fa-check"></i> تم الترتيب'
                 : '<i class="fa-solid fa-arrows-up-down"></i> ترتيب';
-            // أعد رسم الكروت لإظهار/إخفاء الأسهم
+
+            // ⚡ أول تفعيل: إعادة ترقيم تتابعي لو الأرقام مش منطقية
+            if (orderModeEnabled) {
+                await autoAssignSequentialOrders();
+            }
             filterSections();
+        }
+
+        // ══════ ترقيم تتابعي — يخلي الأرقام 1,2,3...N ══════
+        async function autoAssignSequentialOrders() {
+            // رتّب حسب order تنازلي (اللي عنده أعلى رقم → يفضل الأول)
+            const sorted = [...allSectionsData].sort((a, b) => (b.order || 0) - (a.order || 0));
+            const total = sorted.length;
+            const updates = [];
+
+            sorted.forEach((s, i) => {
+                const newOrder = total - i; // الأول = أعلى رقم
+                if (s.order !== newOrder) {
+                    s.order = newOrder;
+                    updates.push(
+                        fetch(`/api/sections/${s._id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ order: newOrder })
+                        })
+                    );
+                }
+            });
+
+            if (updates.length > 0) {
+                try {
+                    await Promise.all(updates);
+                    console.log(`✅ Auto-assigned sequential orders for ${updates.length} sections (1 to ${total})`);
+                } catch (err) {
+                    console.error('❌ Auto-assign failed:', err);
+                }
+            }
         }
 
         // ══════ تحريك قسم بالأسهم ⬆️⬇️ ══════
@@ -5298,15 +5334,10 @@
             const current = sorted[idx];
             const target = sorted[targetIdx];
 
-            // swap orders
-            const tempOrder = current.order || 0;
-            current.order = target.order || 0;
+            // ✅ بدل القيمتين — دلوقتي مضمون أنهم تتابعيين
+            const tempOrder = current.order;
+            current.order = target.order;
             target.order = tempOrder;
-
-            // لو كانوا بنفس الـ order → أعطيهم قيم مختلفة
-            if (current.order === target.order) {
-                current.order = direction === 'up' ? target.order + 1 : target.order - 1;
-            }
 
             // تحديث الواجهة فوراً
             filterSections();
@@ -5327,7 +5358,7 @@
                         body: JSON.stringify({ order: target.order })
                     })
                 ]);
-                console.log('✅ Order saved:', current.sectionKey, '↔', target.sectionKey);
+                console.log('✅ Order swapped:', current.sectionKey, `(${current.order})`, '↔', target.sectionKey, `(${target.order})`);
             } catch (err) {
                 console.error('❌ Failed to save order:', err);
             }
