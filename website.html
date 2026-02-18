@@ -2238,14 +2238,55 @@
         }
 
         // Save section (bookmark)
+        // === Saved sections storage (localStorage) ===
+        function getSavedKey() {
+            const params = new URLSearchParams(location.search);
+            return 'saved_sections_' + (params.get('lesson') || 'unknown');
+        }
+        function getSavedSections() {
+            try { return JSON.parse(localStorage.getItem(getSavedKey()) || '[]'); }
+            catch { return []; }
+        }
+        function setSavedSections(arr) {
+            localStorage.setItem(getSavedKey(), JSON.stringify(arr));
+        }
+
         function saveCard(btn) {
             const saveBtn = btn.closest('.save-btn') || btn;
+            const section = saveBtn.closest('.section') || saveBtn.closest('.dynamic-section');
+            const sectionId = section ? section.id : '';
+
             saveBtn.classList.toggle('saved');
             const isSaved = saveBtn.classList.contains('saved');
             saveBtn.innerHTML = isSaved
                 ? '<i class="fas fa-heart"></i> محفوظ'
                 : '<i class="fas fa-bookmark"></i> حفظ';
+
+            // حفظ/حذف من localStorage
+            let saved = getSavedSections();
+            if (isSaved && sectionId && !saved.includes(sectionId)) {
+                saved.push(sectionId);
+            } else if (!isSaved) {
+                saved = saved.filter(id => id !== sectionId);
+            }
+            setSavedSections(saved);
+
             showToast(isSaved ? '🔖 تم الحفظ' : '❌ تم إلغاء الحفظ');
+        }
+
+        // تحميل الحالة المحفوظة عند فتح الصفحة
+        function restoreSavedStates() {
+            const saved = getSavedSections();
+            if (!saved.length) return;
+            saved.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (!section) return;
+                const saveBtn = section.querySelector('.save-btn');
+                if (saveBtn && !saveBtn.classList.contains('saved')) {
+                    saveBtn.classList.add('saved');
+                    saveBtn.innerHTML = '<i class="fas fa-heart"></i> محفوظ';
+                }
+            });
         }
 
         // Copy section content
@@ -2259,7 +2300,8 @@
 
         // Run addCardActions now and also observe for dynamically loaded cards
         addCardActions();
-        const cardObserver = new MutationObserver(() => addCardActions());
+        restoreSavedStates(); // ← استرجاع الأقسام المحفوظة
+        const cardObserver = new MutationObserver(() => { addCardActions(); restoreSavedStates(); });
         cardObserver.observe(document.getElementById('lessonContent') || document.body,
             { childList: true, subtree: true });
 
