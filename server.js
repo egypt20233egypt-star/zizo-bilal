@@ -2,14 +2,35 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
 
 // ============ Middleware ============
+app.use(compression()); // 🗜️ gzip — يقلل حجم الملفات 60-80%
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(__dirname));
+
+// 🔒 Security: سرف الملفات العامة فقط (مش كل المشروع!)
+// منع الوصول لـ .env, server.js, models/, routes/ إلخ
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/style.css', express.static(path.join(__dirname, 'style.css')));
+app.use('/script.js', express.static(path.join(__dirname, 'script.js')));
+app.use('/admin-modern.css', express.static(path.join(__dirname, 'admin-modern.css')));
+app.use('/v3_enhancements.css', express.static(path.join(__dirname, 'v3_enhancements.css')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// 🔔 Rate Limiting على الـ API العامة
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 دقيقة
+    max: 100, // 100 طلب لكل IP
+    message: { error: 'طلبات كتير! استنى شوية وجرب تاني.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+app.use('/api/public', apiLimiter);
 
 // ============ MongoDB Connection ============
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
@@ -146,6 +167,11 @@ app.get('/api/status', (req, res) => {
     });
 });
 
+// ============ 404 Error Page ============
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
+});
+
 // ============ Start Server ============
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -156,4 +182,7 @@ app.listen(PORT, () => {
     console.log(`📖 Browse: http://localhost:${PORT}/browse`);
     console.log(`📚 Lessons: http://localhost:${PORT}/lessons`);
     console.log(`🔌 API: http://localhost:${PORT}/api/lessons`);
+    console.log(`🔒 Security: express.static secured (no .env exposure)`);
+    console.log(`🗜️ Compression: gzip enabled`);
+    console.log(`🔔 Rate Limit: 100 req/15min on public API`);
 });

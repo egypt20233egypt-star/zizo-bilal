@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دروس الشيخ — عِلْمٌ يُنْتَفَعُ بِهِ</title>
     <meta name="description" content="دروس الشيخ — منصة عِلْمٌ يُنْتَفَعُ بِهِ">
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="دروس الشيخ — عِلْمٌ يُنْتَفَعُ بِهِ" />
+    <meta property="og:description" content="دروس إسلامية من علماء موثوقين — آيات وأحاديث وفوائد" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ar_AR" />
+    <meta name="twitter:card" content="summary" />
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -382,27 +388,54 @@
         </div>
     </div>
 
-    <!-- ══════════════ BOTTOM NAV ══════════════ -->
-    <nav class="bottom-nav" aria-label="التنقل الرئيسي">
-        <a href="/" class="nav-item">
-            <i class="fas fa-home"></i>
-            <span>الرئيسية</span>
-        </a>
-        <a href="/browse" class="nav-item">
-            <i class="fas fa-user-tie"></i>
-            <span>المشايخ</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item disabled" style="position:relative;">
-            <i class="fas fa-star"></i>
-            <span>ذهبي</span>
-            <span class="badge-soon">قريباً</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item disabled" style="position:relative;">
-            <i class="fas fa-robot"></i>
-            <span>شات</span>
-            <span class="badge-soon">قريباً</span>
-        </a>
+    <!-- ══════════════ BOTTOM NAV (ديناميكي من API) ══════════════ -->
+    <nav class="bottom-nav" id="bottomNav" aria-label="التنقل الرئيسي">
+        <!-- Fallback ثابت — يتبدل بالديناميكي من JS -->
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+        <a href="/browse" class="nav-item"><i class="fas fa-user-tie"></i><span>المشايخ</span></a>
     </nav>
+
+    <script>
+        // Bottom Nav ديناميكي (مثل index.html)
+        (async function loadDynamicNav() {
+            try {
+                const res = await fetch('/api/public/nav');
+                const items = await res.json();
+                const nav = document.getElementById('bottomNav');
+                if (!items.length) return;
+
+                nav.innerHTML = '';
+                const currentPath = location.pathname;
+
+                items.filter(i => i.type !== 'center').forEach(item => {
+                    const a = document.createElement('a');
+                    a.href = item.href;
+                    a.className = 'nav-item';
+                    if (item.target === '_blank') a.target = '_blank';
+
+                    // Active: المشايخ يكون active في صفحة الدروس
+                    if (item.href === '/browse') {
+                        a.classList.add('active');
+                    }
+
+                    if (item.disabled || item.href === 'javascript:void(0)') {
+                        a.classList.add('disabled');
+                        a.style.position = 'relative';
+                    }
+
+                    a.innerHTML = `<i class="${item.icon}"></i><span>${item.label}</span>`;
+
+                    if (item.badge) {
+                        a.innerHTML += `<span class="badge-soon">${item.badge}</span>`;
+                    }
+
+                    nav.appendChild(a);
+                });
+            } catch (err) {
+                console.log('Nav API fallback (static nav visible)');
+            }
+        })();
+    </script>
 
     <!-- ══════════════ JAVASCRIPT ══════════════ -->
     <script>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — الصفحة مش موجودة | عِلْمٌ يُنْتَفَعُ بِهِ</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="عِلْمٌ يُنْتَفَعُ بِهِ — الصفحة مش موجودة" />
+    <meta property="og:description" content="منصة تعليمية دينية تربوية ذكية — دروس من علماء موثوقين" />
+    <meta property="og:type" content="website" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #060B14;
+            color: #EAEAF0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            padding: 2rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .error-code {
+            font-size: 7rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #EDBA26, #C9A020);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #F5D245;
+        }
+
+        .error-desc {
+            font-size: 1.1rem;
+            color: #8A8AAE;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #EDBA26, #C9A020);
+            color: #060B14;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(237, 186, 38, 0.3);
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(237, 186, 38, 0.4);
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(237, 186, 38, 0.4);
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .verse {
+            margin-top: 2.5rem;
+            padding: 1.2rem 1.5rem;
+            background: rgba(237, 186, 38, 0.05);
+            border: 1px solid rgba(237, 186, 38, 0.15);
+            border-radius: 16px;
+            font-size: 1rem;
+            color: #8A8AAE;
+            line-height: 1.8;
+        }
+
+        .verse .arabic {
+            color: #F5D245;
+            font-size: 1.15rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Stars background -->
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <div class="error-icon">🔍</div>
+        <div class="error-code">404</div>
+        <h1 class="error-title">الصفحة مش موجودة</h1>
+        <p class="error-desc">
+            الرابط ده مش موجود أو اتنقل لمكان تاني.
+            <br>جرّب ترجع للصفحة الرئيسية.
+        </p>
+        <a href="/" class="back-btn">
+            <i class="fas fa-home"></i>
+            الصفحة الرئيسية
+        </a>
+
+        <div class="verse">
+            <span class="arabic">﴿ وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا ﴾</span>
+            سورة الطلاق — آية 2
+        </div>
+    </div>
+
+    <script>
+        // Generate random stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (2 + Math.random() * 3) + 's';
+            starsContainer.appendChild(star);
+        }
+    </script>
+</body>
+
+</html>

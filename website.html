@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>عِلمٌ يُنتَفَعُ بِه - المنصة الدعوية</title>
     <meta name="description" content="منصة دعوية تعليمية لنشر العلم الشرعي">
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="عِلمٌ يُنتَفَعُ بِه — المنصة الدعوية" />
+    <meta property="og:description" content="درس إسلامي مفصّل — آيات، أحاديث، فوائد، قصص، شخصيات" />
+    <meta property="og:type" content="article" />
+    <meta property="og:locale" content="ar_AR" />
+    <meta name="twitter:card" content="summary" />
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="v3_enhancements.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -2203,17 +2209,30 @@
             // Dynamic cards are now visible immediately - no animation hiding
         }
 
-        // Share section content
+        // Share section content with unique link (lesson ID + section ID)
         function shareCard(btn) {
-            const section = btn.closest('.dynamic-section');
-            const text = section.innerText.replace(/مشاركة|حفظ|نسخ/g, '').trim();
+            const section = btn.closest('.section') || btn.closest('.dynamic-section');
+            const sectionId = section ? section.id : '';
+            const text = section.innerText.replace(/مشاركة|حفظ|نسخ|محفوظ/g, '').trim();
+
+            // بناء رابط فريد: /website?lesson=XXX#section_id
+            const shareUrl = window.location.origin + window.location.pathname
+                + window.location.search
+                + (sectionId ? '#' + sectionId : '');
+
+            // عنوان القسم (أول h2 أو h3)
+            const heading = section ? (section.querySelector('h2, h3') || {}).textContent : '';
+            const shareTitle = heading ? heading.trim() : 'عِلمٌ يُنتَفَعُ بِه';
 
             if (navigator.share) {
-                navigator.share({ title: 'عِلمٌ يُنتَفَعُ بِه', text: text.substring(0, 300) })
-                    .catch(() => { });
+                navigator.share({
+                    title: shareTitle,
+                    text: text.substring(0, 200) + '...',
+                    url: shareUrl
+                }).catch(() => { });
             } else {
-                navigator.clipboard.writeText(text.substring(0, 500))
-                    .then(() => showToast('✅ تم النسخ للمشاركة'))
+                navigator.clipboard.writeText(shareUrl)
+                    .then(() => showToast('🔗 تم نسخ رابط القسم'))
                     .catch(() => showToast('❌ فشل النسخ'));
             }
         }
@@ -2243,6 +2262,20 @@
         const cardObserver = new MutationObserver(() => addCardActions());
         cardObserver.observe(document.getElementById('lessonContent') || document.body,
             { childList: true, subtree: true });
+
+        // Auto-scroll to section if URL has #hash (from share link)
+        if (window.location.hash) {
+            setTimeout(() => {
+                const target = document.querySelector(window.location.hash);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // هايلايت خفيف للقسم عشان يلفت الانتباه
+                    target.style.transition = 'box-shadow 0.5s ease';
+                    target.style.boxShadow = '0 0 20px rgba(237, 186, 38, 0.4)';
+                    setTimeout(() => { target.style.boxShadow = ''; }, 3000);
+                }
+            }, 800); // تأخير عشان المحتوى يكون اتحمل
+        }
     </script>
 </body>
 
