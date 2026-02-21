@@ -316,34 +316,32 @@ router.get('/search', async (req, res) => {
         };
 
         let lessons = await Lesson.find(filter)
-            .select('title sheikhId rawSource rawContent overview questions benefits stories analysis podcast quranHadith')
             .limit(20)
             .lean();
 
-        // ═══ Step 2: If few results, also search inside structured AI fields ═══
-        if (lessons.length < 5) {
-            const existingIds = lessons.map(l => l._id.toString());
-            const allPublished = await Lesson.find({ status: 'published', _id: { $nin: existingIds } })
-                .select('title sheikhId rawSource rawContent overview questions benefits stories analysis podcast quranHadith')
-                .lean();
+        // ═══ Step 2: ALWAYS also search inside structured AI fields ═══
+        const existingIds = lessons.map(l => l._id.toString());
+        const allPublished = await Lesson.find({ status: 'published', _id: { $nin: existingIds } })
+            .lean();
 
-            const qLower = q.toLowerCase();
-            const extraMatches = allPublished.filter(lesson => {
-                // Search in stringified AI sections
-                const sections = ['overview', 'questions', 'benefits', 'stories', 'analysis', 'podcast', 'quranHadith'];
-                for (const sec of sections) {
-                    if (lesson[sec]) {
-                        try {
-                            const str = JSON.stringify(lesson[sec]);
-                            if (str.toLowerCase().includes(qLower)) return true;
-                        } catch (e) { /* ignore */ }
-                    }
+        const qLower2 = q.toLowerCase();
+        const allAiKeys = ['overview', 'questions', 'benefits', 'stories', 'analysis',
+            'podcast', 'quranHadith', 'characters', 'fiqh',
+            'answer', 'situation', 'mistake', 'action', 'points',
+            'keyT', 'wrong', 'source', 'name', 'trueFalse'];
+        const extraMatches = allPublished.filter(lesson => {
+            for (const sec of allAiKeys) {
+                if (lesson[sec]) {
+                    try {
+                        const str = JSON.stringify(lesson[sec]);
+                        if (str.toLowerCase().includes(qLower2)) return true;
+                    } catch (e) { /* ignore */ }
                 }
-                return false;
-            }).slice(0, 20 - lessons.length);
+            }
+            return false;
+        }).slice(0, 20 - lessons.length);
 
-            lessons = lessons.concat(extraMatches);
-        }
+        lessons = lessons.concat(extraMatches);
 
         // Enrich with sheikh names
         const sheikhIds = [...new Set(lessons.map(l => l.sheikhId).filter(Boolean))];
