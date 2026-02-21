@@ -391,10 +391,59 @@ router.get('/search', async (req, res) => {
                     if (src) {
                         const idx = src.toLowerCase().indexOf(qLower);
                         if (idx !== -1) {
-                            matchedSection = sec;
-                            const start = Math.max(0, idx - 40);
-                            const end = Math.min(src.length, idx + q.length + 40);
-                            snippet = (start > 0 ? '...' : '') + src.substring(start, end) + (end < src.length ? '...' : '');
+                            // ═══ Smart: if rawContent is JSON, find exact section inside ═══
+                            let detectedSec = sec;
+                            let cleanSnippet = '';
+                            if (src.trim().startsWith('{')) {
+                                try {
+                                    const parsed = JSON.parse(src);
+                                    const sectionKeys = ['questions', 'trueFalse', 'benefits', 'stories', 'analysis',
+                                        'overview', 'podcast', 'quranHadith', 'characters', 'fiqh',
+                                        'points', 'keyT', 'wrong', 'mistake', 'action', 'answer', 'situation'];
+                                    for (const key of sectionKeys) {
+                                        if (parsed[key]) {
+                                            const valStr = JSON.stringify(parsed[key]);
+                                            if (valStr.toLowerCase().includes(qLower)) {
+                                                // Map sub-keys to known sections
+                                                const keyMap = {
+                                                    'trueFalse': 'questions', 'points': 'overview',
+                                                    'keyT': 'analysis', 'wrong': 'questions',
+                                                    'mistake': 'questions', 'action': 'analysis',
+                                                    'answer': 'questions', 'situation': 'stories'
+                                                };
+                                                detectedSec = keyMap[key] || key;
+                                                // Clean snippet from this section
+                                                const subIdx = valStr.toLowerCase().indexOf(qLower);
+                                                if (subIdx !== -1) {
+                                                    const s = Math.max(0, subIdx - 40);
+                                                    const e = Math.min(valStr.length, subIdx + q.length + 50);
+                                                    let raw = valStr.substring(s, e);
+                                                    raw = raw.replace(/"[a-zA-Z_]+"\s*:/g, '');
+                                                    raw = raw.replace(/[{}\[\]"\\]/g, '');
+                                                    raw = raw.replace(/,\s*/g, ' ');
+                                                    raw = raw.replace(/\s+/g, ' ').trim();
+                                                    cleanSnippet = (s > 0 ? '...' : '') + raw + (e < valStr.length ? '...' : '');
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } catch (e) { /* not valid JSON, use as-is */ }
+                            }
+                            matchedSection = detectedSec;
+                            if (cleanSnippet) {
+                                snippet = cleanSnippet;
+                            } else {
+                                const start = Math.max(0, idx - 40);
+                                const end = Math.min(src.length, idx + q.length + 40);
+                                let raw = src.substring(start, end);
+                                // Clean JSON artifacts if present
+                                raw = raw.replace(/"[a-zA-Z_]+"\s*:/g, '');
+                                raw = raw.replace(/[{}\[\]"\\]/g, '');
+                                raw = raw.replace(/,\s*/g, ' ');
+                                raw = raw.replace(/\s+/g, ' ').trim();
+                                snippet = (start > 0 ? '...' : '') + raw + (end < src.length ? '...' : '');
+                            }
                             break;
                         }
                     }
