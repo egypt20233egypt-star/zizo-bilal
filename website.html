@@ -16,6 +16,29 @@
     <link rel="stylesheet" href="v3_enhancements.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ═══ Search Results ═══ */
+        .search-results-list {
+            max-height: 55vh;
+            overflow-y: auto;
+            padding: 0 1rem;
+        }
+
+        .search-result-item {
+            padding: .8rem .6rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background .2s;
+        }
+
+        .search-result-item:hover {
+            background: rgba(218, 165, 32, .08);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
         /* ============ 🎨 تحسين الكروت الديناميكية ============ */
         .dynamic-section .cards-grid {
             display: grid;
@@ -537,9 +560,10 @@
     <!-- Search Modal -->
     <div class="search-modal" id="searchModal">
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="ابحث في المحتوى...">
+            <input type="text" id="searchInput" placeholder="ابحث في كل الدروس..." autocomplete="off">
             <button onclick="closeSearch()">✕</button>
         </div>
+        <div class="search-results-list" id="searchResultsList"></div>
     </div>
 
     <!-- Toast -->
@@ -2183,6 +2207,7 @@
             const searchBtn = document.getElementById('searchBtn');
             const searchModal = document.getElementById('searchModal');
             const searchInput = document.getElementById('searchInput');
+            const resultsList = document.getElementById('searchResultsList');
 
             searchBtn.addEventListener('click', () => {
                 searchModal.classList.add('active');
@@ -2201,11 +2226,44 @@
                     searchInput.focus();
                 }
             });
+
+            // ═══ Debounced Search Logic ═══
+            let timer = null, ctrl = null;
+            searchInput.addEventListener('input', function () {
+                clearTimeout(timer);
+                const q = this.value.trim();
+                if (q.length < 2) { resultsList.innerHTML = ''; return; }
+                timer = setTimeout(() => doSearch(q), 300);
+            });
+
+            async function doSearch(q) {
+                if (ctrl) ctrl.abort();
+                ctrl = new AbortController();
+                resultsList.innerHTML = '<div style="text-align:center;padding:1.5rem;color:rgba(255,255,255,.3);"><i class="fas fa-spinner fa-spin"></i> جاري البحث...</div>';
+                try {
+                    const res = await fetch(`/api/public/search?q=${encodeURIComponent(q)}`, { signal: ctrl.signal });
+                    const data = await res.json();
+                    if (!data.results || !data.results.length) {
+                        resultsList.innerHTML = '<div style="text-align:center;padding:1.5rem;color:rgba(255,255,255,.3);"><i class="fas fa-search"></i> لا توجد نتائج</div>';
+                    } else {
+                        resultsList.innerHTML = data.results.map(r => `
+                            <div class="search-result-item" onclick="closeSearch(); location.href='/website?lesson=${r._id}'">
+                                <div style="color:#DAA520;font-weight:600;margin-bottom:3px;">${r.title}</div>
+                                <div style="font-size:.78rem;color:rgba(255,255,255,.4);"><i class="fas fa-user-tie"></i> ${r.sheikhName}</div>
+                                ${r.snippet ? `<div style="font-size:.75rem;color:rgba(255,255,255,.25);margin-top:3px;line-height:1.4;">${r.snippet}</div>` : ''}
+                            </div>
+                        `).join('');
+                    }
+                } catch (e) {
+                    if (e.name !== 'AbortError') { resultsList.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444;">خطأ في البحث</div>'; }
+                }
+            }
         }
 
         function closeSearch() {
             document.getElementById('searchModal').classList.remove('active');
             document.getElementById('searchInput').value = '';
+            document.getElementById('searchResultsList').innerHTML = '';
         }
 
         // ============ 🎨 v3 Enhancements ============
