@@ -371,22 +371,21 @@ router.get('/search', async (req, res) => {
 
         const results = lessons.map(l => {
             let snippet = '';
+            let matchedField = '';
 
-            // Try ALL fields to find a clean snippet
+            // Try ALL fields to find a clean snippet — track which field matched
+            const aiKeys = ['questions', 'benefits', 'stories', 'analysis', 'overview',
+                'podcast', 'quranHadith', 'characters', 'fiqh'];
             const allSources = [
-                // AI sections first (most meaningful)
-                ...['questions', 'benefits', 'stories', 'analysis', 'overview',
-                    'podcast', 'quranHadith', 'characters', 'fiqh']
-                    .filter(k => l[k])
-                    .map(k => JSON.stringify(l[k])),
-                // Then raw text fields
-                l.rawSource, l.rawContent
-            ].filter(Boolean);
+                ...aiKeys.filter(k => l[k]).map(k => ({ key: k, str: JSON.stringify(l[k]) })),
+                { key: 'rawSource', str: l.rawSource || '' },
+                { key: 'rawContent', str: l.rawContent || '' }
+            ];
 
-            for (const src of allSources) {
-                if (src.toLowerCase().includes(qLower)) {
-                    snippet = cleanSnippet(src, q);
-                    if (snippet) break;
+            for (const { key, str } of allSources) {
+                if (str && str.toLowerCase().includes(qLower)) {
+                    snippet = cleanSnippet(str, q);
+                    if (snippet) { matchedField = key; break; }
                 }
             }
 
@@ -394,7 +393,8 @@ router.get('/search', async (req, res) => {
                 _id: l._id,
                 title: l.title,
                 sheikhName: sheikhMap[l.sheikhId] || 'غير محدد',
-                snippet
+                snippet,
+                matchedField
             };
         });
 

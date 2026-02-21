@@ -1750,13 +1750,22 @@
                     if (!data.results || !data.results.length) {
                         box.innerHTML = '<div class="search-no-results">لا توجد نتائج</div>';
                     } else {
-                        box.innerHTML = data.results.map(r => `
+                        const fieldNames = {
+                            questions: '❓ الأسئلة', benefits: '💎 الفوائد', stories: '📚 القصص',
+                            analysis: '🔍 التحليل', overview: '📋 نظرة عامة', podcast: '🎙️ البودكاست',
+                            quranHadith: '📖 آيات وأحاديث', characters: '👥 الشخصيات', fiqh: '🕌 الأحكام',
+                            rawSource: '📄 النص الأصلي', rawContent: '📄 المحتوى'
+                        };
+                        box.innerHTML = data.results.map(r => {
+                            const badge = fieldNames[r.matchedField] || '';
+                            return `
                             <div class="search-result-item" onclick="location.href='/website?lesson=${r._id}&q=${encodeURIComponent(q)}'">
                                 <div class="search-result-title">${r.title}</div>
                                 <div class="search-result-sheikh"><i class="fas fa-user-tie"></i> ${r.sheikhName}</div>
+                                ${badge ? `<div style="color:var(--gold);font-size:.75rem;margin-top:2px">${badge}</div>` : ''}
                                 ${r.snippet ? `<div class="search-result-snippet">${r.snippet}</div>` : ''}
                             </div>
-                        `).join('');
+                        `}).join('');
                     }
                     showBox();
                 } catch (e) {
