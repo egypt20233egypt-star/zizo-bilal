@@ -2300,13 +2300,25 @@
                     if (!data.results || !data.results.length) {
                         resultsList.innerHTML = '<div style="text-align:center;padding:1.5rem;color:rgba(255,255,255,.3);"><i class="fas fa-search"></i> لا توجد نتائج</div>';
                     } else {
-                        resultsList.innerHTML = data.results.map(r => `
-                            <div class="search-result-item" onclick="closeSearch(); location.href='/website?lesson=${r._id}'">
+                        const fieldNames = {
+                            questions: '❓ الأسئلة', benefits: '💎 الفوائد', stories: '📚 القصص',
+                            analysis: '🔍 التحليل', overview: '📋 نظرة عامة', podcast: '🎙️ البودكاست',
+                            quranHadith: '📖 آيات وأحاديث', characters: '👥 الشخصيات', fiqh: '🕌 الأحكام',
+                            answer: '💬 الإجابة', situation: '📍 الموقف', mistake: '⚠️ الخطأ',
+                            action: '⚡ الفعل', points: '📌 النقاط الرئيسية', keyT: '🔑 المفاتيح',
+                            wrong: '❌ الخطأ الشائع', source: '📖 المصدر', name: '🏷️ الاسم',
+                            trueFalse: '✅ صح وخطأ', rawSource: '📄 النص الأصلي', rawContent: '📄 المحتوى'
+                        };
+                        resultsList.innerHTML = data.results.map(r => {
+                            const badge = fieldNames[r.matchedField] || '';
+                            return `
+                            <div class="search-result-item" onclick="closeSearch(); location.href='/website?lesson=${r._id}&q=${encodeURIComponent(q)}'">
                                 <div style="color:#DAA520;font-weight:600;margin-bottom:3px;">${r.title}</div>
                                 <div style="font-size:.78rem;color:rgba(255,255,255,.4);"><i class="fas fa-user-tie"></i> ${r.sheikhName}</div>
+                                ${badge ? `<div style="color:#DAA520;font-size:.75rem;margin-top:2px">${badge}</div>` : ''}
                                 ${r.snippet ? `<div style="font-size:.75rem;color:rgba(255,255,255,.25);margin-top:3px;line-height:1.4;">${r.snippet}</div>` : ''}
                             </div>
-                        `).join('');
+                        `}).join('');
                     }
                 } catch (e) {
                     if (e.name !== 'AbortError') { resultsList.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444;">خطأ في البحث</div>'; }
