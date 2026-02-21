@@ -366,18 +366,28 @@ lesson._sectionLabels (أولوية 1) → KNOWN_SECTIONS (أولوية 2) → A
 
 ---
 
-## 🚀 المرحلة 11: Phase 8.5b — UX Enhancements (قيد التخطيط)
+## 🚀 المرحلة 11: Phase 8.5b — UX Enhancements (v5.3) ✅
 
-### مخطط:
-| # | الميزة | الملفات |
-|---|--------|---------|
-| 1 | 🎨 Loading Skeleton (shimmer زي YouTube) | `browse.html`, `lessons.html` |
-| 2 | 🔗 Breadcrumbs (الرئيسية > المشايخ > الدرس) | `browse.html`, `lessons.html`, `website.html` |
-| 3 | 🎯 Progress Tracking (localStorage + badges + bars) | `website.html`, `lessons.html`, `browse.html` |
-| 4 | 🔍 بحث شامل (API endpoint + search bar في Home) | `routes/public.js`, `index.html` |
+### اللي اتعمل:
+| # | الميزة | الملفات | التفاصيل |
+|---|--------|---------|----------|
+| 54 | 🎨 **Loading Skeleton** | `browse.html`, `lessons.html` | CSS shimmer cards بدل spinner |
+| 55 | 🔗 **Breadcrumbs** | `browse.html`, `lessons.html`, `website.html` | Dynamic breadcrumb — اسم الشيخ + عنوان الدرس |
+| 56 | 🎯 **Progress Tracking** | `website.html`, `lessons.html`, `browse.html` | `ProgressManager` + ✅ badges + progress bar |
+| 57 | 🔍 **بحث شامل** | `routes/public.js`, `index.html` | `GET /api/public/search?q=` + debounced search bar |
+
+### تفاصيل تقنية:
+- **Skeleton**: `@keyframes shimmer` gradient + `generateSkeletons(count)`
+- **Breadcrumbs**: ديناميكي — hidden by default في website.html → visible on lesson load
+- **ProgressManager**: `localStorage` key: `read_lessons` — markAsRead + isRead + getReadCount
+- **Search**: regex sanitization (ReDoS prevention) + AbortController + max 20 results + snippets
+
+### Git Commit:
+`a1e612a` — Phase 8.5b
 
 ---
 
 *الملف ده بتاع مشروع زيزو وبلال — القلب السليم* ✌️
-*آخر تحديث: v5.2-security-polish → Phase 8.5b*
+*آخر تحديث: v5.3-ux-enhancements → Phase 8.5b*
+
 
