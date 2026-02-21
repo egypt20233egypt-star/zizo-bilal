@@ -302,18 +302,23 @@ router.get('/search', async (req, res) => {
             return res.json({ results: [] });
         }
 
-        // Sanitize regex special chars (prevent ReDoS)
-        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // ═══ Flexible search: split into words, ignore special chars ═══
+        const words = q.replace(/["""''\-–—_\[\]{}<>()\/\\|:;,\.!؟?٪%#@&=+~`^]/g, ' ')
+            .split(/\s+/).filter(w => w.length >= 2);
+        if (!words.length) return res.json({ results: [] });
 
-        // ═══ Step 1: Search in title, rawSource, rawContent ═══
-        const filter = {
-            status: 'published',
-            $or: [
-                { title: { $regex: escaped, $options: 'i' } },
-                { rawSource: { $regex: escaped, $options: 'i' } },
-                { rawContent: { $regex: escaped, $options: 'i' } }
-            ]
-        };
+        // MongoDB: each word must appear in at least one text field
+        const wordFilters = words.map(w => {
+            const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return {
+                $or: [
+                    { title: { $regex: esc, $options: 'i' } },
+                    { rawSource: { $regex: esc, $options: 'i' } },
+                    { rawContent: { $regex: esc, $options: 'i' } }
+                ]
+            };
+        });
+        const filter = { status: 'published', $and: wordFilters };
 
         let lessons = await Lesson.find(filter)
             .limit(20)
@@ -324,17 +329,22 @@ router.get('/search', async (req, res) => {
         const allPublished = await Lesson.find({ status: 'published', _id: { $nin: existingIds } })
             .lean();
 
-        const qLower2 = q.toLowerCase();
+        const wordsLower = words.map(w => w.toLowerCase());
         const allAiKeys = ['overview', 'questions', 'benefits', 'stories', 'analysis',
             'podcast', 'quranHadith', 'characters', 'fiqh',
             'answer', 'situation', 'mistake', 'action', 'points',
             'keyT', 'wrong', 'source', 'name', 'trueFalse'];
+        // Helper: check if ALL words appear in a string
+        function matchesAllWords(str) {
+            const lower = str.toLowerCase();
+            return wordsLower.every(w => lower.includes(w));
+        }
         const extraMatches = allPublished.filter(lesson => {
             for (const sec of allAiKeys) {
                 if (lesson[sec]) {
                     try {
                         const str = JSON.stringify(lesson[sec]);
-                        if (str.toLowerCase().includes(qLower2)) return true;
+                        if (matchesAllWords(str)) return true;
                     } catch (e) { /* ignore */ }
                 }
             }
@@ -349,14 +359,21 @@ router.get('/search', async (req, res) => {
         const sheikhMap = {};
         sheikhs.forEach(s => sheikhMap[s._id.toString()] = s.name);
 
-        const qLower = q.toLowerCase();
-
         // ═══ Helper: clean JSON artifacts from snippet ═══
-        function cleanSnippet(str, searchTerm) {
-            const idx = str.toLowerCase().indexOf(searchTerm.toLowerCase());
-            if (idx === -1) return '';
-            const start = Math.max(0, idx - 50);
-            const end = Math.min(str.length, idx + searchTerm.length + 50);
+        function cleanSnippet(str) {
+            // Find the first matching word to center the snippet around
+            const lower = str.toLowerCase();
+            let bestIdx = -1;
+            let bestWord = wordsLower[0];
+            for (const w of wordsLower) {
+                const idx = lower.indexOf(w);
+                if (idx !== -1 && (bestIdx === -1 || idx < bestIdx)) {
+                    bestIdx = idx; bestWord = w;
+                }
+            }
+            if (bestIdx === -1) return '';
+            const start = Math.max(0, bestIdx - 50);
+            const end = Math.min(str.length, bestIdx + bestWord.length + 50);
             let raw = str.substring(start, end);
             raw = raw.replace(/"[a-zA-Z_]+"\s*:/g, '');          // "key":
             raw = raw.replace(/:\s*(true|false|null)\b/g, '');   // : true/false/null
@@ -383,8 +400,8 @@ router.get('/search', async (req, res) => {
             ];
 
             for (const { key, str } of allSources) {
-                if (str && str.toLowerCase().includes(qLower)) {
-                    snippet = cleanSnippet(str, q);
+                if (str && matchesAllWords(str)) {
+                    snippet = cleanSnippet(str);
                     if (snippet) {
                         matchedField = key;
                         // If match is in rawContent/rawSource and it's JSON → find actual sub-section
@@ -392,7 +409,7 @@ router.get('/search', async (req, res) => {
                             try {
                                 const parsed = JSON.parse(str);
                                 for (const subKey of aiKeys) {
-                                    if (parsed[subKey] && JSON.stringify(parsed[subKey]).toLowerCase().includes(qLower)) {
+                                    if (parsed[subKey] && matchesAllWords(JSON.stringify(parsed[subKey]))) {
                                         matchedField = subKey;
                                         break;
                                     }
