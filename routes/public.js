@@ -385,7 +385,22 @@ router.get('/search', async (req, res) => {
             for (const { key, str } of allSources) {
                 if (str && str.toLowerCase().includes(qLower)) {
                     snippet = cleanSnippet(str, q);
-                    if (snippet) { matchedField = key; break; }
+                    if (snippet) {
+                        matchedField = key;
+                        // If match is in rawContent/rawSource and it's JSON → find actual sub-section
+                        if ((key === 'rawContent' || key === 'rawSource') && str.trim().startsWith('{')) {
+                            try {
+                                const parsed = JSON.parse(str);
+                                for (const subKey of aiKeys) {
+                                    if (parsed[subKey] && JSON.stringify(parsed[subKey]).toLowerCase().includes(qLower)) {
+                                        matchedField = subKey;
+                                        break;
+                                    }
+                                }
+                            } catch (e) { /* not valid JSON */ }
+                        }
+                        break;
+                    }
                 }
             }
 
