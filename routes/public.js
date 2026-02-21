@@ -330,21 +330,36 @@ router.get('/search', async (req, res) => {
             .lean();
 
         const wordsLower = words.map(w => w.toLowerCase());
+
+        // ═══ Core helper: strip ALL special chars for clean comparison ═══
+        function cleanText(s) {
+            return s.replace(/["""''`\-–—_\[\]{}<>()\/\\|:;,\.!؟?٪%#@&=+~^*·•●○►▶◆■□▪▫✦✧✱✲✳✴✵✶★☆♦♠♣♥♡⚡⭐🔹🔸💎❓📋🔍📚🎙️📖👥🕌💬📍⚠️⚡📌🔑❌📄🏷️✅\d]/g, ' ')
+                .replace(/\s+/g, ' ').trim().toLowerCase();
+        }
+        const cleanQuery = cleanText(q);
+
+        // Strategy 1: Clean phrase match (most accurate — for badge)
+        function matchPhrase(str) {
+            return cleanText(str).includes(cleanQuery);
+        }
+
+        // Strategy 2: Word match (for finding lessons only — NOT for badge)
+        function matchWords(str) {
+            const lower = str.toLowerCase();
+            return wordsLower.every(w => lower.includes(w));
+        }
+
         const allAiKeys = ['overview', 'questions', 'benefits', 'stories', 'analysis',
             'podcast', 'quranHadith', 'characters', 'fiqh',
             'answer', 'situation', 'mistake', 'action', 'points',
             'keyT', 'wrong', 'source', 'name', 'trueFalse'];
-        // Helper: check if ALL words appear in a string
-        function matchesAllWords(str) {
-            const lower = str.toLowerCase();
-            return wordsLower.every(w => lower.includes(w));
-        }
+
         const extraMatches = allPublished.filter(lesson => {
             for (const sec of allAiKeys) {
                 if (lesson[sec]) {
                     try {
                         const str = JSON.stringify(lesson[sec]);
-                        if (matchesAllWords(str)) return true;
+                        if (matchPhrase(str) || matchWords(str)) return true;
                     } catch (e) { /* ignore */ }
                 }
             }
@@ -359,28 +374,42 @@ router.get('/search', async (req, res) => {
         const sheikhMap = {};
         sheikhs.forEach(s => sheikhMap[s._id.toString()] = s.name);
 
-        // ═══ Helper: clean JSON artifacts from snippet ═══
-        function cleanSnippet(str) {
-            // Find the first matching word to center the snippet around
-            const lower = str.toLowerCase();
-            let bestIdx = -1;
-            let bestWord = wordsLower[0];
-            for (const w of wordsLower) {
-                const idx = lower.indexOf(w);
-                if (idx !== -1 && (bestIdx === -1 || idx < bestIdx)) {
-                    bestIdx = idx; bestWord = w;
+        // ═══ Helper: generate snippet around the matched phrase ═══
+        function makeSnippet(str) {
+            const cleanStr = cleanText(str);
+            let idx = cleanStr.indexOf(cleanQuery);
+            // If full phrase not found, find first significant word
+            if (idx === -1) {
+                const longWords = wordsLower.filter(w => w.length >= 3).sort((a, b) => b.length - a.length);
+                for (const w of longWords) {
+                    idx = cleanStr.indexOf(w);
+                    if (idx !== -1) break;
                 }
             }
-            if (bestIdx === -1) return '';
-            const start = Math.max(0, bestIdx - 50);
-            const end = Math.min(str.length, bestIdx + bestWord.length + 50);
+            if (idx === -1) return '';
+
+            // Map back to original string position (approximate)
+            const origLower = str.toLowerCase();
+            const searchAround = cleanStr.substring(Math.max(0, idx - 5), idx + 10);
+            const stripped = searchAround.replace(/\s+/g, '');
+            let origIdx = -1;
+            // Find the approximate position in the original string
+            for (let i = 0; i < origLower.length - 3; i++) {
+                if (origLower.substring(i, i + stripped.length).replace(/[^a-zA-Z\u0600-\u06FF]/g, '').startsWith(stripped.substring(0, Math.min(6, stripped.length)))) {
+                    origIdx = i; break;
+                }
+            }
+            if (origIdx === -1) origIdx = Math.floor(idx * (str.length / Math.max(1, cleanStr.length)));
+
+            const start = Math.max(0, origIdx - 50);
+            const end = Math.min(str.length, origIdx + 80);
             let raw = str.substring(start, end);
-            raw = raw.replace(/"[a-zA-Z_]+"\s*:/g, '');          // "key":
-            raw = raw.replace(/:\s*(true|false|null)\b/g, '');   // : true/false/null
-            raw = raw.replace(/\b(true|false|null)\b/g, '');     // standalone true/false/null
-            raw = raw.replace(/[{}\[\]"\\]/g, '');               // JSON chars
-            raw = raw.replace(/,\s*/g, ' ');                     // commas
-            raw = raw.replace(/\s+/g, ' ').trim();               // whitespace
+            raw = raw.replace(/"[a-zA-Z_]+"\s*:/g, '');
+            raw = raw.replace(/:\s*(true|false|null)\b/g, '');
+            raw = raw.replace(/\b(true|false|null)\b/g, '');
+            raw = raw.replace(/[{}\[\]"\\]/g, '');
+            raw = raw.replace(/,\s*/g, ' ');
+            raw = raw.replace(/\s+/g, ' ').trim();
             return (start > 0 ? '...' : '') + raw + (end < str.length ? '...' : '');
         }
 
@@ -388,7 +417,6 @@ router.get('/search', async (req, res) => {
             let snippet = '';
             let matchedField = '';
 
-            // Try ALL fields to find a clean snippet — track which field matched
             const aiKeys = ['questions', 'benefits', 'stories', 'analysis', 'overview',
                 'podcast', 'quranHadith', 'characters', 'fiqh',
                 'answer', 'situation', 'mistake', 'action', 'points',
@@ -399,24 +427,38 @@ router.get('/search', async (req, res) => {
                 { key: 'rawContent', str: l.rawContent || '' }
             ];
 
+            // ═══ Badge: use PHRASE match only (accurate) ═══
             for (const { key, str } of allSources) {
-                if (str && matchesAllWords(str)) {
-                    snippet = cleanSnippet(str);
+                if (str && matchPhrase(str)) {
+                    snippet = makeSnippet(str);
                     if (snippet) {
                         matchedField = key;
-                        // If match is in rawContent/rawSource and it's JSON → find actual sub-section
+                        // If rawContent is JSON, dig deeper
                         if ((key === 'rawContent' || key === 'rawSource') && str.trim().startsWith('{')) {
                             try {
                                 const parsed = JSON.parse(str);
                                 for (const subKey of aiKeys) {
-                                    if (parsed[subKey] && matchesAllWords(JSON.stringify(parsed[subKey]))) {
+                                    if (parsed[subKey] && matchPhrase(JSON.stringify(parsed[subKey]))) {
                                         matchedField = subKey;
                                         break;
                                     }
                                 }
-                            } catch (e) { /* not valid JSON */ }
+                            } catch (e) { }
                         }
                         break;
+                    }
+                }
+            }
+
+            // ═══ Fallback: word match for snippet only (no badge change) ═══
+            if (!snippet) {
+                for (const { key, str } of allSources) {
+                    if (str && matchWords(str)) {
+                        snippet = makeSnippet(str);
+                        if (snippet) {
+                            if (!matchedField) matchedField = key;
+                            break;
+                        }
                     }
                 }
             }
