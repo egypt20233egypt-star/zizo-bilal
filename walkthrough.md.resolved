@@ -345,3 +345,39 @@ lesson._sectionLabels (أولوية 1) → KNOWN_SECTIONS (أولوية 2) → A
 | المشكلة | السبب | الحل |
 |---------|-------|------|
 | الزرار بيفتح Modal القديم | Duplicate `id="importModal"` | تغيير لـ `batchImportModal` |
+
+---
+
+## 🔒 المرحلة 10: Phase 8.5 — Security + Performance + Polish (v5.2)
+
+### اللي اتعمل:
+| # | الوصف | الملفات |
+|---|-------|---------|
+| 52 | Security: إصلاح `express.static(__dirname)` → ملفات محددة فقط (حماية `.env` + `server.js`) | `server.js` |
+| 52 | Performance: gzip compression (تقليل 60-80%) + Rate Limiting 100 req/15min | `server.js` |
+| 52 | صفحة 404 بتصميم dark/gold + نجوم متحركة + آية قرآنية | `404.html` |
+| 52 | Open Graph + Twitter Card meta tags (4 صفحات) | `index.html`, `browse.html`, `lessons.html`, `website.html` |
+| 52 | Bottom Nav ديناميكي من API في browse + lessons مع fallback ثابت | `browse.html`, `lessons.html` |
+| 53 | إصلاح حفظ المفضلة: localStorage بـ key فريد + restoreSavedStates() + MutationObserver | `website.html` |
+
+### Dependencies جديدة:
+- `compression` — gzip middleware
+- `express-rate-limit` — rate limiting
+
+---
+
+## 🚀 المرحلة 11: Phase 8.5b — UX Enhancements (قيد التخطيط)
+
+### مخطط:
+| # | الميزة | الملفات |
+|---|--------|---------|
+| 1 | 🎨 Loading Skeleton (shimmer زي YouTube) | `browse.html`, `lessons.html` |
+| 2 | 🔗 Breadcrumbs (الرئيسية > المشايخ > الدرس) | `browse.html`, `lessons.html`, `website.html` |
+| 3 | 🎯 Progress Tracking (localStorage + badges + bars) | `website.html`, `lessons.html`, `browse.html` |
+| 4 | 🔍 بحث شامل (API endpoint + search bar في Home) | `routes/public.js`, `index.html` |
+
+---
+
+*الملف ده بتاع مشروع زيزو وبلال — القلب السليم* ✌️
+*آخر تحديث: v5.2-security-polish → Phase 8.5b*
+
