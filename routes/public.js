@@ -353,43 +353,58 @@ router.get('/search', async (req, res) => {
 
         const qLower = q.toLowerCase();
         const results = lessons.map(l => {
-            // Generate snippet — try rawSource first, then rawContent, then AI sections
+            // ═══ Find which section matched ═══
             let snippet = '';
-            const sources = [l.rawSource, l.rawContent];
-            for (const src of sources) {
+            let matchedSection = '';
+
+            // 1. Check title
+            if (l.title && l.title.toLowerCase().includes(qLower)) {
+                matchedSection = 'title';
+            }
+
+            // 2. Check rawSource / rawContent
+            const textSources = [
+                { field: l.rawSource, sec: 'rawSource' },
+                { field: l.rawContent, sec: 'rawContent' }
+            ];
+            for (const { field: src, sec } of textSources) {
                 if (src) {
                     const idx = src.toLowerCase().indexOf(qLower);
                     if (idx !== -1) {
                         const start = Math.max(0, idx - 40);
                         const end = Math.min(src.length, idx + q.length + 40);
                         snippet = (start > 0 ? '...' : '') + src.substring(start, end) + (end < src.length ? '...' : '');
+                        if (!matchedSection) matchedSection = sec;
                         break;
                     }
                 }
             }
-            // Try AI sections for snippet if still empty
+
+            // 3. Check AI sections
             if (!snippet) {
-                const sections = ['overview', 'questions', 'benefits', 'stories', 'analysis'];
+                const sections = ['overview', 'questions', 'benefits', 'stories', 'analysis', 'podcast', 'quranHadith', 'characters', 'fiqh'];
                 for (const sec of sections) {
                     if (l[sec]) {
                         try {
                             const str = JSON.stringify(l[sec]);
                             const idx = str.toLowerCase().indexOf(qLower);
                             if (idx !== -1) {
-                                // Clean JSON artifacts from snippet
                                 const raw = str.substring(Math.max(0, idx - 40), Math.min(str.length, idx + q.length + 60));
                                 snippet = '...' + raw.replace(/[{}\[\]"]/g, '').replace(/,/g, ' ').trim() + '...';
+                                if (!matchedSection) matchedSection = sec;
                                 break;
                             }
                         } catch (e) { /* ignore */ }
                     }
                 }
             }
+
             return {
                 _id: l._id,
                 title: l.title,
                 sheikhName: sheikhMap[l.sheikhId] || 'غير محدد',
-                snippet
+                snippet,
+                matchedSection: matchedSection || 'overview'
             };
         });
 

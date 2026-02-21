@@ -698,6 +698,32 @@
                 ProgressManager.markAsRead(lesson._id, lesson.sheikhId);
                 updateBreadcrumb(lesson);
 
+                // ✅ Search: scroll to matched section if ?section= param exists
+                const sectionParam = new URLSearchParams(window.location.search).get('section');
+                if (sectionParam) {
+                    setTimeout(() => {
+                        // Find the section element by ID
+                        const sectionEl = document.getElementById(sectionParam);
+                        if (sectionEl) {
+                            sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Flash highlight
+                            sectionEl.style.outline = '2px solid var(--gold, #edba26)';
+                            sectionEl.style.outlineOffset = '4px';
+                            sectionEl.style.borderRadius = '12px';
+                            setTimeout(() => {
+                                sectionEl.style.outline = 'none';
+                            }, 3000);
+                        }
+                        // Activate matching nav tab
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === '#' + sectionParam) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }, 800); // Wait for content to render
+                }
+
                 // تحديث العنوان
                 document.title = `${lesson.title} | منصة زيزو وبلال`;
 
