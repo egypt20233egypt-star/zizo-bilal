@@ -353,50 +353,57 @@ router.get('/search', async (req, res) => {
 
         const qLower = q.toLowerCase();
         const results = lessons.map(l => {
-            // ═══ Find which section matched ═══
             let snippet = '';
             let matchedSection = '';
 
-            // 1. Check title
-            if (l.title && l.title.toLowerCase().includes(qLower)) {
+            // ═══ PRIORITY 1: Check AI sections FIRST (most specific) ═══
+            const aiSections = ['questions', 'benefits', 'stories', 'analysis', 'overview', 'podcast', 'quranHadith', 'characters', 'fiqh'];
+            for (const sec of aiSections) {
+                if (l[sec]) {
+                    try {
+                        const str = JSON.stringify(l[sec]);
+                        const idx = str.toLowerCase().indexOf(qLower);
+                        if (idx !== -1) {
+                            matchedSection = sec;
+                            // Clean snippet: extract text around match, remove JSON artifacts
+                            const start = Math.max(0, idx - 50);
+                            const end = Math.min(str.length, idx + q.length + 50);
+                            let raw = str.substring(start, end);
+                            // Remove JSON syntax: keys, quotes, braces, brackets, colons
+                            raw = raw.replace(/"[a-zA-Z_]+"\s*:/g, ''); // remove "key":
+                            raw = raw.replace(/[{}\[\]"\\]/g, '');       // remove JSON chars
+                            raw = raw.replace(/,\s*/g, ' ');             // commas → spaces
+                            raw = raw.replace(/\s+/g, ' ').trim();       // collapse whitespace
+                            snippet = (start > 0 ? '...' : '') + raw + (end < str.length ? '...' : '');
+                            break;
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+            }
+
+            // ═══ PRIORITY 2: Check rawSource / rawContent (if no AI match) ═══
+            if (!matchedSection) {
+                const textSources = [
+                    { field: l.rawSource, sec: 'rawSource' },
+                    { field: l.rawContent, sec: 'rawContent' }
+                ];
+                for (const { field: src, sec } of textSources) {
+                    if (src) {
+                        const idx = src.toLowerCase().indexOf(qLower);
+                        if (idx !== -1) {
+                            matchedSection = sec;
+                            const start = Math.max(0, idx - 40);
+                            const end = Math.min(src.length, idx + q.length + 40);
+                            snippet = (start > 0 ? '...' : '') + src.substring(start, end) + (end < src.length ? '...' : '');
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // ═══ PRIORITY 3: Title match (lowest priority — just set section) ═══
+            if (!matchedSection && l.title && l.title.toLowerCase().includes(qLower)) {
                 matchedSection = 'title';
-            }
-
-            // 2. Check rawSource / rawContent
-            const textSources = [
-                { field: l.rawSource, sec: 'rawSource' },
-                { field: l.rawContent, sec: 'rawContent' }
-            ];
-            for (const { field: src, sec } of textSources) {
-                if (src) {
-                    const idx = src.toLowerCase().indexOf(qLower);
-                    if (idx !== -1) {
-                        const start = Math.max(0, idx - 40);
-                        const end = Math.min(src.length, idx + q.length + 40);
-                        snippet = (start > 0 ? '...' : '') + src.substring(start, end) + (end < src.length ? '...' : '');
-                        if (!matchedSection) matchedSection = sec;
-                        break;
-                    }
-                }
-            }
-
-            // 3. Check AI sections
-            if (!snippet) {
-                const sections = ['overview', 'questions', 'benefits', 'stories', 'analysis', 'podcast', 'quranHadith', 'characters', 'fiqh'];
-                for (const sec of sections) {
-                    if (l[sec]) {
-                        try {
-                            const str = JSON.stringify(l[sec]);
-                            const idx = str.toLowerCase().indexOf(qLower);
-                            if (idx !== -1) {
-                                const raw = str.substring(Math.max(0, idx - 40), Math.min(str.length, idx + q.length + 60));
-                                snippet = '...' + raw.replace(/[{}\[\]"]/g, '').replace(/,/g, ' ').trim() + '...';
-                                if (!matchedSection) matchedSection = sec;
-                                break;
-                            }
-                        } catch (e) { /* ignore */ }
-                    }
-                }
             }
 
             return {
