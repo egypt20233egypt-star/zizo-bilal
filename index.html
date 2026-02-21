@@ -1715,11 +1715,19 @@
             const inp = document.getElementById('globalSearchInput');
             const box = document.getElementById('searchResults');
             if (!inp || !box) return;
+
+            // ✅ Portal: move results div to <body> to escape hero overflow:hidden
+            document.body.appendChild(box);
+
             let timer = null, ctrl = null;
 
             function showBox() {
                 const rect = inp.getBoundingClientRect();
+                box.style.position = 'fixed';
                 box.style.top = (rect.bottom + 6) + 'px';
+                box.style.left = rect.left + 'px';
+                box.style.width = rect.width + 'px';
+                box.style.zIndex = '99999';
                 box.style.display = 'block';
             }
             function hideBox() {
@@ -1758,7 +1766,7 @@
 
             // Close on click outside
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.global-search')) hideBox();
+                if (!e.target.closest('.global-search') && !e.target.closest('#searchResults')) hideBox();
             });
         })();
     </script>
