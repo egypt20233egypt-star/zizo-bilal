@@ -375,7 +375,9 @@ router.get('/search', async (req, res) => {
 
             // Try ALL fields to find a clean snippet — track which field matched
             const aiKeys = ['questions', 'benefits', 'stories', 'analysis', 'overview',
-                'podcast', 'quranHadith', 'characters', 'fiqh'];
+                'podcast', 'quranHadith', 'characters', 'fiqh',
+                'answer', 'situation', 'mistake', 'action', 'points',
+                'keyT', 'wrong', 'source', 'name', 'trueFalse'];
             const allSources = [
                 ...aiKeys.filter(k => l[k]).map(k => ({ key: k, str: JSON.stringify(l[k]) })),
                 { key: 'rawSource', str: l.rawSource || '' },
