@@ -1750,29 +1750,13 @@
                     if (!data.results || !data.results.length) {
                         box.innerHTML = '<div class="search-no-results">لا توجد نتائج</div>';
                     } else {
-                        // Map API section names to website.html section IDs
-                        const sectionMap = {
-                            'title': 'overview', 'rawSource': 'overview', 'rawContent': 'overview',
-                            'overview': 'overview', 'questions': 'questions', 'benefits': 'benefits',
-                            'stories': 'stories', 'analysis': 'analysis', 'podcast': 'podcast',
-                            'quranHadith': 'quran', 'characters': 'characters', 'fiqh': 'fiqh'
-                        };
-                        const sectionNames = {
-                            'overview': '📋 نظرة عامة', 'questions': '❓ الأسئلة', 'benefits': '💎 الفوائد',
-                            'stories': '📚 القصص', 'analysis': '🔍 التحليل', 'podcast': '🎙️ البودكاست',
-                            'quran': '📖 آيات وأحاديث', 'characters': '👥 الشخصيات', 'fiqh': '🕌 الأحكام'
-                        };
-                        box.innerHTML = data.results.map(r => {
-                            const secId = sectionMap[r.matchedSection] || 'overview';
-                            const secName = sectionNames[secId] || '';
-                            return `
-                            <div class="search-result-item" onclick="location.href='/website?lesson=${r._id}&section=${secId}'">
+                        box.innerHTML = data.results.map(r => `
+                            <div class="search-result-item" onclick="location.href='/website?lesson=${r._id}&q=${encodeURIComponent(q)}'">
                                 <div class="search-result-title">${r.title}</div>
                                 <div class="search-result-sheikh"><i class="fas fa-user-tie"></i> ${r.sheikhName}</div>
-                                ${secName ? `<div class="search-result-section" style="color:var(--gold);font-size:.75rem;margin-top:2px">${secName}</div>` : ''}
                                 ${r.snippet ? `<div class="search-result-snippet">${r.snippet}</div>` : ''}
                             </div>
-                        `}).join('');
+                        `).join('');
                     }
                     showBox();
                 } catch (e) {

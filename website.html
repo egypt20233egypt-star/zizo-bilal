@@ -698,30 +698,58 @@
                 ProgressManager.markAsRead(lesson._id, lesson.sheikhId);
                 updateBreadcrumb(lesson);
 
-                // ✅ Search: scroll to matched section if ?section= param exists
-                const sectionParam = new URLSearchParams(window.location.search).get('section');
-                if (sectionParam) {
+                // ✅ Search: dynamic scroll to matched text if ?q= param exists
+                const searchQuery = new URLSearchParams(window.location.search).get('q');
+                if (searchQuery) {
                     setTimeout(() => {
-                        // Find the section element by ID
-                        const sectionEl = document.getElementById(sectionParam);
-                        if (sectionEl) {
-                            sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            // Flash highlight
-                            sectionEl.style.outline = '2px solid var(--gold, #edba26)';
-                            sectionEl.style.outlineOffset = '4px';
-                            sectionEl.style.borderRadius = '12px';
-                            setTimeout(() => {
-                                sectionEl.style.outline = 'none';
-                            }, 3000);
-                        }
-                        // Activate matching nav tab
-                        document.querySelectorAll('.nav-link').forEach(link => {
-                            link.classList.remove('active');
-                            if (link.getAttribute('href') === '#' + sectionParam) {
-                                link.classList.add('active');
+                        // 🔍 Search in the actual rendered DOM for the text
+                        const container = document.getElementById('lessonContent');
+                        if (!container) return;
+
+                        const walker = document.createTreeWalker(
+                            container, NodeFilter.SHOW_TEXT, null, false
+                        );
+                        let matchNode = null;
+                        while (walker.nextNode()) {
+                            if (walker.currentNode.textContent.includes(searchQuery)) {
+                                matchNode = walker.currentNode;
+                                break;
                             }
-                        });
-                    }, 800); // Wait for content to render
+                        }
+
+                        if (matchNode) {
+                            // Find the closest section parent (div with id)
+                            let sectionEl = matchNode.parentElement;
+                            while (sectionEl && sectionEl !== container) {
+                                if (sectionEl.id && sectionEl.classList.contains('section')) break;
+                                sectionEl = sectionEl.parentElement;
+                            }
+
+                            // Scroll to section or directly to element
+                            const scrollTarget = (sectionEl && sectionEl.id) ? sectionEl : matchNode.parentElement;
+                            scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                            // Highlight the matched text
+                            const parent = matchNode.parentElement;
+                            const originalHTML = parent.innerHTML;
+                            const highlighted = originalHTML.replace(
+                                new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                                '<mark style="background:var(--gold,#edba26);color:#000;padding:2px 4px;border-radius:4px">$1</mark>'
+                            );
+                            parent.innerHTML = highlighted;
+                            setTimeout(() => { parent.innerHTML = originalHTML; }, 4000);
+
+                            // Activate matching nav tab
+                            if (sectionEl && sectionEl.id) {
+                                document.querySelectorAll('.nav-link').forEach(link => {
+                                    link.classList.remove('active');
+                                    if (link.getAttribute('href') === '#' + sectionEl.id) {
+                                        link.classList.add('active');
+                                    }
+                                });
+                            }
+                        }
+                    }, 1000);
                 }
 
                 // تحديث العنوان
