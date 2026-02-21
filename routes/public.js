@@ -305,18 +305,45 @@ router.get('/search', async (req, res) => {
         // Sanitize regex special chars (prevent ReDoS)
         const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+        // ═══ Step 1: Search in title, rawSource, rawContent ═══
         const filter = {
             status: 'published',
             $or: [
                 { title: { $regex: escaped, $options: 'i' } },
-                { rawSource: { $regex: escaped, $options: 'i' } }
+                { rawSource: { $regex: escaped, $options: 'i' } },
+                { rawContent: { $regex: escaped, $options: 'i' } }
             ]
         };
 
-        const lessons = await Lesson.find(filter)
-            .select('title sheikhId rawSource')
+        let lessons = await Lesson.find(filter)
+            .select('title sheikhId rawSource rawContent overview questions benefits stories analysis podcast quranHadith')
             .limit(20)
             .lean();
+
+        // ═══ Step 2: If few results, also search inside structured AI fields ═══
+        if (lessons.length < 5) {
+            const existingIds = lessons.map(l => l._id.toString());
+            const allPublished = await Lesson.find({ status: 'published', _id: { $nin: existingIds } })
+                .select('title sheikhId rawSource rawContent overview questions benefits stories analysis podcast quranHadith')
+                .lean();
+
+            const qLower = q.toLowerCase();
+            const extraMatches = allPublished.filter(lesson => {
+                // Search in stringified AI sections
+                const sections = ['overview', 'questions', 'benefits', 'stories', 'analysis', 'podcast', 'quranHadith'];
+                for (const sec of sections) {
+                    if (lesson[sec]) {
+                        try {
+                            const str = JSON.stringify(lesson[sec]);
+                            if (str.toLowerCase().includes(qLower)) return true;
+                        } catch (e) { /* ignore */ }
+                    }
+                }
+                return false;
+            }).slice(0, 20 - lessons.length);
+
+            lessons = lessons.concat(extraMatches);
+        }
 
         // Enrich with sheikh names
         const sheikhIds = [...new Set(lessons.map(l => l.sheikhId).filter(Boolean))];
@@ -324,15 +351,38 @@ router.get('/search', async (req, res) => {
         const sheikhMap = {};
         sheikhs.forEach(s => sheikhMap[s._id.toString()] = s.name);
 
+        const qLower = q.toLowerCase();
         const results = lessons.map(l => {
-            // Generate snippet from rawSource
+            // Generate snippet — try rawSource first, then rawContent, then AI sections
             let snippet = '';
-            if (l.rawSource) {
-                const idx = l.rawSource.toLowerCase().indexOf(q.toLowerCase());
-                if (idx !== -1) {
-                    const start = Math.max(0, idx - 40);
-                    const end = Math.min(l.rawSource.length, idx + q.length + 40);
-                    snippet = (start > 0 ? '...' : '') + l.rawSource.substring(start, end) + (end < l.rawSource.length ? '...' : '');
+            const sources = [l.rawSource, l.rawContent];
+            for (const src of sources) {
+                if (src) {
+                    const idx = src.toLowerCase().indexOf(qLower);
+                    if (idx !== -1) {
+                        const start = Math.max(0, idx - 40);
+                        const end = Math.min(src.length, idx + q.length + 40);
+                        snippet = (start > 0 ? '...' : '') + src.substring(start, end) + (end < src.length ? '...' : '');
+                        break;
+                    }
+                }
+            }
+            // Try AI sections for snippet if still empty
+            if (!snippet) {
+                const sections = ['overview', 'questions', 'benefits', 'stories', 'analysis'];
+                for (const sec of sections) {
+                    if (l[sec]) {
+                        try {
+                            const str = JSON.stringify(l[sec]);
+                            const idx = str.toLowerCase().indexOf(qLower);
+                            if (idx !== -1) {
+                                // Clean JSON artifacts from snippet
+                                const raw = str.substring(Math.max(0, idx - 40), Math.min(str.length, idx + q.length + 60));
+                                snippet = '...' + raw.replace(/[{}\[\]"]/g, '').replace(/,/g, ' ').trim() + '...';
+                                break;
+                            }
+                        } catch (e) { /* ignore */ }
+                    }
                 }
             }
             return {
