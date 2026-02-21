@@ -1717,10 +1717,19 @@
             if (!inp || !box) return;
             let timer = null, ctrl = null;
 
+            function showBox() {
+                const rect = inp.getBoundingClientRect();
+                box.style.top = (rect.bottom + 6) + 'px';
+                box.style.display = 'block';
+            }
+            function hideBox() {
+                box.style.display = 'none';
+            }
+
             inp.addEventListener('input', function () {
                 clearTimeout(timer);
                 const q = this.value.trim();
-                if (q.length < 2) { box.classList.remove('show'); return; }
+                if (q.length < 2) { hideBox(); return; }
                 timer = setTimeout(() => doSearch(q), 300);
             });
 
@@ -1741,10 +1750,7 @@
                             </div>
                         `).join('');
                     }
-                    // Position dropdown below input
-                    const rect = inp.getBoundingClientRect();
-                    box.style.top = (rect.bottom + 6) + 'px';
-                    box.classList.add('show');
+                    showBox();
                 } catch (e) {
                     if (e.name !== 'AbortError') console.error('Search error:', e);
                 }
@@ -1752,7 +1758,7 @@
 
             // Close on click outside
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.global-search')) box.classList.remove('show');
+                if (!e.target.closest('.global-search')) hideBox();
             });
         })();
     </script>
