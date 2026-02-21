@@ -67,6 +67,42 @@
             border-radius: 3px;
         }
 
+        /* ═══ Breadcrumb ═══ */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .6rem 1.2rem;
+            font-size: .82rem;
+            color: var(--text-3);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb a {
+            color: var(--gold);
+            text-decoration: none;
+            opacity: .8;
+            transition: opacity .2s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+
+        .breadcrumb .sep {
+            opacity: .4;
+        }
+
+        .breadcrumb .current {
+            color: var(--text-2);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -300,6 +336,66 @@
             }
         }
 
+        /* ═══ Skeleton Shimmer ═══ */
+        .skeleton-lesson {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.2rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: var(--radius);
+            margin-bottom: .75rem;
+        }
+
+        .skeleton-num {
+            min-width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, .06);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-lines {
+            flex: 1;
+        }
+
+        .skeleton-line {
+            height: 12px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, .06);
+            margin-bottom: .5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-line.w80 {
+            width: 80%;
+        }
+
+        .skeleton-line.w50 {
+            width: 50%;
+        }
+
+        .skeleton-num::after,
+        .skeleton-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            100% {
+                left: 100%;
+            }
+        }
+
         /* ═══ Bottom Nav ═══ */
         .bottom-nav {
             position: fixed;
@@ -366,6 +462,14 @@
 </head>
 
 <body>
+
+    <div class="breadcrumb">
+        <a href="/"><i class="fas fa-home" style="font-size:.75rem;"></i> الرئيسية</a>
+        <span class="sep">›</span>
+        <a href="/browse">المشايخ</a>
+        <span class="sep">›</span>
+        <span class="current" id="breadcrumbSheikh">دروس الشيخ</span>
+    </div>
 
     <!-- ══════════════ PAGE HEADER ══════════════ -->
     <div class="page-header">
@@ -445,6 +549,23 @@
         const sheikhId = params.get('sheikh');
         const sheikhNameFromUrl = params.get('name') ? decodeURIComponent(params.get('name')) : null;
 
+        // Breadcrumb: update sheikh name immediately
+        if (sheikhNameFromUrl) {
+            document.getElementById('breadcrumbSheikh').textContent = sheikhNameFromUrl;
+        }
+
+        // ═══════════ Progress Manager (same API as website.html) ═══════════
+        const ProgressManager = {
+            KEY: 'read_lessons',
+            _get() {
+                try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); }
+                catch { return {}; }
+            },
+            isRead(lessonId) {
+                return !!this._get()[lessonId];
+            }
+        };
+
         // ═══════════ Back Button (Claude fix: fallback to /browse) ═══════════
         document.getElementById('btnBack').addEventListener('click', () => {
             if (document.referrer && window.history.length > 1) {
@@ -474,7 +595,16 @@
             }
 
             const list = document.getElementById('lessonsList');
-            list.innerHTML = '<div class="state-msg"><div class="spinner"></div><p>جاري تحميل الدروس...</p></div>';
+            // Skeleton shimmer بدل spinner
+            list.innerHTML = Array.from({ length: 5 }, () => `
+                <div class="skeleton-lesson">
+                    <div class="skeleton-num"></div>
+                    <div class="skeleton-lines">
+                        <div class="skeleton-line w80"></div>
+                        <div class="skeleton-line w50"></div>
+                    </div>
+                </div>
+            `).join('');
 
             try {
                 // Claude fix: limit=500 بدل 100 عشان ميفوتش دروس
@@ -522,18 +652,21 @@
                 return;
             }
 
-            list.innerHTML = lessons.map((l, i) => `
+            list.innerHTML = lessons.map((l, i) => {
+                const isRead = ProgressManager.isRead(l._id);
+                return `
                 <div class="lesson-card" onclick="location.href='/website?lesson=${l._id}'">
-                    <div class="lesson-num">${i + 1}</div>
+                    <div class="lesson-num">${isRead ? '<i class="fas fa-check" style="color:#10b981;font-size:.8rem;"></i>' : (i + 1)}</div>
                     <div class="lesson-info">
-                        <div class="lesson-title">${l.title}</div>
+                        <div class="lesson-title">${l.title}${isRead ? ' <span style="color:#10b981;font-size:.75rem;">✅</span>' : ''}</div>
                         <div class="lesson-meta">
                             ${l.categoryName ? `<span><i class="fas fa-folder"></i>${l.categoryName}</span>` : ''}
                         </div>
                     </div>
                     <i class="fas fa-chevron-left lesson-arrow"></i>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // ═══════════ Search Lessons ═══════════

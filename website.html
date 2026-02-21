@@ -426,6 +426,41 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ═══ Breadcrumb ═══ */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .5rem 1.2rem;
+            font-size: .8rem;
+            color: rgba(255, 255, 255, .4);
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb a {
+            color: #DAA520;
+            text-decoration: none;
+            opacity: .8;
+            transition: opacity .2s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+
+        .breadcrumb .sep {
+            opacity: .3;
+        }
+
+        .breadcrumb .current {
+            color: rgba(255, 255, 255, .6);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
     </style>
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap"
@@ -439,6 +474,17 @@
     <div class="loading-screen" id="loadingScreen">
         <div class="loader"></div>
         <p>جاري التحميل...</p>
+    </div>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="breadcrumb" id="breadcrumbBar" style="display:none;">
+        <a href="/"><i class="fas fa-home" style="font-size:.7rem;"></i> الرئيسية</a>
+        <span class="sep">›</span>
+        <a href="/browse">المشايخ</a>
+        <span class="sep">›</span>
+        <a href="#" id="breadcrumbSheikh">الشيخ</a>
+        <span class="sep">›</span>
+        <span class="current" id="breadcrumbLesson">الدرس</span>
     </div>
 
     <!-- Header -->
@@ -505,6 +551,53 @@
 
         let currentLesson = null;
         let allLessons = [];
+
+        // ============ Progress Manager (localStorage) ============
+        const ProgressManager = {
+            KEY: 'read_lessons',
+            _get() {
+                try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); }
+                catch { return {}; }
+            },
+            markAsRead(lessonId, sheikhId) {
+                if (!lessonId) return;
+                const data = this._get();
+                if (!data[lessonId]) {
+                    data[lessonId] = { sheikhId: sheikhId || '', readAt: Date.now() };
+                    try { localStorage.setItem(this.KEY, JSON.stringify(data)); }
+                    catch (e) { console.warn('localStorage full'); }
+                }
+            },
+            isRead(lessonId) {
+                return !!this._get()[lessonId];
+            },
+            getReadCount(sheikhId) {
+                const data = this._get();
+                if (!sheikhId) return Object.keys(data).length;
+                return Object.values(data).filter(v => v.sheikhId === sheikhId).length;
+            },
+            getTotalRead() {
+                return Object.keys(this._get()).length;
+            }
+        };
+
+        // ============ Breadcrumb Update ============
+        function updateBreadcrumb(lesson) {
+            const bar = document.getElementById('breadcrumbBar');
+            if (!bar || !lesson) return;
+            bar.style.display = 'flex';
+
+            const sheikhEl = document.getElementById('breadcrumbSheikh');
+            const lessonEl = document.getElementById('breadcrumbLesson');
+
+            if (sheikhEl && lesson.sheikhName) {
+                sheikhEl.textContent = lesson.sheikhName;
+                sheikhEl.href = `/lessons?sheikh=${lesson.sheikhId || ''}&name=${encodeURIComponent(lesson.sheikhName)}`;
+            }
+            if (lessonEl && lesson.title) {
+                lessonEl.textContent = lesson.title;
+            }
+        }
 
         // ============ Initialize ============
         document.addEventListener('DOMContentLoaded', async function () {
@@ -576,6 +669,10 @@
                 // عرض الدرس مباشرة (نفس نظام العرض الموجود)
                 renderLessonsGrid([lesson]);
                 selectLesson(lesson);
+
+                // ✅ Progress: mark as read + Breadcrumb update
+                ProgressManager.markAsRead(lesson._id, lesson.sheikhId);
+                updateBreadcrumb(lesson);
 
                 // تحديث العنوان
                 document.title = `${lesson.title} | منصة زيزو وبلال`;
@@ -1241,6 +1338,10 @@
         function selectLesson(lesson) {
             currentLesson = lesson;
             resetCardColors(); // إعادة تعيين الألوان عند اختيار درس جديد
+
+            // ✅ Progress: mark as read + Breadcrumb update
+            ProgressManager.markAsRead(lesson._id, lesson.sheikhId);
+            updateBreadcrumb(lesson);
 
             // Update header
             document.getElementById('lessonTitle').textContent = lesson.title;

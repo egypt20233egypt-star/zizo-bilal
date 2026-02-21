@@ -33,6 +33,105 @@
             --gold-l: #F5D245;
             --gold-d: #C9A020;
             --gold-glow: rgba(237, 186, 38, 0.18);
+
+            /* ═══ Global Search ═══ */
+            .global-search {
+                position: relative;
+                max-width: 420px;
+                margin: 1.5rem auto 0;
+            }
+
+            .global-search input {
+                width: 100%;
+                padding: .85rem 1rem .85rem 2.8rem;
+                background: rgba(255, 255, 255, .06);
+                border: 1px solid rgba(237, 186, 38, .15);
+                border-radius: 30px;
+                color: #fff;
+                font-size: .95rem;
+                font-family: inherit;
+                outline: none;
+                transition: border .2s;
+            }
+
+            .global-search input:focus {
+                border-color: rgba(237, 186, 38, .4);
+            }
+
+            .global-search input::placeholder {
+                color: rgba(255, 255, 255, .3);
+            }
+
+            .global-search .search-icon {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--gold);
+                opacity: .5;
+                font-size: .9rem;
+            }
+
+            .search-results {
+                position: absolute;
+                top: calc(100% + 6px);
+                left: 0;
+                right: 0;
+                background: rgba(12, 20, 34, .97);
+                border: 1px solid rgba(237, 186, 38, .2);
+                border-radius: 14px;
+                max-height: 350px;
+                overflow-y: auto;
+                z-index: 100;
+                display: none;
+                backdrop-filter: blur(12px);
+            }
+
+            .search-results.show {
+                display: block;
+            }
+
+            .search-result-item {
+                padding: .8rem 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, .04);
+                cursor: pointer;
+                transition: background .2s;
+            }
+
+            .search-result-item:hover {
+                background: rgba(237, 186, 38, .08);
+            }
+
+            .search-result-item:last-child {
+                border-bottom: none;
+            }
+
+            .search-result-title {
+                color: var(--gold);
+                font-weight: 600;
+                font-size: .9rem;
+                margin-bottom: .2rem;
+            }
+
+            .search-result-sheikh {
+                font-size: .75rem;
+                color: rgba(255, 255, 255, .4);
+            }
+
+            .search-result-snippet {
+                font-size: .78rem;
+                color: rgba(255, 255, 255, .3);
+                margin-top: .2rem;
+                line-height: 1.4;
+            }
+
+            .search-no-results {
+                padding: 1.2rem;
+                text-align: center;
+                color: rgba(255, 255, 255, .3);
+                font-size: .85rem;
+            }
+
             --gold-glow-s: rgba(237, 186, 38, 0.35);
             --green: #1B5E3A;
             --green-l: #2D8A5A;
@@ -1195,6 +1294,13 @@
                 <a href="/website" class="btn-v3 btn-gold me-2"><i class="fa-solid fa-arrow-left"></i> ابدأ الآن</a>
                 <a href="#categories" class="btn-v3 btn-outline"><i class="fa-solid fa-compass"></i> استكشف</a>
             </div>
+
+            <!-- 🔍 Global Search Bar -->
+            <div class="global-search rv">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="globalSearchInput" placeholder="ابحث في كل الدروس..." autocomplete="off">
+                <div class="search-results" id="searchResults"></div>
+            </div>
         </div>
     </section>
 
@@ -1604,6 +1710,48 @@
             let t; if (m < 60) t = `منذ ${m} دقيقة`; else if (h < 24) t = `منذ ${h} ساعة`; else t = `منذ ${d} يوم`;
             el.innerHTML = `<i class="fa-solid fa-sparkles"></i> آخر درس: "${l.title}" — ${t}`;
         }
+        /* ═══ Global Search ═══ */
+        (function () {
+            const inp = document.getElementById('globalSearchInput');
+            const box = document.getElementById('searchResults');
+            if (!inp || !box) return;
+            let timer = null, ctrl = null;
+
+            inp.addEventListener('input', function () {
+                clearTimeout(timer);
+                const q = this.value.trim();
+                if (q.length < 2) { box.classList.remove('show'); return; }
+                timer = setTimeout(() => doSearch(q), 300);
+            });
+
+            async function doSearch(q) {
+                if (ctrl) ctrl.abort();
+                ctrl = new AbortController();
+                try {
+                    const res = await fetch(`/api/public/search?q=${encodeURIComponent(q)}`, { signal: ctrl.signal });
+                    const data = await res.json();
+                    if (!data.results || !data.results.length) {
+                        box.innerHTML = '<div class="search-no-results">لا توجد نتائج</div>';
+                    } else {
+                        box.innerHTML = data.results.map(r => `
+                            <div class="search-result-item" onclick="location.href='/website?lesson=${r._id}'">
+                                <div class="search-result-title">${r.title}</div>
+                                <div class="search-result-sheikh"><i class="fas fa-user-tie"></i> ${r.sheikhName}</div>
+                                ${r.snippet ? `<div class="search-result-snippet">${r.snippet}</div>` : ''}
+                            </div>
+                        `).join('');
+                    }
+                    box.classList.add('show');
+                } catch (e) {
+                    if (e.name !== 'AbortError') console.error('Search error:', e);
+                }
+            }
+
+            // Close on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.global-search')) box.classList.remove('show');
+            });
+        })();
     </script>
 </body>
 

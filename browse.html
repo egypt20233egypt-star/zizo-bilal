@@ -67,6 +67,38 @@
             border-radius: 3px;
         }
 
+        /* ═══ Breadcrumb ═══ */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .6rem 1.2rem;
+            font-size: .82rem;
+            color: var(--text-3);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb a {
+            color: var(--gold);
+            text-decoration: none;
+            opacity: .8;
+            transition: opacity .2s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+
+        .breadcrumb .sep {
+            opacity: .4;
+        }
+
+        .breadcrumb .current {
+            color: var(--text-2);
+            font-weight: 600;
+        }
+
         /* ═══ Views ═══ */
         .view {
             display: none;
@@ -261,6 +293,33 @@
             margin-left: .3rem;
         }
 
+        /* ═══ Progress Bar ═══ */
+        .sheikh-progress {
+            margin-top: .5rem;
+            width: 100%;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, .06);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 2px;
+            transition: width .5s ease;
+        }
+
+        .progress-text {
+            font-size: .7rem;
+            color: var(--text-3);
+            margin-top: .2rem;
+        }
+
         /* ═══ Lessons removed — now in lessons.html ═══ */
 
         /* ═══ Empty / Error / Loading ═══ */
@@ -312,6 +371,60 @@
         @keyframes spin {
             to {
                 transform: rotate(360deg);
+            }
+        }
+
+        /* ═══ Skeleton Shimmer ═══ */
+        .skeleton-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: var(--radius);
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+
+        .skeleton-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: rgba(255, 255, 255, .06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, .06);
+            margin: .5rem auto 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-line.w60 {
+            width: 60%;
+        }
+
+        .skeleton-line.w40 {
+            width: 40%;
+        }
+
+        .skeleton-avatar::after,
+        .skeleton-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            100% {
+                left: 100%;
             }
         }
 
@@ -395,6 +508,12 @@
 
     <!-- ══════════════ SCREEN 1: SHEIKHS ══════════════ -->
     <section id="view-sheikhs" class="view active">
+        <div class="breadcrumb">
+            <a href="/"><i class="fas fa-home" style="font-size:.75rem;"></i> الرئيسية</a>
+            <span class="sep">›</span>
+            <span class="current">المشايخ</span>
+        </div>
+
         <div class="hero">
             <h1>🕌 المشايخ الكرام</h1>
             <p>اختر شيخك المفضل واستمع لدروسه</p>
@@ -470,6 +589,20 @@
         // ═══════════ State ═══════════
         let allSheikhs = [];
 
+        // ═══════════ Progress Manager (read-only, same API as website.html) ═══════════
+        const ProgressManager = {
+            KEY: 'read_lessons',
+            _get() {
+                try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); }
+                catch { return {}; }
+            },
+            getReadCount(sheikhId) {
+                const data = this._get();
+                if (!sheikhId) return Object.keys(data).length;
+                return Object.values(data).filter(v => v.sheikhId === sheikhId).length;
+            }
+        };
+
         // ═══════════ SVG Avatar Placeholder ═══════════
         function avatarPlaceholder(name) {
             const initial = name ? name.charAt(0) : '؟';
@@ -479,9 +612,21 @@
         }
 
         // ═══════════ Load Sheikhs ═══════════
+        // ═══════════ Skeleton Generator ═══════════
+        function showSkeletonSheikhs() {
+            const grid = document.getElementById('sheikhsGrid');
+            grid.innerHTML = Array.from({ length: 6 }, () => `
+                <div class="skeleton-card">
+                    <div class="skeleton-avatar"></div>
+                    <div class="skeleton-line w60"></div>
+                    <div class="skeleton-line w40"></div>
+                </div>
+            `).join('');
+        }
+
         async function loadSheikhs() {
             const grid = document.getElementById('sheikhsGrid');
-            grid.innerHTML = '<div class="state-msg"><div class="spinner"></div><p>جاري تحميل المشايخ...</p></div>';
+            showSkeletonSheikhs();
 
             try {
                 const res = await fetch('/api/public/sheikhs');
@@ -519,13 +664,21 @@
                 const imgSrc = s.image || avatarPlaceholder(s.name);
                 const fallback = avatarPlaceholder(s.name);
                 const encodedName = encodeURIComponent(s.name);
+                const total = s.lessonCount || 0;
+                const read = ProgressManager.getReadCount(s._id);
+                const pct = total > 0 ? Math.round((read / total) * 100) : 0;
                 return `
           <div class="sheikh-card" onclick="location.href='/lessons?sheikh=${s._id}&name=${encodedName}'">
             <div class="sheikh-avatar">
               <img src="${imgSrc}" alt="${s.name}" onerror="this.src='${fallback}'">
             </div>
             <div class="sheikh-name">${s.name}</div>
-            <div class="sheikh-count"><i class="fas fa-book"></i> ${s.lessonCount || 0} درس</div>
+            <div class="sheikh-count"><i class="fas fa-book"></i> ${total} درس</div>
+            ${total > 0 ? `
+            <div class="sheikh-progress">
+                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+                <div class="progress-text">${read}/${total} مقروء ${pct > 0 ? `(${pct}%)` : ''}</div>
+            </div>` : ''}
           </div>`;
             }).join('');
         }

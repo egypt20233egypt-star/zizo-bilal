@@ -293,6 +293,64 @@ router.get('/lessons/:id', async (req, res) => {
 });
 
 // ============================================================
+// ═══ GET /api/public/search — بحث شامل في كل الدروس ═══
+// ============================================================
+router.get('/search', async (req, res) => {
+    try {
+        const q = (req.query.q || '').trim();
+        if (!q || q.length < 2) {
+            return res.json({ results: [] });
+        }
+
+        // Sanitize regex special chars (prevent ReDoS)
+        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const filter = {
+            status: 'published',
+            $or: [
+                { title: { $regex: escaped, $options: 'i' } },
+                { rawSource: { $regex: escaped, $options: 'i' } }
+            ]
+        };
+
+        const lessons = await Lesson.find(filter)
+            .select('title sheikhId rawSource')
+            .limit(20)
+            .lean();
+
+        // Enrich with sheikh names
+        const sheikhIds = [...new Set(lessons.map(l => l.sheikhId).filter(Boolean))];
+        const sheikhs = await Sheikh.find({ _id: { $in: sheikhIds } }).select('name').lean();
+        const sheikhMap = {};
+        sheikhs.forEach(s => sheikhMap[s._id.toString()] = s.name);
+
+        const results = lessons.map(l => {
+            // Generate snippet from rawSource
+            let snippet = '';
+            if (l.rawSource) {
+                const idx = l.rawSource.toLowerCase().indexOf(q.toLowerCase());
+                if (idx !== -1) {
+                    const start = Math.max(0, idx - 40);
+                    const end = Math.min(l.rawSource.length, idx + q.length + 40);
+                    snippet = (start > 0 ? '...' : '') + l.rawSource.substring(start, end) + (end < l.rawSource.length ? '...' : '');
+                }
+            }
+            return {
+                _id: l._id,
+                title: l.title,
+                sheikhName: sheikhMap[l.sheikhId] || 'غير محدد',
+                snippet
+            };
+        });
+
+        res.json({ results });
+    } catch (error) {
+        console.error('❌ Search Error:', error);
+        res.status(500).json({ error: 'خطأ في البحث' });
+    }
+});
+
+// ============================================================
 // ═══ Cache Invalidation (يُستدعى من routes/lessons.js) ═══
 // ============================================================
 router.invalidateCache = function () {
