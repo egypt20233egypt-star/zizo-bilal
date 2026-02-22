@@ -702,62 +702,134 @@
                 const searchQuery = new URLSearchParams(window.location.search).get('q');
                 if (searchQuery) {
                     setTimeout(() => {
-                        // Unicode-safe: clean query, get longest word
+                        // Unicode-safe: clean query, get words
                         const cleanQ = searchQuery.replace(/[^\p{L}\p{N}\s]/gu, ' ').trim();
                         const searchWords = cleanQ.split(/\s+/).filter(w => w.length >= 2);
                         if (!searchWords.length) return;
-                        const targetWord = searchWords.sort((a, b) => b.length - a.length)[0];
 
                         const container = document.getElementById('lessonContent');
                         if (!container) return;
 
-                        // DOM TreeWalker: find longest word
-                        const walker = document.createTreeWalker(
-                            container, NodeFilter.SHOW_TEXT, null, false
-                        );
+                        // ═══ Strategy 1: Phrase match (3+ consecutive words) ═══
                         let matchNode = null;
-                        while (walker.nextNode()) {
-                            if (walker.currentNode.textContent.includes(targetWord)) {
-                                matchNode = walker.currentNode;
-                                break;
+                        if (searchWords.length >= 2) {
+                            const phrase = searchWords.slice(0, Math.min(5, searchWords.length)).join(' ');
+                            const walker1 = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                            while (walker1.nextNode()) {
+                                const normalized = walker1.currentNode.textContent.replace(/\s+/g, ' ');
+                                if (normalized.includes(phrase)) {
+                                    matchNode = walker1.currentNode;
+                                    break;
+                                }
                             }
                         }
 
-                        if (matchNode) {
-                            // Find the closest section parent
-                            let sectionEl = matchNode.parentElement;
-                            while (sectionEl && sectionEl !== container) {
-                                if (sectionEl.id && sectionEl.classList.contains('section')) break;
-                                sectionEl = sectionEl.parentElement;
+                        // ═══ Strategy 2: Longest single word (fallback) ═══
+                        const targetWord = [...searchWords].sort((a, b) => b.length - a.length)[0];
+                        if (!matchNode) {
+                            const walker2 = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+                            while (walker2.nextNode()) {
+                                if (walker2.currentNode.textContent.includes(targetWord)) {
+                                    matchNode = walker2.currentNode;
+                                    break;
+                                }
                             }
-
-                            // Scroll to section or element
-                            const scrollTarget = (sectionEl && sectionEl.id) ? sectionEl : matchNode.parentElement;
-                            scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                            // Highlight the matched word
-                            const parent = matchNode.parentElement;
-                            const originalHTML = parent.innerHTML;
-                            const escaped = targetWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                            const highlighted = originalHTML.replace(
-                                new RegExp(`(${escaped})`, 'gi'),
-                                '<mark style="background:var(--gold,#edba26);color:#000;padding:2px 4px;border-radius:4px">$1</mark>'
-                            );
-                            parent.innerHTML = highlighted;
-                            setTimeout(() => { parent.innerHTML = originalHTML; }, 4000);
-
-                            // Activate matching nav tab
-                            if (sectionEl && sectionEl.id) {
-                                document.querySelectorAll('.nav-link').forEach(link => {
-                                    link.classList.remove('active');
-                                    if (link.getAttribute('href') === '#' + sectionEl.id) {
-                                        link.classList.add('active');
-                                    }
-                                });
-                            }
-                            console.info('🔍 Search navigated to section:', sectionEl?.id || 'direct element');
                         }
-                    }, 1000);
+
+                        if (!matchNode) {
+                            console.warn('🔍 لم يتم العثور على النص في الصفحة');
+                            return;
+                        }
+
+                        // ═══ Find parent section ═══
+                        let sectionEl = matchNode.parentElement;
+                        while (sectionEl && sectionEl !== container) {
+                            if (sectionEl.tagName === 'SECTION' && sectionEl.classList.contains('section')) break;
+                            sectionEl = sectionEl.parentElement;
+                        }
+
+                        // ═══ Get Arabic section name from h2.section-title ═══
+                        let sectionName = '';
+                        let sectionId = '';
+                        if (sectionEl && sectionEl.tagName === 'SECTION') {
+                            sectionId = sectionEl.id || '';
+                            const h2 = sectionEl.querySelector('.section-title');
+                            sectionName = h2 ? h2.textContent.trim() : sectionId;
+                        }
+
+                        // ═══ Activate matching nav link ═══
+                        if (sectionId) {
+                            document.querySelectorAll('.nav-link').forEach(link => {
+                                link.classList.remove('active');
+                                if (link.getAttribute('href') === '#' + sectionId) {
+                                    link.classList.add('active');
+                                }
+                            });
+                        }
+
+                        // ═══ Scroll to the matched element ═══
+                        const scrollTarget = matchNode.parentElement;
+                        scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        // ═══ Highlight the matched word ═══
+                        const parent = matchNode.parentElement;
+                        const originalHTML = parent.innerHTML;
+                        const escaped = targetWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const highlighted = originalHTML.replace(
+                            new RegExp(`(${escaped})`, 'gi'),
+                            '<mark style="background:linear-gradient(90deg,#ffd700,#ffed4e);color:#000;padding:2px 6px;border-radius:4px;font-weight:600">$1</mark>'
+                        );
+                        parent.innerHTML = highlighted;
+                        setTimeout(() => { parent.innerHTML = originalHTML; }, 5000);
+
+                        // ═══ Show notification badge ═══
+                        if (sectionName) {
+                            const badge = document.createElement('div');
+                            badge.id = 'search-found-badge';
+                            badge.style.cssText = `
+                                position:fixed;top:80px;right:20px;z-index:9999;
+                                background:linear-gradient(135deg,#1a1a2e,#16213e);
+                                border:1px solid rgba(218,165,32,.4);
+                                color:#fff;padding:14px 22px;border-radius:12px;
+                                box-shadow:0 8px 25px rgba(0,0,0,.4);
+                                display:flex;align-items:center;gap:12px;
+                                animation:searchBadgeIn .4s ease;
+                                max-width:350px;
+                            `;
+                            badge.innerHTML = `
+                                <i class="fas fa-check-circle" style="color:#DAA520;font-size:1.4rem"></i>
+                                <div>
+                                    <div style="font-weight:700;font-size:.95rem;color:#DAA520">تم العثور على النتيجة</div>
+                                    <div style="font-size:.82rem;opacity:.85;margin-top:3px">القسم: ${sectionName}</div>
+                                </div>
+                                <button onclick="this.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:1.2rem;padding:0 0 0 8px">✕</button>
+                            `;
+                            // Remove old badge if exists
+                            document.getElementById('search-found-badge')?.remove();
+                            document.body.appendChild(badge);
+
+                            // Add animation CSS if not already present
+                            if (!document.getElementById('search-badge-style')) {
+                                const style = document.createElement('style');
+                                style.id = 'search-badge-style';
+                                style.textContent = `
+                                    @keyframes searchBadgeIn { from { transform:translateX(400px);opacity:0 } to { transform:translateX(0);opacity:1 } }
+                                    @keyframes searchBadgeOut { from { transform:translateX(0);opacity:1 } to { transform:translateX(400px);opacity:0 } }
+                                `;
+                                document.head.appendChild(style);
+                            }
+
+                            // Auto-hide after 5 seconds
+                            setTimeout(() => {
+                                if (badge.parentElement) {
+                                    badge.style.animation = 'searchBadgeOut .4s ease';
+                                    setTimeout(() => badge.remove(), 400);
+                                }
+                            }, 5000);
+                        }
+
+                        console.info(`🔍 تم الانتقال إلى: "${sectionName}" (id: ${sectionId})`);
+                    }, 1200);
                 }
 
                 // تحديث العنوان
