@@ -371,31 +371,6 @@ router.get('/search', async (req, res) => {
             catMap[c._id.toString()] = c.name;
         });
 
-        // Section names map (AI field → Arabic label)
-        const SECTION_NAMES = {
-            'overview': '📋 نظرة عامة',
-            'quranHadith': '📖 آيات وأحاديث',
-            'fiqh': '⚖️ الأحكام الفقهية',
-            'benefits': '💎 الفوائد',
-            'questions': '❓ الأسئلة',
-            'stories': '📚 القصص',
-            'analysis': '🔍 التحليل',
-            'podcast': '🎙️ بودكاست',
-            'characters': '👥 الشخصيات',
-            'practicalApplication': '🏆 التطبيق العملي',
-            'points': '🔑 النقاط الرئيسية',
-            'action': '👣 خطوات عملية',
-            'wrong': '⚠️ أخطاء شائعة',
-            'mistake': '⚠️ أخطاء شائعة',
-            'situation': '🌍 ربط بالواقع',
-            'keyT': '🔑 النقاط الرئيسية',
-            'answer': '💬 الإجابات',
-            'trueFalse': '✅ صح وغلط',
-            'name': '📝 الأسماء',
-            'source': '📌 المصادر',
-            'rawSource': '📄 النص الأصلي',
-            'rawContent': '📄 المحتوى'
-        };
 
         // Snippet + matched section finder
         function simpleSnippet(lesson) {
@@ -430,7 +405,7 @@ router.get('/search', async (req, res) => {
                 title: l.title,
                 sheikhName: sheikhMap[l.sheikhId?.toString()] || 'غير محدد',
                 categoryName: catMap[l.categoryId?.toString()] || '',
-                matchedSection: SECTION_NAMES[sectionKey] || '',
+                sectionKey,
                 snippet
             };
         });
