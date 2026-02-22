@@ -371,7 +371,33 @@ router.get('/search', async (req, res) => {
             catMap[c._id.toString()] = c.name;
         });
 
-        // Simple snippet: find longest word in any field
+        // Section names map (AI field → Arabic label)
+        const SECTION_NAMES = {
+            'overview': '📋 نظرة عامة',
+            'quranHadith': '📖 آيات وأحاديث',
+            'fiqh': '⚖️ الأحكام الفقهية',
+            'benefits': '💎 الفوائد',
+            'questions': '❓ الأسئلة',
+            'stories': '📚 القصص',
+            'analysis': '🔍 التحليل',
+            'podcast': '🎙️ بودكاست',
+            'characters': '👥 الشخصيات',
+            'practicalApplication': '🏆 التطبيق العملي',
+            'points': '🔑 النقاط الرئيسية',
+            'action': '👣 خطوات عملية',
+            'wrong': '⚠️ أخطاء شائعة',
+            'mistake': '⚠️ أخطاء شائعة',
+            'situation': '🌍 ربط بالواقع',
+            'keyT': '🔑 النقاط الرئيسية',
+            'answer': '💬 الإجابات',
+            'trueFalse': '✅ صح وغلط',
+            'name': '📝 الأسماء',
+            'source': '📌 المصادر',
+            'rawSource': '📄 النص الأصلي',
+            'rawContent': '📄 المحتوى'
+        };
+
+        // Snippet + matched section finder
         function simpleSnippet(lesson) {
             const longestWord = [...words].sort((a, b) => b.length - a.length)[0].toLowerCase();
             const fields = [...aiKeys, 'rawSource', 'rawContent'];
@@ -390,19 +416,24 @@ router.get('/search', async (req, res) => {
                 if (idx !== -1) {
                     const start = Math.max(0, idx - 40);
                     const end = Math.min(str.length, idx + 60);
-                    return (start > 0 ? '...' : '') + str.substring(start, end).trim() + (end < str.length ? '...' : '');
+                    const snippet = (start > 0 ? '...' : '') + str.substring(start, end).trim() + (end < str.length ? '...' : '');
+                    return { snippet, sectionKey: f };
                 }
             }
-            return '';
+            return { snippet: '', sectionKey: '' };
         }
 
-        const results = lessons.map(l => ({
-            _id: l._id,
-            title: l.title,
-            sheikhName: sheikhMap[l.sheikhId?.toString()] || 'غير محدد',
-            categoryName: catMap[l.categoryId?.toString()] || '',
-            snippet: simpleSnippet(l)
-        }));
+        const results = lessons.map(l => {
+            const { snippet, sectionKey } = simpleSnippet(l);
+            return {
+                _id: l._id,
+                title: l.title,
+                sheikhName: sheikhMap[l.sheikhId?.toString()] || 'غير محدد',
+                categoryName: catMap[l.categoryId?.toString()] || '',
+                matchedSection: SECTION_NAMES[sectionKey] || '',
+                snippet
+            };
+        });
 
         res.json({ results });
     } catch (error) {
