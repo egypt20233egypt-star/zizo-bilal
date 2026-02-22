@@ -23,6 +23,40 @@ if (TENSORIX_KEY) {
     console.warn('⚠️ TENSORIX_API_KEY not set — chatbot will run without AI fallback');
 }
 
+// ============ SECTION_LABELS (English → Arabic) ============
+const SECTION_LABELS = {
+    overview: '📋 نظرة عامة',
+    podcast: '🎙️ بودكاست',
+    characters: '👥 الشخصيات',
+    quranHadith: '📖 القرآن والأحاديث',
+    fiqh: '⚖️ الفقه والأحكام',
+    questions: '❓ أسئلة وأجوبة',
+    benefits: '💡 الفوائد',
+    stories: '📚 القصص',
+    analysis: '🔍 التحليل',
+    practicalApplication: '🎯 التطبيق العملي',
+    socialMedia: '📱 السوشيال ميديا',
+    commonMistakes: '⚠️ الأخطاء الشائعة',
+    kidsCorner: '🧒 ركن الأطفال',
+    rulings: '📜 الأحكام الشرعية',
+    badges: '🏅 شارات الإنجاز',
+    realLifeConnection: '🌍 ربط بالواقع',
+    summary: '📝 الملخص',
+    lessonPlan: '📋 خطة الدرس',
+    keyT: '🔑 الرسائل المفتاحية',
+    conclusion: '🎯 الخاتمة',
+    finalConclusion: '🎯 الخاتمة النهائية',
+    scientificMiracles: '🔬 الإعجاز العلمي',
+    duaa: '🤲 الدعاء',
+    tafseer: '📖 التفسير',
+    memorization: '📝 الحفظ',
+    review: '📋 المراجعة',
+    weeklyChallenge: '🎯 التحدي الأسبوعي',
+    additionalResources: '📚 مصادر إضافية',
+    discussion: '💬 مناقشة',
+    homework: '📝 الواجب',
+};
+
 // ============ System Prompt ============
 const SYSTEM_PROMPT = `أنت مساعد ذكي لمنصة "عِلمٌ يُنتَفَعُ بِه" الدعوية التعليمية.
 
@@ -32,7 +66,8 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي لمنصة "عِلمٌ يُنت�
 3. استخدم لغة عربية فصحى بسيطة وسلسة
 4. لو فيه آيات قرآنية أو أحاديث في المحتوى → اذكرها بالكامل
 5. الإجابة المختصرة أفضل (2-3 فقرات كحد أقصى)
-6. اذكر مصدر الإجابة (اسم القسم) في نهاية الرد`;
+6. اذكر مصدر الإجابة (اسم القسم بالعربي كما هو في المحتوى) في نهاية الرد — اسم القسم مكتوب بين الأقواس المربعة مثل [📖 القرآن والأحاديث]
+7. لو اليوزر سألك سؤال متابعة → راجع سياق المحادثة السابقة واربط الرد`;
 
 // ============ META_KEYS (نفس stats.js) ============
 const META_KEYS = new Set([
@@ -42,7 +77,61 @@ const META_KEYS = new Set([
     'id', 'history', 'importedAt', 'importSource'
 ]);
 
+// ============ Conversation History (in-memory) ============
+// key = IP:lessonId → last 5 messages
+const conversationHistory = new Map();
+const MAX_HISTORY = 5;
+const HISTORY_TTL = 30 * 60 * 1000; // 30 دقيقة
+
+function getHistoryKey(ip, lessonId) {
+    return `${ip}:${lessonId}`;
+}
+
+function getHistory(ip, lessonId) {
+    const key = getHistoryKey(ip, lessonId);
+    const entry = conversationHistory.get(key);
+    if (!entry) return [];
+    // check TTL
+    if (Date.now() - entry.lastUpdate > HISTORY_TTL) {
+        conversationHistory.delete(key);
+        return [];
+    }
+    return entry.messages;
+}
+
+function addToHistory(ip, lessonId, role, content) {
+    const key = getHistoryKey(ip, lessonId);
+    let entry = conversationHistory.get(key);
+    if (!entry) {
+        entry = { messages: [], lastUpdate: Date.now() };
+        conversationHistory.set(key, entry);
+    }
+    entry.messages.push({ role, content });
+    // keep only last N messages
+    if (entry.messages.length > MAX_HISTORY * 2) {
+        entry.messages = entry.messages.slice(-MAX_HISTORY * 2);
+    }
+    entry.lastUpdate = Date.now();
+}
+
+// Cleanup old histories every 10 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of conversationHistory.entries()) {
+        if (now - entry.lastUpdate > HISTORY_TTL) {
+            conversationHistory.delete(key);
+        }
+    }
+}, 10 * 60 * 1000);
+
 // ============ Helpers ============
+
+/**
+ * اسم القسم بالعربي (من SECTION_LABELS أو fallback)
+ */
+function getSectionLabel(key) {
+    return SECTION_LABELS[key] || key;
+}
 
 /**
  * استخراج نص قابل للقراءة من أي Mixed value
@@ -62,19 +151,20 @@ function extractText(value) {
 }
 
 /**
- * بناء Context كامل من درس واحد
+ * بناء Context كامل من درس واحد — بأسماء عربية
  */
 function buildLessonContext(lesson) {
     const parts = [];
     parts.push(`عنوان الدرس: ${lesson.title}`);
     if (lesson.subtitle) parts.push(`الوصف: ${lesson.subtitle}`);
 
-    // كل الأقسام الديناميكية
+    // كل الأقسام الديناميكية بأسماء عربية
     const keys = Object.keys(lesson).filter(k => !META_KEYS.has(k));
     for (const key of keys) {
         const text = extractText(lesson[key]);
         if (text && text.trim().length > 10) {
-            parts.push(`[${key}]:\n${text}`);
+            const label = getSectionLabel(key);
+            parts.push(`[${label}]:\n${text}`);
         }
     }
 
@@ -148,6 +238,7 @@ router.post('/', async (req, res) => {
         }
 
         const cleanQuestion = question.trim().slice(0, 500); // حد أقصى 500 حرف
+        const userIP = req.ip || req.connection?.remoteAddress || 'unknown';
 
         // ─── Fetch Lesson ───
         const lesson = await Lesson.findById(lessonId).lean();
@@ -161,28 +252,34 @@ router.post('/', async (req, res) => {
         const qLower = cleanQuestion.toLowerCase();
 
         if (qLower.includes('عنوان') || qLower.includes('اسم الدرس')) {
+            const answer = `📚 عنوان الدرس: **${lesson.title}**` + (lesson.subtitle ? `\n📝 ${lesson.subtitle}` : '');
+            addToHistory(userIP, lessonId, 'user', cleanQuestion);
+            addToHistory(userIP, lessonId, 'assistant', answer);
             return res.json({
                 type: 'direct',
-                answer: `📚 عنوان الدرس: **${lesson.title}**` + (lesson.subtitle ? `\n📝 ${lesson.subtitle}` : ''),
+                answer,
                 source: 'بيانات الدرس'
             });
         }
 
         if (qLower.includes('الشيخ') || qLower.includes('المحاضر') || qLower.includes('الداعية')) {
+            let answer;
             if (lesson.sheikhId) {
                 const sheikh = await Sheikh.findById(lesson.sheikhId).select('name').lean();
                 if (sheikh) {
-                    return res.json({
-                        type: 'direct',
-                        answer: `🕌 الدرس للشيخ: **${sheikh.name}**`,
-                        source: 'بيانات الشيخ'
-                    });
+                    answer = `🕌 الدرس للشيخ: **${sheikh.name}**`;
+                } else {
+                    answer = 'الشيخ غير محدد لهذا الدرس.';
                 }
+            } else {
+                answer = 'الشيخ غير محدد لهذا الدرس.';
             }
+            addToHistory(userIP, lessonId, 'user', cleanQuestion);
+            addToHistory(userIP, lessonId, 'assistant', answer);
             return res.json({
                 type: 'direct',
-                answer: 'الشيخ غير محدد لهذا الدرس.',
-                source: 'بيانات الدرس'
+                answer,
+                source: 'بيانات الشيخ'
             });
         }
 
@@ -193,6 +290,8 @@ router.post('/', async (req, res) => {
         const localResult = localSearch(contextText, cleanQuestion);
 
         if (localResult && localResult.type === 'exact_match') {
+            addToHistory(userIP, lessonId, 'user', cleanQuestion);
+            addToHistory(userIP, lessonId, 'assistant', localResult.snippet);
             return res.json({
                 type: 'local',
                 answer: localResult.snippet,
@@ -207,6 +306,8 @@ router.post('/', async (req, res) => {
         if (!aiClient) {
             // لو مفيش AI → نرجع الـ local search لو فيه keyword match
             if (localResult && localResult.type === 'keyword_match') {
+                addToHistory(userIP, lessonId, 'user', cleanQuestion);
+                addToHistory(userIP, lessonId, 'assistant', localResult.snippet);
                 return res.json({
                     type: 'local',
                     answer: localResult.snippet,
@@ -224,17 +325,33 @@ router.post('/', async (req, res) => {
         // تحضير الـ Context (حد أقصى ~6000 حرف عشان Token limit)
         const trimmedContext = contextText.slice(0, 6000);
 
+        // بناء الرسائل مع المحادثة السابقة
+        const history = getHistory(userIP, lessonId);
+        const messages = [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: `المحتوى المتاح:\n\"\"\"\n${trimmedContext}\n\"\"\"` }
+        ];
+
+        // أضف المحادثة السابقة (لو فيه)
+        for (const msg of history) {
+            messages.push({ role: msg.role, content: msg.content });
+        }
+
+        // أضف السؤال الجديد
+        messages.push({ role: 'user', content: cleanQuestion });
+
         const completion = await aiClient.chat.completions.create({
             model: process.env.TENSORIX_MODEL || 'openai/gpt-oss-20b',
-            messages: [
-                { role: 'system', content: SYSTEM_PROMPT },
-                { role: 'user', content: `المحتوى المتاح:\n\"\"\"\n${trimmedContext}\n\"\"\"\n\nالسؤال: ${cleanQuestion}` }
-            ],
+            messages,
             max_tokens: 600,
             temperature: 0.3
         });
 
         const aiAnswer = completion.choices?.[0]?.message?.content || 'عذراً، لم أتمكن من توليد إجابة.';
+
+        // حفظ في المحادثة
+        addToHistory(userIP, lessonId, 'user', cleanQuestion);
+        addToHistory(userIP, lessonId, 'assistant', aiAnswer);
 
         return res.json({
             type: 'ai',
@@ -258,3 +375,4 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
+
