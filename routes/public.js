@@ -357,12 +357,18 @@ router.get('/search', async (req, res) => {
             lessons = lessons.concat(extra);
         }
 
-        // Sheikh names (sheikhId = String في الـ Lesson model — مش ObjectId reference)
-        const allSheikhs = await Sheikh.find({}).select('name').lean();
+        // Sheikh + Category names
+        const [allSheikhs, allCategories] = await Promise.all([
+            Sheikh.find({}).select('name').lean(),
+            Category.find({}).select('name icon').lean()
+        ]);
         const sheikhMap = {};
         allSheikhs.forEach(s => {
             sheikhMap[s._id.toString()] = s.name;
-            sheikhMap[String(s._id)] = s.name;
+        });
+        const catMap = {};
+        allCategories.forEach(c => {
+            catMap[c._id.toString()] = c.name;
         });
 
         // Simple snippet: find longest word in any field
@@ -394,6 +400,7 @@ router.get('/search', async (req, res) => {
             _id: l._id,
             title: l.title,
             sheikhName: sheikhMap[l.sheikhId?.toString()] || 'غير محدد',
+            categoryName: catMap[l.categoryId?.toString()] || '',
             snippet: simpleSnippet(l)
         }));
 
