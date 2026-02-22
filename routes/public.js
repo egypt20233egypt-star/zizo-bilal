@@ -357,11 +357,13 @@ router.get('/search', async (req, res) => {
             lessons = lessons.concat(extra);
         }
 
-        // Sheikh names
-        const sheikhIds = [...new Set(lessons.map(l => l.sheikhId).filter(Boolean))];
-        const sheikhs = await Sheikh.find({ _id: { $in: sheikhIds } }).select('name').lean();
+        // Sheikh names (sheikhId = String في الـ Lesson model — مش ObjectId reference)
+        const allSheikhs = await Sheikh.find({}).select('name').lean();
         const sheikhMap = {};
-        sheikhs.forEach(s => sheikhMap[s._id.toString()] = s.name);
+        allSheikhs.forEach(s => {
+            sheikhMap[s._id.toString()] = s.name;
+            sheikhMap[String(s._id)] = s.name;
+        });
 
         // Simple snippet: find longest word in any field
         function simpleSnippet(lesson) {
