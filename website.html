@@ -1626,6 +1626,10 @@
 
             // Scroll to content
             document.getElementById('lessonContent').scrollIntoView({ behavior: 'smooth' });
+
+            // 💬 Chat Widget: update lesson ID
+            const chatWidget = document.getElementById('chat-widget');
+            if (chatWidget) chatWidget.dataset.lessonId = lesson._id;
         }
 
         function buildNavigation(lesson) {
@@ -2727,6 +2731,10 @@
             }, 800); // تأخير عشان المحتوى يكون اتحمل
         }
     </script>
+
+    <!-- 💬 Chat Widget (Phase 9A) -->
+    <div id="chat-widget"></div>
+    <script src="/public/chat-widget.js"></script>
 </body>
 
 </html>

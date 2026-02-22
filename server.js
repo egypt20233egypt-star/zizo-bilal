@@ -32,6 +32,15 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/public', apiLimiter);
 
+// 💬 Rate Limit خاص للشات (أقل عشان حماية API Key)
+const chatLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // دقيقة واحدة
+    max: 10, // 10 أسئلة في الدقيقة لكل IP
+    message: { error: 'حاول مرة أخرى بعد دقيقة — تم تجاوز الحد المسموح.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
 // ============ MongoDB Connection ============
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
@@ -117,6 +126,9 @@ app.use('/api/stats', requireAuth, require('./routes/stats')); // 📊 Section U
 // Public API routes (بدون auth - للصفحة الرئيسية)
 app.use('/api/public', require('./routes/public'));
 
+// 💬 Chatbot Route (Phase 9A — Lesson Chat MVP)
+app.use('/api/public/chat', chatLimiter, require('./routes/chatbot'));
+
 // ============ Page Routes ============
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -185,4 +197,5 @@ app.listen(PORT, () => {
     console.log(`🔒 Security: express.static secured (no .env exposure)`);
     console.log(`🗜️ Compression: gzip enabled`);
     console.log(`🔔 Rate Limit: 100 req/15min on public API`);
+    console.log(`💬 Chatbot: /api/public/chat (10 req/min)`);
 });
