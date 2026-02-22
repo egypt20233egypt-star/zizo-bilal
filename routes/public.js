@@ -391,7 +391,7 @@ router.get('/search', async (req, res) => {
         const results = lessons.map(l => ({
             _id: l._id,
             title: l.title,
-            sheikhName: sheikhMap[l.sheikhId] || 'غير محدد',
+            sheikhName: sheikhMap[l.sheikhId?.toString()] || 'غير محدد',
             snippet: simpleSnippet(l)
         }));
 
