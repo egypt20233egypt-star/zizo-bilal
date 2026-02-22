@@ -444,6 +444,47 @@
             font-size: 1.2em;
         }
 
+        /* ═══ Collapse/Expand Toggle ═══ */
+        .section-title.collapsible {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            padding: 8px 4px;
+            border-radius: 8px;
+            transition: background .2s;
+        }
+
+        .section-title.collapsible:hover {
+            background: rgba(218, 165, 32, 0.08);
+        }
+
+        .section-title .collapse-arrow {
+            font-size: .7em;
+            color: rgba(218, 165, 32, .6);
+            transition: transform .3s ease;
+            margin-left: 8px;
+        }
+
+        .section-title.collapsed .collapse-arrow {
+            transform: rotate(-90deg);
+        }
+
+        .section-content-wrap {
+            overflow: hidden;
+            transition: max-height .4s ease, opacity .3s ease;
+            max-height: 5000px;
+            opacity: 1;
+        }
+
+        .section-content-wrap.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+        }
+
         @media (max-width: 600px) {
             .dynamic-section .cards-grid {
                 grid-template-columns: 1fr;
@@ -1935,6 +1976,13 @@
                 (details.length ? '<div class="badges" style="margin-top:8px;flex-wrap:wrap;gap:6px;">' + details.join(' ') + '</div>' : '') +
                 '</div>';
         }
+        // ============ Collapse/Expand Toggle ============
+        function toggleSection(titleEl) {
+            const wrap = titleEl.nextElementSibling; // .section-content-wrap
+            if (!wrap) return;
+            titleEl.classList.toggle('collapsed');
+            wrap.classList.toggle('collapsed');
+        }
 
         function renderDynamicSection(key, data, lesson = null) {
             // 🧠 SectionResolver — 3 طبقات: JSON → KNOWN → Auto
@@ -1988,8 +2036,13 @@
             }
 
             return '<section id="' + key + '" class="section dynamic-section">' +
-                '<h2 class="section-title"><span>' + icon + '</span> ' + label + '</h2>' +
+                '<h2 class="section-title collapsible" onclick="toggleSection(this)">' +
+                '<span><span>' + icon + '</span> ' + label + '</span>' +
+                '<i class="fa-solid fa-chevron-down collapse-arrow"></i>' +
+                '</h2>' +
+                '<div class="section-content-wrap">' +
                 '<div class="card featured">' + contentHtml + '</div>' +
+                '</div>' +
                 '</section>';
         }
 
