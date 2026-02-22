@@ -373,9 +373,12 @@ router.get('/search', async (req, res) => {
 
 
         // Snippet + matched section finder
+        // rawSource/rawContent = نصوص خام مش أقسام → نبحث فيهم للـ snippet بس مش نرجع اسم قسم
+        const RAW_FIELDS = ['rawSource', 'rawContent'];
         function simpleSnippet(lesson) {
             const longestWord = [...words].sort((a, b) => b.length - a.length)[0].toLowerCase();
-            const fields = [...aiKeys, 'rawSource', 'rawContent'];
+            // ابحث في AI fields أول (الأقسام الحقيقية) → بعدين raw fields
+            const fields = [...aiKeys, ...RAW_FIELDS];
 
             for (const f of fields) {
                 const val = lesson[f];
@@ -392,7 +395,8 @@ router.get('/search', async (req, res) => {
                     const start = Math.max(0, idx - 40);
                     const end = Math.min(str.length, idx + 60);
                     const snippet = (start > 0 ? '...' : '') + str.substring(start, end).trim() + (end < str.length ? '...' : '');
-                    return { snippet, sectionKey: f };
+                    // rawSource/rawContent = snippet بس من غير section label
+                    return { snippet, sectionKey: RAW_FIELDS.includes(f) ? '' : f };
                 }
             }
             return { snippet: '', sectionKey: '' };
