@@ -295,6 +295,12 @@ router.get('/lessons/:id', async (req, res) => {
 // ============================================================
 // ═══ GET /api/public/search — بحث شامل في كل الدروس ═══
 // ============================================================
+
+// ✅ حماية من Regex Injection (أحرف مثل . * + ? ^ $ {} () | [] \)
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 router.get('/search', async (req, res) => {
     try {
         const q = (req.query.q || '').trim();
@@ -312,9 +318,9 @@ router.get('/search', async (req, res) => {
             status: 'published',
             $and: words.map(w => ({
                 $or: [
-                    { title: { $regex: w, $options: 'i' } },
-                    { rawSource: { $regex: w, $options: 'i' } },
-                    { rawContent: { $regex: w, $options: 'i' } }
+                    { title: { $regex: escapeRegex(w), $options: 'i' } },
+                    { rawSource: { $regex: escapeRegex(w), $options: 'i' } },
+                    { rawContent: { $regex: escapeRegex(w), $options: 'i' } }
                 ]
             }))
         };

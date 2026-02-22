@@ -698,138 +698,244 @@
                 ProgressManager.markAsRead(lesson._id, lesson.sheikhId);
                 updateBreadcrumb(lesson);
 
-                // ✅ Search: dynamic scroll to matched text if ?q= param exists
+                // ✅ Search v3: Combined best from 5 AI models
+                // MutationObserver (Gemini) + knownSections (Genspark) + Simple UX (ChatGPT) + Full logic (ernie.baidu)
                 const searchQuery = new URLSearchParams(window.location.search).get('q');
-                if (searchQuery) {
-                    setTimeout(() => {
-                        // Unicode-safe: clean query, get words
-                        const cleanQ = searchQuery.replace(/[^\p{L}\p{N}\s]/gu, ' ').trim();
-                        const searchWords = cleanQ.split(/\s+/).filter(w => w.length >= 2);
-                        if (!searchWords.length) return;
+                if (searchQuery && searchQuery.trim().length >= 2) {
 
+                    // ═══ Known sections fallback map (Genspark) ═══
+                    const KNOWN_SECTIONS = {
+                        'overview': '📋 نظرة عامة',
+                        'quranHadith': '📖 آيات وأحاديث',
+                        'fiqh': '⚖️ الأحكام الفقهية',
+                        'benefits': '💎 الفوائد',
+                        'questions': '❓ الأسئلة',
+                        'stories': '📚 القصص',
+                        'analysis': '🔍 التحليل',
+                        'podcast': '🎙️ بودكاست',
+                        'characters': '👥 الشخصيات',
+                        'practicalApplication': '🏆 التطبيق العملي'
+                    };
+
+                    // ═══ Helper: Get section info ═══
+                    function getSectionInfo(element) {
+                        let el = element;
+                        let depth = 0;
+                        while (el && depth < 20) {
+                            if (el.tagName === 'SECTION' && el.classList.contains('section') && el.id) {
+                                const h2 = el.querySelector('.section-title');
+                                const name = h2 ? h2.textContent.trim() : (KNOWN_SECTIONS[el.id] || el.id);
+                                return { id: el.id, name };
+                            }
+                            el = el.parentElement;
+                            depth++;
+                        }
+                        return { id: '', name: 'غير محدد' };
+                    }
+
+                    // ═══ Helper: Find ALL text matches ═══
+                    function findAllMatches(container, searchText) {
+                        const matches = [];
+                        const searchLower = searchText.toLowerCase();
+                        const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+                            acceptNode: (node) => {
+                                const tag = node.parentElement?.tagName;
+                                if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return NodeFilter.FILTER_REJECT;
+                                if (!node.textContent.trim()) return NodeFilter.FILTER_SKIP;
+                                return node.textContent.toLowerCase().includes(searchLower)
+                                    ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+                            }
+                        });
+                        while (walker.nextNode()) matches.push(walker.currentNode);
+                        return matches;
+                    }
+
+                    // ═══ Helper: Safe highlight (no replaceChild danger) ═══
+                    function highlightMatch(textNode, searchText) {
+                        const parent = textNode.parentElement;
+                        if (!parent) return null;
+                        const text = textNode.textContent;
+                        const idx = text.toLowerCase().indexOf(searchText.toLowerCase());
+                        if (idx === -1) return null;
+
+                        const before = text.substring(0, idx);
+                        const match = text.substring(idx, idx + searchText.length);
+                        const after = text.substring(idx + searchText.length);
+
+                        const mark = document.createElement('mark');
+                        mark.className = 'search-highlight';
+                        mark.style.cssText = 'background:linear-gradient(135deg,#ffd700,#ffed4e);color:#000;padding:3px 7px;border-radius:5px;font-weight:600;box-shadow:0 2px 8px rgba(255,215,0,.4)';
+                        mark.textContent = match;
+
+                        parent.insertBefore(document.createTextNode(before), textNode);
+                        parent.insertBefore(mark, textNode);
+                        parent.insertBefore(document.createTextNode(after), textNode);
+                        parent.removeChild(textNode);
+
+                        return mark;
+                    }
+
+                    // ═══ Helper: Remove all highlights ═══
+                    function clearHighlights() {
+                        document.querySelectorAll('.search-highlight').forEach(el => {
+                            const parent = el.parentNode;
+                            if (parent) {
+                                parent.replaceChild(document.createTextNode(el.textContent), el);
+                                parent.normalize();
+                            }
+                        });
+                    }
+
+                    // ═══ Helper: Show notification badge ═══
+                    function showSearchBadge(sectionName, current, total) {
+                        document.getElementById('search-found-badge')?.remove();
+                        const badge = document.createElement('div');
+                        badge.id = 'search-found-badge';
+                        badge.style.cssText = `
+                            position:fixed;top:80px;right:20px;z-index:9999;
+                            background:linear-gradient(135deg,#1a1a2e,#16213e);
+                            border:1px solid rgba(218,165,32,.4);
+                            color:#fff;padding:14px 22px;border-radius:12px;
+                            box-shadow:0 8px 25px rgba(0,0,0,.4);
+                            display:flex;align-items:center;gap:12px;
+                            animation:searchBadgeIn .4s ease;
+                            max-width:400px;
+                        `;
+                        badge.innerHTML = `
+                            <i class="fas fa-check-circle" style="color:#DAA520;font-size:1.4rem"></i>
+                            <div style="flex:1">
+                                <div style="font-weight:700;font-size:.95rem;color:#DAA520">تم العثور على النتيجة</div>
+                                <div style="font-size:.82rem;opacity:.85;margin-top:3px">القسم: ${sectionName}</div>
+                                ${total > 1 ? `<div style="font-size:.75rem;opacity:.7;margin-top:3px">النتيجة ${current} من ${total}</div>` : ''}
+                            </div>
+                            ${total > 1 ? `<button onclick="window._searchNext?.()" style="background:#DAA520;color:#000;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:700">التالي ←</button>` : ''}
+                            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:1.2rem;padding:0 0 0 8px">✕</button>
+                        `;
+
+                        // Add CSS animations
+                        if (!document.getElementById('search-badge-style')) {
+                            const s = document.createElement('style');
+                            s.id = 'search-badge-style';
+                            s.textContent = `
+                                @keyframes searchBadgeIn { from { transform:translateX(400px);opacity:0 } to { transform:translateX(0);opacity:1 } }
+                                @keyframes searchBadgeOut { from { transform:translateX(0);opacity:1 } to { transform:translateX(400px);opacity:0 } }
+                            `;
+                            document.head.appendChild(s);
+                        }
+
+                        document.body.appendChild(badge);
+
+                        // Auto-hide after 8 seconds
+                        setTimeout(() => {
+                            if (badge.parentElement) {
+                                badge.style.animation = 'searchBadgeOut .4s ease';
+                                setTimeout(() => badge.remove(), 400);
+                            }
+                        }, 8000);
+                    }
+
+                    // ═══ Main: DOM Search with MutationObserver (Gemini) ═══
+                    function performDOMSearch() {
                         const container = document.getElementById('lessonContent');
-                        if (!container) return;
+                        if (!container || container.children.length === 0) return false;
 
-                        // ═══ Strategy 1: Phrase match (3+ consecutive words) ═══
-                        let matchNode = null;
-                        if (searchWords.length >= 2) {
-                            const phrase = searchWords.slice(0, Math.min(5, searchWords.length)).join(' ');
-                            const walker1 = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-                            while (walker1.nextNode()) {
-                                const normalized = walker1.currentNode.textContent.replace(/\s+/g, ' ');
-                                if (normalized.includes(phrase)) {
-                                    matchNode = walker1.currentNode;
-                                    break;
-                                }
+                        const rawQ = searchQuery.trim();
+                        console.info(`🔍 بحث عن: "${rawQ}"`);
+
+                        // Strategy 1: Search with original query (keeps symbols)
+                        let allMatches = findAllMatches(container, rawQ);
+
+                        // Strategy 2: Fallback to longest word (cleaned)
+                        let usedWord = rawQ;
+                        if (allMatches.length === 0) {
+                            const words = rawQ.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(w => w.length >= 2);
+                            if (words.length > 0) {
+                                usedWord = words.sort((a, b) => b.length - a.length)[0];
+                                console.info(`🔍 Fallback: "${usedWord}"`);
+                                allMatches = findAllMatches(container, usedWord);
                             }
                         }
 
-                        // ═══ Strategy 2: Longest single word (fallback) ═══
-                        const targetWord = [...searchWords].sort((a, b) => b.length - a.length)[0];
-                        if (!matchNode) {
-                            const walker2 = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-                            while (walker2.nextNode()) {
-                                if (walker2.currentNode.textContent.includes(targetWord)) {
-                                    matchNode = walker2.currentNode;
-                                    break;
-                                }
-                            }
+                        if (allMatches.length === 0) {
+                            console.warn('❌ لم يتم العثور على النص');
+                            return true; // DOM was ready, just no results
                         }
 
-                        if (!matchNode) {
-                            console.warn('🔍 لم يتم العثور على النص في الصفحة');
-                            return;
-                        }
+                        console.info(`✅ ${allMatches.length} نتيجة`);
 
-                        // ═══ Find parent section ═══
-                        let sectionEl = matchNode.parentElement;
-                        while (sectionEl && sectionEl !== container) {
-                            if (sectionEl.tagName === 'SECTION' && sectionEl.classList.contains('section')) break;
-                            sectionEl = sectionEl.parentElement;
-                        }
+                        // Navigation state
+                        let currentIdx = 0;
 
-                        // ═══ Get Arabic section name from h2.section-title ═══
-                        let sectionName = '';
-                        let sectionId = '';
-                        if (sectionEl && sectionEl.tagName === 'SECTION') {
-                            sectionId = sectionEl.id || '';
-                            const h2 = sectionEl.querySelector('.section-title');
-                            sectionName = h2 ? h2.textContent.trim() : sectionId;
-                        }
+                        function showMatch(idx) {
+                            clearHighlights();
+                            const node = allMatches[idx];
+                            if (!node || !node.parentElement) return;
 
-                        // ═══ Activate matching nav link ═══
-                        if (sectionId) {
-                            document.querySelectorAll('.nav-link').forEach(link => {
-                                link.classList.remove('active');
-                                if (link.getAttribute('href') === '#' + sectionId) {
-                                    link.classList.add('active');
-                                }
-                            });
-                        }
+                            const section = getSectionInfo(node.parentElement);
 
-                        // ═══ Scroll to the matched element ═══
-                        const scrollTarget = matchNode.parentElement;
-                        scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                        // ═══ Highlight the matched word ═══
-                        const parent = matchNode.parentElement;
-                        const originalHTML = parent.innerHTML;
-                        const escaped = targetWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const highlighted = originalHTML.replace(
-                            new RegExp(`(${escaped})`, 'gi'),
-                            '<mark style="background:linear-gradient(90deg,#ffd700,#ffed4e);color:#000;padding:2px 6px;border-radius:4px;font-weight:600">$1</mark>'
-                        );
-                        parent.innerHTML = highlighted;
-                        setTimeout(() => { parent.innerHTML = originalHTML; }, 5000);
-
-                        // ═══ Show notification badge ═══
-                        if (sectionName) {
-                            const badge = document.createElement('div');
-                            badge.id = 'search-found-badge';
-                            badge.style.cssText = `
-                                position:fixed;top:80px;right:20px;z-index:9999;
-                                background:linear-gradient(135deg,#1a1a2e,#16213e);
-                                border:1px solid rgba(218,165,32,.4);
-                                color:#fff;padding:14px 22px;border-radius:12px;
-                                box-shadow:0 8px 25px rgba(0,0,0,.4);
-                                display:flex;align-items:center;gap:12px;
-                                animation:searchBadgeIn .4s ease;
-                                max-width:350px;
-                            `;
-                            badge.innerHTML = `
-                                <i class="fas fa-check-circle" style="color:#DAA520;font-size:1.4rem"></i>
-                                <div>
-                                    <div style="font-weight:700;font-size:.95rem;color:#DAA520">تم العثور على النتيجة</div>
-                                    <div style="font-size:.82rem;opacity:.85;margin-top:3px">القسم: ${sectionName}</div>
-                                </div>
-                                <button onclick="this.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:1.2rem;padding:0 0 0 8px">✕</button>
-                            `;
-                            // Remove old badge if exists
-                            document.getElementById('search-found-badge')?.remove();
-                            document.body.appendChild(badge);
-
-                            // Add animation CSS if not already present
-                            if (!document.getElementById('search-badge-style')) {
-                                const style = document.createElement('style');
-                                style.id = 'search-badge-style';
-                                style.textContent = `
-                                    @keyframes searchBadgeIn { from { transform:translateX(400px);opacity:0 } to { transform:translateX(0);opacity:1 } }
-                                    @keyframes searchBadgeOut { from { transform:translateX(0);opacity:1 } to { transform:translateX(400px);opacity:0 } }
-                                `;
-                                document.head.appendChild(style);
+                            // Highlight
+                            const mark = highlightMatch(node, usedWord);
+                            if (mark) {
+                                mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }
 
-                            // Auto-hide after 5 seconds
-                            setTimeout(() => {
-                                if (badge.parentElement) {
-                                    badge.style.animation = 'searchBadgeOut .4s ease';
-                                    setTimeout(() => badge.remove(), 400);
-                                }
-                            }, 5000);
+                            // Activate nav link
+                            if (section.id) {
+                                document.querySelectorAll('.nav-link').forEach(link => {
+                                    link.classList.remove('active');
+                                    if (link.getAttribute('href') === '#' + section.id) {
+                                        link.classList.add('active');
+                                    }
+                                });
+                            }
+
+                            // Badge
+                            showSearchBadge(section.name, idx + 1, allMatches.length);
+
+                            console.info(`🎯 النتيجة ${idx + 1}/${allMatches.length} — "${section.name}" (id: ${section.id})`);
+                            currentIdx = idx;
                         }
 
-                        console.info(`🔍 تم الانتقال إلى: "${sectionName}" (id: ${sectionId})`);
-                    }, 1200);
+                        // "Next" button handler
+                        window._searchNext = () => {
+                            const nextIdx = (currentIdx + 1) % allMatches.length;
+                            showMatch(nextIdx);
+                        };
+
+                        // F3 keyboard shortcut
+                        document.addEventListener('keydown', (e) => {
+                            if (e.key === 'F3' || (e.ctrlKey && e.key === 'g')) {
+                                e.preventDefault();
+                                if (allMatches.length > 0) window._searchNext();
+                            }
+                        });
+
+                        showMatch(0);
+                        return true;
+                    }
+
+                    // ═══ Smart DOM readiness (MutationObserver + fallback) ═══
+                    const contentEl = document.getElementById('lessonContent');
+                    if (contentEl && contentEl.children.length > 0) {
+                        // DOM already loaded
+                        setTimeout(performDOMSearch, 300);
+                    } else {
+                        // Wait for DOM via MutationObserver
+                        const observer = new MutationObserver((mutations, obs) => {
+                            const el = document.getElementById('lessonContent');
+                            if (el && el.children.length > 0) {
+                                obs.disconnect();
+                                setTimeout(performDOMSearch, 300);
+                            }
+                        });
+                        observer.observe(document.body, { childList: true, subtree: true });
+
+                        // Fallback timeout (2s max)
+                        setTimeout(() => {
+                            observer.disconnect();
+                            performDOMSearch();
+                        }, 2000);
+                    }
                 }
 
                 // تحديث العنوان
