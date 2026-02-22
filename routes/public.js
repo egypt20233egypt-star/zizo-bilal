@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const Lesson = require('../models/Lesson');
 const Sheikh = require('../models/Sheikh');
@@ -302,179 +302,96 @@ router.get('/search', async (req, res) => {
             return res.json({ results: [] });
         }
 
-        // ═══ Flexible search: split into words, ignore special chars ═══
-        const words = q.replace(/["""''\-–—_\[\]{}<>()\/\\|:;,\.!؟?٪%#@&=+~`^]/g, ' ')
+        // Unicode-safe: keep only letters + numbers + spaces
+        const words = q.replace(/[^\p{L}\p{N}\s]/gu, ' ')
             .split(/\s+/).filter(w => w.length >= 2);
         if (!words.length) return res.json({ results: [] });
 
-        // MongoDB: each word must appear in at least one text field
-        const wordFilters = words.map(w => {
-            const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            return {
+        // MongoDB: each word must appear in title/rawSource/rawContent
+        const filter = {
+            status: 'published',
+            $and: words.map(w => ({
                 $or: [
-                    { title: { $regex: esc, $options: 'i' } },
-                    { rawSource: { $regex: esc, $options: 'i' } },
-                    { rawContent: { $regex: esc, $options: 'i' } }
+                    { title: { $regex: w, $options: 'i' } },
+                    { rawSource: { $regex: w, $options: 'i' } },
+                    { rawContent: { $regex: w, $options: 'i' } }
                 ]
-            };
-        });
-        const filter = { status: 'published', $and: wordFilters };
+            }))
+        };
 
-        let lessons = await Lesson.find(filter)
-            .limit(20)
-            .lean();
+        let lessons = await Lesson.find(filter).limit(20).lean();
 
-        // ═══ Step 2: ALWAYS also search inside structured AI fields ═══
-        const existingIds = lessons.map(l => l._id.toString());
-        const allPublished = await Lesson.find({ status: 'published', _id: { $nin: existingIds } })
-            .lean();
-
-        const wordsLower = words.map(w => w.toLowerCase());
-
-        // ═══ Core helper: strip ALL special chars for clean comparison ═══
-        function cleanText(s) {
-            return s.replace(/["""''`\-–—_\[\]{}<>()\/\\|:;,\.!؟?٪%#@&=+~^*·•●○►▶◆■□▪▫✦✧✱✲✳✴✵✶★☆♦♠♣♥♡⚡⭐🔹🔸💎❓📋🔍📚🎙️📖👥🕌💬📍⚠️⚡📌🔑❌📄🏷️✅\d]/g, ' ')
-                .replace(/\s+/g, ' ').trim().toLowerCase();
-        }
-        const cleanQuery = cleanText(q);
-
-        // Strategy 1: Clean phrase match (most accurate — for badge)
-        function matchPhrase(str) {
-            return cleanText(str).includes(cleanQuery);
-        }
-
-        // Strategy 2: Word match (for finding lessons only — NOT for badge)
-        function matchWords(str) {
-            const lower = str.toLowerCase();
-            return wordsLower.every(w => lower.includes(w));
-        }
-
-        const allAiKeys = ['overview', 'questions', 'benefits', 'stories', 'analysis',
+        // Also search inside structured AI fields
+        const aiKeys = ['overview', 'questions', 'benefits', 'stories', 'analysis',
             'podcast', 'quranHadith', 'characters', 'fiqh',
             'answer', 'situation', 'mistake', 'action', 'points',
             'keyT', 'wrong', 'source', 'name', 'trueFalse'];
 
-        const extraMatches = allPublished.filter(lesson => {
-            for (const sec of allAiKeys) {
-                if (lesson[sec]) {
+        if (lessons.length < 20) {
+            const existingIds = lessons.map(l => l._id.toString());
+            const allPublished = await Lesson.find({
+                status: 'published',
+                _id: { $nin: existingIds }
+            }).lean();
+
+            const wordsLower = words.map(w => w.toLowerCase());
+            const extra = allPublished.filter(lesson => {
+                for (const key of aiKeys) {
+                    if (!lesson[key]) continue;
                     try {
-                        const str = JSON.stringify(lesson[sec]);
-                        if (matchPhrase(str) || matchWords(str)) return true;
-                    } catch (e) { /* ignore */ }
+                        const str = typeof lesson[key] === 'string'
+                            ? lesson[key]
+                            : JSON.stringify(lesson[key]);
+                        if (wordsLower.every(w => str.toLowerCase().includes(w))) return true;
+                    } catch (e) { }
                 }
-            }
-            return false;
-        }).slice(0, 20 - lessons.length);
+                return false;
+            }).slice(0, 20 - lessons.length);
 
-        lessons = lessons.concat(extraMatches);
+            lessons = lessons.concat(extra);
+        }
 
-        // Enrich with sheikh names
+        // Sheikh names
         const sheikhIds = [...new Set(lessons.map(l => l.sheikhId).filter(Boolean))];
         const sheikhs = await Sheikh.find({ _id: { $in: sheikhIds } }).select('name').lean();
         const sheikhMap = {};
         sheikhs.forEach(s => sheikhMap[s._id.toString()] = s.name);
 
-        // ═══ Helper: generate snippet around the matched phrase ═══
-        function makeSnippet(str) {
-            const cleanStr = cleanText(str);
-            let idx = cleanStr.indexOf(cleanQuery);
-            // If full phrase not found, find first significant word
-            if (idx === -1) {
-                const longWords = wordsLower.filter(w => w.length >= 3).sort((a, b) => b.length - a.length);
-                for (const w of longWords) {
-                    idx = cleanStr.indexOf(w);
-                    if (idx !== -1) break;
+        // Simple snippet: find longest word in any field
+        function simpleSnippet(lesson) {
+            const longestWord = [...words].sort((a, b) => b.length - a.length)[0].toLowerCase();
+            const fields = [...aiKeys, 'rawSource', 'rawContent'];
+
+            for (const f of fields) {
+                const val = lesson[f];
+                if (!val) continue;
+                let str = typeof val === 'string' ? val : JSON.stringify(val);
+                str = str.replace(/"[a-zA-Z_]+"\s*:/g, '');
+                str = str.replace(/[{}\[\]"\\]/g, '');
+                str = str.replace(/\b(true|false|null)\b/g, '');
+                str = str.replace(/,\s*/g, ' ');
+                str = str.replace(/\s+/g, ' ').trim();
+
+                const idx = str.toLowerCase().indexOf(longestWord);
+                if (idx !== -1) {
+                    const start = Math.max(0, idx - 40);
+                    const end = Math.min(str.length, idx + 60);
+                    return (start > 0 ? '...' : '') + str.substring(start, end).trim() + (end < str.length ? '...' : '');
                 }
             }
-            if (idx === -1) return '';
-
-            // Map back to original string position (approximate)
-            const origLower = str.toLowerCase();
-            const searchAround = cleanStr.substring(Math.max(0, idx - 5), idx + 10);
-            const stripped = searchAround.replace(/\s+/g, '');
-            let origIdx = -1;
-            // Find the approximate position in the original string
-            for (let i = 0; i < origLower.length - 3; i++) {
-                if (origLower.substring(i, i + stripped.length).replace(/[^a-zA-Z\u0600-\u06FF]/g, '').startsWith(stripped.substring(0, Math.min(6, stripped.length)))) {
-                    origIdx = i; break;
-                }
-            }
-            if (origIdx === -1) origIdx = Math.floor(idx * (str.length / Math.max(1, cleanStr.length)));
-
-            const start = Math.max(0, origIdx - 50);
-            const end = Math.min(str.length, origIdx + 80);
-            let raw = str.substring(start, end);
-            raw = raw.replace(/"[a-zA-Z_]+"\s*:/g, '');
-            raw = raw.replace(/:\s*(true|false|null)\b/g, '');
-            raw = raw.replace(/\b(true|false|null)\b/g, '');
-            raw = raw.replace(/[{}\[\]"\\]/g, '');
-            raw = raw.replace(/,\s*/g, ' ');
-            raw = raw.replace(/\s+/g, ' ').trim();
-            return (start > 0 ? '...' : '') + raw + (end < str.length ? '...' : '');
+            return '';
         }
 
-        const results = lessons.map(l => {
-            let snippet = '';
-            let matchedField = '';
-
-            const aiKeys = ['questions', 'benefits', 'stories', 'analysis', 'overview',
-                'podcast', 'quranHadith', 'characters', 'fiqh',
-                'answer', 'situation', 'mistake', 'action', 'points',
-                'keyT', 'wrong', 'source', 'name', 'trueFalse'];
-            const allSources = [
-                ...aiKeys.filter(k => l[k]).map(k => ({ key: k, str: JSON.stringify(l[k]) })),
-                { key: 'rawSource', str: l.rawSource || '' },
-                { key: 'rawContent', str: l.rawContent || '' }
-            ];
-
-            // ═══ Badge: use PHRASE match only (accurate) ═══
-            for (const { key, str } of allSources) {
-                if (str && matchPhrase(str)) {
-                    snippet = makeSnippet(str);
-                    if (snippet) {
-                        matchedField = key;
-                        // If rawContent is JSON, dig deeper
-                        if ((key === 'rawContent' || key === 'rawSource') && str.trim().startsWith('{')) {
-                            try {
-                                const parsed = JSON.parse(str);
-                                for (const subKey of aiKeys) {
-                                    if (parsed[subKey] && matchPhrase(JSON.stringify(parsed[subKey]))) {
-                                        matchedField = subKey;
-                                        break;
-                                    }
-                                }
-                            } catch (e) { }
-                        }
-                        break;
-                    }
-                }
-            }
-
-            // ═══ Fallback: word match for snippet only (no badge change) ═══
-            if (!snippet) {
-                for (const { key, str } of allSources) {
-                    if (str && matchWords(str)) {
-                        snippet = makeSnippet(str);
-                        if (snippet) {
-                            if (!matchedField) matchedField = key;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return {
-                _id: l._id,
-                title: l.title,
-                sheikhName: sheikhMap[l.sheikhId] || 'غير محدد',
-                snippet,
-                matchedField
-            };
-        });
+        const results = lessons.map(l => ({
+            _id: l._id,
+            title: l.title,
+            sheikhName: sheikhMap[l.sheikhId] || 'غير محدد',
+            snippet: simpleSnippet(l)
+        }));
 
         res.json({ results });
     } catch (error) {
-        console.error('❌ Search Error:', error);
+        console.error('Search Error:', error);
         res.status(500).json({ error: 'خطأ في البحث' });
     }
 });
