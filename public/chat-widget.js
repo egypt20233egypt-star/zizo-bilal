@@ -110,6 +110,12 @@
                     </div>
                 </div>
 
+                <div id="chat-quick-actions">
+                    <button class="chat-quick-btn" data-q="لخص الدرس">📝 لخص الدرس</button>
+                    <button class="chat-quick-btn" data-q="أهم فوائد الدرس">💡 أهم فوائد</button>
+                    <button class="chat-quick-btn" data-q="آيات وأحاديث الدرس">📖 آيات وأحاديث</button>
+                </div>
+
                 <div id="chat-input-area">
                     <input type="text" id="chat-input"
                         placeholder="اكتب سؤالك هنا..."
@@ -150,6 +156,14 @@
         // Enable/disable send button
         input.addEventListener('input', () => {
             sendBtn.disabled = input.value.trim().length < 3;
+        });
+
+        // 🎯 Quick Actions
+        document.querySelectorAll('.chat-quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const q = btn.getAttribute('data-q');
+                sendMessage(q);
+            });
         });
     }
 
@@ -313,7 +327,7 @@
         return `<div class="chat-badge-line"><span class="chat-badge ${cfg.cls}">${cfg.icon} ${cfg.label}</span></div>`;
     }
 
-    // ─── Action Buttons (Rating + Share + Read Aloud) ───
+    // ─── Action Buttons (⭐ Star Rating + Copy + TTS + WhatsApp) ───
     function addActionButtons(msgId, botData) {
         const msgEl = document.getElementById(msgId);
         if (!msgEl) return;
@@ -331,53 +345,72 @@
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'chat-actions';
         actionsDiv.innerHTML = `
+            <div class="chat-stars-row">
+                <span class="chat-stars-label">قيّم:</span>
+                <div class="chat-stars">
+                    <span class="chat-star" data-value="1">★</span>
+                    <span class="chat-star" data-value="2">★</span>
+                    <span class="chat-star" data-value="3">★</span>
+                    <span class="chat-star" data-value="4">★</span>
+                    <span class="chat-star" data-value="5">★</span>
+                </div>
+                <span class="chat-stars-text"></span>
+            </div>
             <div class="chat-actions-row">
-                <button class="chat-action-btn chat-rate-up" data-helpful="true" title="مفيدة">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
-                        <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-                    </svg>
-                </button>
-                <button class="chat-action-btn chat-rate-down" data-helpful="false" title="غير مفيدة">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/>
-                        <path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/>
-                    </svg>
-                </button>
-                <span class="chat-actions-divider"></span>
                 <button class="chat-action-btn chat-copy-btn" title="نسخ الإجابة">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                     </svg>
                 </button>
                 <button class="chat-action-btn chat-tts-btn" title="اقرأ بصوت عالي">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
                         <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    </svg>
+                </button>
+                <button class="chat-action-btn chat-wa-btn" title="شارك على واتساب">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                        <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
                     </svg>
                 </button>
             </div>
         `;
 
-        // Append AFTER content bubble (not inside it)
+        // Append BELOW content bubble
         msgEl.appendChild(actionsDiv);
 
-        // 👍/👎 Rating
-        actionsDiv.querySelectorAll('[data-helpful]').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const isHelpful = btn.getAttribute('data-helpful') === 'true';
-                btn.classList.add('chat-rate-selected');
+        // ⭐ Star Rating
+        const stars = actionsDiv.querySelectorAll('.chat-star');
+        const starsText = actionsDiv.querySelector('.chat-stars-text');
+        const labels = ['', 'ضعيف', 'مقبول', 'جيد', 'جيد جداً', 'ممتاز'];
 
-                // Show done state
-                const ratingBtns = actionsDiv.querySelectorAll('[data-helpful]');
-                ratingBtns.forEach(b => {
-                    if (b !== btn) b.style.opacity = '0.3';
-                    b.style.pointerEvents = 'none';
+        // Hover effect
+        stars.forEach(star => {
+            star.addEventListener('mouseenter', () => {
+                const val = parseInt(star.dataset.value);
+                stars.forEach(s => {
+                    s.classList.toggle('chat-star-hover', parseInt(s.dataset.value) <= val);
                 });
-                btn.style.color = isHelpful ? 'var(--green)' : 'var(--red)';
-                btn.style.borderColor = isHelpful ? 'var(--green)' : 'var(--red)';
+                starsText.textContent = labels[val];
+            });
+            star.addEventListener('mouseleave', () => {
+                stars.forEach(s => s.classList.remove('chat-star-hover'));
+                starsText.textContent = '';
+            });
+
+            // Click
+            star.addEventListener('click', async () => {
+                const rating = parseInt(star.dataset.value);
+                // Fill stars permanently
+                stars.forEach(s => {
+                    const v = parseInt(s.dataset.value);
+                    s.classList.toggle('chat-star-active', v <= rating);
+                    s.style.pointerEvents = 'none';
+                });
+                starsText.textContent = labels[rating] + ' ✅';
+                starsText.style.color = 'var(--green)';
 
                 // ✅ افتح الإدخال تاني
                 awaitingRating = false;
@@ -399,7 +432,7 @@
                             question: botData.question,
                             answer: botData.answer,
                             source: botData.source,
-                            isHelpful
+                            rating
                         })
                     });
                 } catch (e) {
@@ -413,22 +446,21 @@
         copyBtn.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(botData.answer);
-                copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
-                // Show toast confirmation
+                copyBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
                 const toast = document.createElement('span');
                 toast.className = 'chat-copy-toast';
                 toast.textContent = 'تم النسخ ✅';
                 copyBtn.parentNode.appendChild(toast);
                 setTimeout(() => {
                     toast.remove();
-                    copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                    copyBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
                 }, 2000);
             } catch (e) {
                 console.warn('Copy failed:', e);
             }
         });
 
-        // 🔊 Read Aloud (enhanced)
+        // 🔊 Read Aloud (Arabic)
         const ttsBtn = actionsDiv.querySelector('.chat-tts-btn');
         ttsBtn.addEventListener('click', () => {
             if (!('speechSynthesis' in window)) {
@@ -441,17 +473,22 @@
                 ttsBtn.classList.remove('chat-tts-active');
                 return;
             }
-            // Strip HTML tags for clean speech
             const cleanText = botData.answer.replace(/<[^>]*>/g, '').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
             const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'ar-SA';
+            utterance.lang = 'ar';
             utterance.rate = 0.9;
             utterance.pitch = 1;
             utterance.volume = 1;
-            // Find best Arabic voice
+            // Try Egyptian Arabic first, then Saudi, then any Arabic
             const voices = speechSynthesis.getVoices();
-            const arVoice = voices.find(v => v.lang.startsWith('ar')) || voices.find(v => v.lang.includes('ar'));
-            if (arVoice) utterance.voice = arVoice;
+            const arVoice = voices.find(v => v.lang === 'ar-EG')
+                || voices.find(v => v.lang === 'ar-SA')
+                || voices.find(v => v.lang.startsWith('ar'))
+                || voices.find(v => v.lang.includes('ar'));
+            if (arVoice) {
+                utterance.voice = arVoice;
+                utterance.lang = arVoice.lang;
+            }
             utterance.onend = () => {
                 isSpeaking = false;
                 ttsBtn.classList.remove('chat-tts-active');
@@ -460,11 +497,18 @@
                 isSpeaking = false;
                 ttsBtn.classList.remove('chat-tts-active');
             };
-            // Cancel any previous speech
             speechSynthesis.cancel();
             isSpeaking = true;
             ttsBtn.classList.add('chat-tts-active');
             speechSynthesis.speak(utterance);
+        });
+
+        // 🤝 WhatsApp Share
+        const waBtn = actionsDiv.querySelector('.chat-wa-btn');
+        waBtn.addEventListener('click', () => {
+            const text = `❓ *السؤال:*\n${botData.question}\n\n💡 *الإجابة:*\n${botData.answer}\n\n📚 _من منصة عِلْمٌ يُنْتَفَعُ بِهِ_`;
+            const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
         });
     }
 
@@ -798,10 +842,11 @@
 /* ── Message Bubbles ── */
 .chat-msg {
     display: flex;
+    flex-direction: column;
     animation: chat-msg-in 0.35s var(--spring);
 }
-.chat-msg.user { justify-content: flex-start; }
-.chat-msg.bot { justify-content: flex-end; }
+.chat-msg.user { align-items: flex-start; }
+.chat-msg.bot { align-items: flex-end; }
 
 @keyframes chat-msg-in {
     from { opacity: 0; transform: translateY(12px) scale(0.97); }
@@ -934,38 +979,75 @@
     border-color: rgba(251,191,36,0.2);
 }
 
-/* ── Action Buttons Bar (outside bubble) ── */
+/* ── Action Buttons Bar (below bubble) ── */
 .chat-actions {
     margin-top: 6px;
-    padding: 6px 8px;
+    padding: 8px 10px;
     border-radius: 12px;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.04);
     animation: chat-rating-slide-in 0.4s var(--spring);
-    max-width: 82%;
-    margin-left: auto;
+    width: fit-content;
+    max-width: 90%;
 }
 @keyframes chat-rating-slide-in {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Star Rating ── */
+.chat-stars-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.chat-stars-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+}
+.chat-stars {
+    display: flex;
+    gap: 2px;
+    direction: ltr;
+}
+.chat-star {
+    font-size: 20px;
+    color: rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: all 0.15s var(--spring);
+    user-select: none;
+}
+.chat-star:hover,
+.chat-star-hover {
+    color: var(--gold);
+    transform: scale(1.2);
+    text-shadow: 0 0 8px rgba(212,175,55,0.4);
+}
+.chat-star-active {
+    color: var(--gold) !important;
+    text-shadow: 0 0 10px rgba(212,175,55,0.5);
+}
+.chat-stars-text {
+    font-size: 11px;
+    color: var(--gold);
+    min-width: 50px;
+}
+
+/* ── Actions Row ── */
 .chat-actions-row {
     display: flex;
     align-items: center;
     gap: 4px;
 }
-.chat-actions-divider {
-    width: 1px;
-    height: 18px;
-    background: rgba(255,255,255,0.08);
-    margin: 0 4px;
-}
 .chat-action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     background: transparent;
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 8px;
@@ -978,24 +1060,6 @@
     background: rgba(255,255,255,0.06);
     transform: scale(1.1);
 }
-.chat-rate-up:hover {
-    color: var(--green);
-    border-color: rgba(52,211,153,0.3);
-    background: rgba(52,211,153,0.08);
-}
-.chat-rate-down:hover {
-    color: var(--red);
-    border-color: rgba(248,113,113,0.3);
-    background: rgba(248,113,113,0.08);
-}
-.chat-rate-selected {
-    animation: chat-rate-pop 0.35s var(--spring);
-}
-@keyframes chat-rate-pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3) rotate(10deg); }
-    100% { transform: scale(1); }
-}
 .chat-copy-btn:hover {
     color: #60a5fa;
     border-color: rgba(96,165,250,0.3);
@@ -1003,6 +1067,11 @@
 .chat-tts-btn:hover {
     color: #a78bfa;
     border-color: rgba(167,139,250,0.3);
+}
+.chat-wa-btn:hover {
+    color: #25d366;
+    border-color: rgba(37,211,102,0.3);
+    background: rgba(37,211,102,0.08);
 }
 .chat-tts-active {
     color: #a78bfa !important;
@@ -1034,6 +1103,34 @@
     padding: 2px 8px;
     animation: chat-fade-in 0.3s var(--smooth);
     white-space: nowrap;
+}
+
+/* ── Quick Actions ── */
+#chat-quick-actions {
+    display: flex;
+    gap: 6px;
+    padding: 6px 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-top: 1px solid rgba(255,255,255,0.04);
+}
+.chat-quick-btn {
+    font-size: 11px;
+    padding: 5px 12px;
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 20px;
+    background: rgba(212,175,55,0.05);
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.25s var(--smooth);
+    white-space: nowrap;
+    font-family: inherit;
+}
+.chat-quick-btn:hover {
+    background: rgba(212,175,55,0.15);
+    border-color: rgba(212,175,55,0.35);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(212,175,55,0.15);
 }
 
 /* ── History Divider ── */

@@ -289,6 +289,7 @@ const feedbackSchema = new mongoose.Schema({
     answer: { type: String, required: true },
     source: { type: String, enum: ['direct', 'local', 'ai', 'fallback'], default: 'ai' },
     isHelpful: { type: Boolean, required: true },
+    rating: { type: Number, min: 1, max: 5 },
     ip: String,
     timestamp: { type: Date, default: Date.now }
 });
@@ -514,14 +515,18 @@ router.get('/suggestions/:lessonId', async (req, res) => {
 });
 
 // ============ POST /api/public/chat/feedback ============
-// Phase 9B: تقييم الإجابة — 👍/👎
+// Phase 9B+: تقييم الإجابة — ⭐ 1-5 نجوم
 router.post('/feedback', async (req, res) => {
     try {
-        const { lessonId, question, answer, source, isHelpful } = req.body;
+        const { lessonId, question, answer, source, isHelpful, rating } = req.body;
 
-        if (!lessonId || !question || typeof isHelpful !== 'boolean') {
+        if (!lessonId || !question) {
             return res.status(400).json({ error: 'بيانات ناقصة' });
         }
+
+        // Support both old (isHelpful boolean) and new (rating 1-5)
+        const finalHelpful = rating ? (rating >= 3) : isHelpful;
+        const finalRating = rating || (isHelpful ? 5 : 1);
 
         const userIP = req.ip || req.connection?.remoteAddress || 'unknown';
 
@@ -530,11 +535,13 @@ router.post('/feedback', async (req, res) => {
             question: question.slice(0, 500),
             answer: (answer || '').slice(0, 2000),
             source: source || 'unknown',
-            isHelpful,
+            isHelpful: finalHelpful,
+            rating: finalRating,
             ip: userIP
         });
 
-        console.log(`📊 [FEEDBACK] ${isHelpful ? '👍' : '👎'} | source=${source} | lesson=${lessonId}`);
+        const stars = '⭐'.repeat(finalRating);
+        console.log(`📊 [FEEDBACK] ${stars} (${finalRating}/5) | source=${source} | lesson=${lessonId}`);
         res.json({ success: true });
 
     } catch (err) {
