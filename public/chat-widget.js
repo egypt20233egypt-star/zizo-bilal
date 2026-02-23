@@ -24,6 +24,12 @@
 
     let uiCreated = false;
 
+    // Preload TTS voices (async in most browsers)
+    if ('speechSynthesis' in window) {
+        speechSynthesis.getVoices();
+        speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
+    }
+
     // ─── Init ───
     function init() {
         const container = document.getElementById('chat-widget');
@@ -304,7 +310,7 @@
             fallback: { icon: '⚠️', label: 'احتياطي', cls: 'badge-fallback' }
         };
         const cfg = configs[type] || configs.fallback;
-        return `<span class="chat-badge ${cfg.cls}">${cfg.icon} ${cfg.label}</span>`;
+        return `<div class="chat-badge-line"><span class="chat-badge ${cfg.cls}">${cfg.icon} ${cfg.label}</span></div>`;
     }
 
     // ─── Action Buttons (Rating + Share + Read Aloud) ───
@@ -355,8 +361,8 @@
             </div>
         `;
 
-        const content = msgEl.querySelector('.chat-msg-content');
-        if (content) content.appendChild(actionsDiv);
+        // Append AFTER content bubble (not inside it)
+        msgEl.appendChild(actionsDiv);
 
         // 👍/👎 Rating
         actionsDiv.querySelectorAll('[data-helpful]').forEach(btn => {
@@ -402,13 +408,19 @@
             });
         });
 
-        // 📋 Copy
+        // 📋 Copy with toast
         const copyBtn = actionsDiv.querySelector('.chat-copy-btn');
         copyBtn.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(botData.answer);
                 copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+                // Show toast confirmation
+                const toast = document.createElement('span');
+                toast.className = 'chat-copy-toast';
+                toast.textContent = 'تم النسخ ✅';
+                copyBtn.parentNode.appendChild(toast);
                 setTimeout(() => {
+                    toast.remove();
                     copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
                 }, 2000);
             } catch (e) {
@@ -416,26 +428,40 @@
             }
         });
 
-        // 🔊 Read Aloud
+        // 🔊 Read Aloud (enhanced)
         const ttsBtn = actionsDiv.querySelector('.chat-tts-btn');
         ttsBtn.addEventListener('click', () => {
+            if (!('speechSynthesis' in window)) {
+                alert('المتصفح لا يدعم القراءة الصوتية 😔');
+                return;
+            }
             if (isSpeaking) {
                 speechSynthesis.cancel();
                 isSpeaking = false;
                 ttsBtn.classList.remove('chat-tts-active');
                 return;
             }
-            const utterance = new SpeechSynthesisUtterance(botData.answer);
-            utterance.lang = 'ar';
+            // Strip HTML tags for clean speech
+            const cleanText = botData.answer.replace(/<[^>]*>/g, '').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'ar-SA';
             utterance.rate = 0.9;
-            // Try to find Arabic voice
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            // Find best Arabic voice
             const voices = speechSynthesis.getVoices();
-            const arVoice = voices.find(v => v.lang.startsWith('ar'));
+            const arVoice = voices.find(v => v.lang.startsWith('ar')) || voices.find(v => v.lang.includes('ar'));
             if (arVoice) utterance.voice = arVoice;
             utterance.onend = () => {
                 isSpeaking = false;
                 ttsBtn.classList.remove('chat-tts-active');
             };
+            utterance.onerror = () => {
+                isSpeaking = false;
+                ttsBtn.classList.remove('chat-tts-active');
+            };
+            // Cancel any previous speech
+            speechSynthesis.cancel();
             isSpeaking = true;
             ttsBtn.classList.add('chat-tts-active');
             speechSynthesis.speak(utterance);
@@ -462,11 +488,19 @@
     // ─── Format Answer ───
     function formatAnswer(text) {
         if (!text) return '';
-        // Basic markdown-like formatting
         return text
+            // Decode HTML entities first
+            .replace(/&gt;/g, '>')
+            .replace(/&lt;/g, '<')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            // Markdown formatting
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br>')
-            .replace(/`(.*?)`/g, '<code>$1</code>');
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            // Blockquotes (> at line start)
+            .replace(/^>\s*(.*)/gm, '<span class="chat-blockquote">$1</span>')
+            // Newlines last  
+            .replace(/\n/g, '<br>');
     }
 
     // ─── Add Message ───
@@ -556,10 +590,18 @@
             const key = getHistoryKey();
             const history = JSON.parse(localStorage.getItem(key) || '[]');
             history.push({ q: question, a: answer, t: type, ts: Date.now() });
-            // Keep last 10 only
-            if (history.length > 10) history.splice(0, history.length - 10);
+            // حفظ جميع المحادثات بدون حد
             localStorage.setItem(key, JSON.stringify(history));
-        } catch (e) { console.warn('Failed to save chat history:', e); }
+        } catch (e) {
+            // لو localStorage ممتلئ → احذف أقدم نص
+            try {
+                const key = getHistoryKey();
+                const history = JSON.parse(localStorage.getItem(key) || '[]');
+                if (history.length > 50) history.splice(0, 20);
+                history.push({ q: question, a: answer, t: type, ts: Date.now() });
+                localStorage.setItem(key, JSON.stringify(history));
+            } catch (e2) { console.warn('Failed to save chat history:', e2); }
+        }
     }
 
     function loadChatHistory() {
@@ -808,9 +850,12 @@
     border-radius: 20px;
     background: rgba(212,175,55,0.1);
     color: var(--gold);
-    margin-bottom: 8px;
     border: 1px solid rgba(212,175,55,0.15);
     text-transform: uppercase;
+}
+.chat-badge-line {
+    margin-bottom: 10px;
+    display: block;
 }
 
 /* ── Typing Animation ── */
@@ -889,12 +934,16 @@
     border-color: rgba(251,191,36,0.2);
 }
 
-/* ── Action Buttons Bar ── */
+/* ── Action Buttons Bar (outside bubble) ── */
 .chat-actions {
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
     animation: chat-rating-slide-in 0.4s var(--spring);
+    max-width: 82%;
+    margin-left: auto;
 }
 @keyframes chat-rating-slide-in {
     from { opacity: 0; transform: translateY(6px); }
@@ -964,6 +1013,27 @@
 @keyframes chat-tts-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.3); }
     50% { box-shadow: 0 0 8px 2px rgba(167,139,250,0.15); }
+}
+
+/* ── Blockquote ── */
+.chat-blockquote {
+    display: block;
+    border-right: 3px solid var(--gold);
+    padding: 6px 12px 6px 0;
+    margin: 6px 0;
+    color: var(--text-secondary);
+    font-style: italic;
+    background: rgba(212,175,55,0.04);
+    border-radius: 0 8px 8px 0;
+}
+
+/* ── Copy Toast ── */
+.chat-copy-toast {
+    font-size: 11px;
+    color: var(--green);
+    padding: 2px 8px;
+    animation: chat-fade-in 0.3s var(--smooth);
+    white-space: nowrap;
 }
 
 /* ── History Divider ── */
