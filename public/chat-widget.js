@@ -307,9 +307,21 @@
         const ratingDiv = document.createElement('div');
         ratingDiv.className = 'chat-rating';
         ratingDiv.innerHTML = `
-            <span class="chat-rating-label">⭐ قيّم الإجابة لمساعدتنا في التطوير:</span>
-            <button class="chat-rate-btn" data-helpful="true" title="مفيدة">👍</button>
-            <button class="chat-rate-btn" data-helpful="false" title="غير مفيدة">👎</button>
+            <span class="chat-rating-label">قيّم الإجابة</span>
+            <div class="chat-rating-btns">
+                <button class="chat-rate-btn chat-rate-up" data-helpful="true" title="مفيدة">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                        <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                </button>
+                <button class="chat-rate-btn chat-rate-down" data-helpful="false" title="غير مفيدة">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/>
+                        <path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/>
+                    </svg>
+                </button>
+            </div>
         `;
 
         const content = msgEl.querySelector('.chat-msg-content');
@@ -318,7 +330,12 @@
         ratingDiv.querySelectorAll('.chat-rate-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const isHelpful = btn.getAttribute('data-helpful') === 'true';
-                ratingDiv.innerHTML = `<span class="chat-rating-done">${isHelpful ? '👍 شكراً لتقييمك!' : '👎 شكراً، سنحسن الإجابات!'}</span>`;
+                // Animate clicked button
+                btn.classList.add('chat-rate-selected');
+                // Replace with done state after animation
+                setTimeout(() => {
+                    ratingDiv.innerHTML = `<span class="chat-rating-done">${isHelpful ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> شكراً لتقييمك!' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> شكراً، سنحسّن الإجابات!'}</span>`;
+                }, 300);
 
                 // ✅ افتح الإدخال تاني
                 awaitingRating = false;
@@ -616,36 +633,78 @@
 }
 
 /* ── Rating Buttons ── */
+/* ── Rating System (Floating v3 Style) ── */
 .chat-rating {
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-    padding-top: 6px;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    animation: chat-rating-slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes chat-rating-slide-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .chat-rating-label {
     font-size: 11px;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.3px;
+}
+.chat-rating-btns {
+    display: flex;
+    gap: 6px;
 }
 .chat-rate-btn {
-    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-size: 14px;
+    border-radius: 50%;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: rgba(255,255,255,0.5);
 }
 .chat-rate-btn:hover {
-    background: rgba(212,175,55,0.15);
-    border-color: #d4af37;
-    transform: scale(1.1);
+    transform: scale(1.2);
+}
+.chat-rate-up:hover {
+    background: rgba(74,222,128,0.15);
+    border-color: rgba(74,222,128,0.4);
+    color: #4ade80;
+    box-shadow: 0 0 12px rgba(74,222,128,0.2);
+}
+.chat-rate-down:hover {
+    background: rgba(251,191,36,0.15);
+    border-color: rgba(251,191,36,0.4);
+    color: #fbbf24;
+    box-shadow: 0 0 12px rgba(251,191,36,0.2);
+}
+.chat-rate-btn:active {
+    transform: scale(0.9);
+}
+.chat-rate-selected {
+    animation: chat-rate-pop 0.3s ease;
+}
+@keyframes chat-rate-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4) rotate(10deg); }
+    100% { transform: scale(1); }
 }
 .chat-rating-done {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 12px;
-    color: rgba(212,175,55,0.7);
-    animation: chat-fade-in 0.3s ease;
+    color: rgba(255,255,255,0.6);
+    animation: chat-rating-slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ── Rating Notice ── */

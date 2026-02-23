@@ -134,6 +134,41 @@ function getSectionLabel(key) {
 }
 
 /**
+ * ترجمة المفاتيح الداخلية (sub-keys) للعربي
+ */
+const SUB_KEY_LABELS = {
+    mistake: 'الخطأ', correction: 'التصحيح', evidence: 'الدليل',
+    name: 'الاسم', role: 'الدور', description: 'الوصف',
+    step: 'الخطوة', action: 'الإجراء', lesson: 'الدرس',
+    question: 'السؤال', answer: 'الإجابة', title: 'العنوان',
+    text: 'النص', source: 'المصدر', reference: 'المرجع',
+    benefit: 'الفائدة', tip: 'النصيحة', rule: 'الحكم',
+    verse: 'الآية', hadith: 'الحديث', surah: 'السورة',
+    narrator: 'الراوي', explanation: 'الشرح', note: 'ملاحظة',
+    ageRange: 'الفئة العمرية', activity: 'النشاط',
+    tools: 'الأدوات', duration: 'المدة', objective: 'الهدف',
+    learningOutcome: 'المخرج التعليمي', content: 'المحتوى',
+    category: 'التصنيف', type: 'النوع', summary: 'الملخص',
+    startingPoint: 'نقطة البداية', mainPoints: 'النقاط الرئيسية',
+    practicalSteps: 'الخطوات العملية', impact: 'الأثر',
+};
+
+/**
+ * تحويل Object لنص مقروء بـ labels عربية
+ */
+function humanizeObject(obj) {
+    if (!obj || typeof obj !== 'object') return String(obj || '');
+    const parts = [];
+    for (const [key, val] of Object.entries(obj)) {
+        if (!val) continue;
+        const label = SUB_KEY_LABELS[key] || key;
+        const text = typeof val === 'object' ? JSON.stringify(val) : String(val);
+        parts.push(`${label}: ${text}`);
+    }
+    return parts.join(' | ');
+}
+
+/**
  * استخراج نص قابل للقراءة من أي Mixed value
  */
 function extractText(value) {
@@ -142,11 +177,11 @@ function extractText(value) {
     if (Array.isArray(value)) {
         return value.map(item => {
             if (typeof item === 'string') return item;
-            if (typeof item === 'object') return JSON.stringify(item);
+            if (typeof item === 'object') return humanizeObject(item);
             return String(item);
         }).join('\n');
     }
-    if (typeof value === 'object') return JSON.stringify(value);
+    if (typeof value === 'object') return humanizeObject(value);
     return String(value);
 }
 
