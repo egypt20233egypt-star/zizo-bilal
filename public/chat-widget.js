@@ -19,6 +19,8 @@
     let lastBotData = null; // {question, answer, source, type}
     let awaitingRating = false; // 🔒 يمنع السؤال التالي لحد ما يقيّم
     let lessonTitle = ''; // اسم الدرس للعرض
+    let ttsUtterance = null; // 🔊 Read Aloud
+    let isSpeaking = false;
 
     let uiCreated = false;
 
@@ -160,6 +162,7 @@
             if (!suggestionsLoaded && lessonId) {
                 loadSuggestions();
                 loadLessonTitle();
+                loadChatHistory(); // 🕛 تحميل المحادثات السابقة
                 suggestionsLoaded = true;
             }
         } else {
@@ -238,12 +241,15 @@
             // Save for feedback
             lastBotData = { question: text, answer: data.answer, source: data.type, lessonId };
 
-            // Badge (فوري / بحث / AI)
-            const badge = data.badge ? `<span class="chat-badge">${data.badge}</span>` : '';
-            const msgId = addMsg('bot', badge + formatAnswer(data.answer));
+            // 📊 Confidence badge (فوري / بحث / AI)
+            const confidenceBadge = buildConfidenceBadge(data.type, data.badge);
+            const msgId = addMsg('bot', confidenceBadge + formatAnswer(data.answer), false, true);
 
-            // Add rating buttons
-            addRatingButtons(msgId, lastBotData);
+            // Add action buttons (rating + share + read aloud)
+            addActionButtons(msgId, lastBotData);
+
+            // 🕛 Save to history
+            saveChatHistory(text, data.answer, data.type);
 
         } catch (err) {
             removeMsg(loadingId);
@@ -289,8 +295,20 @@
         });
     }
 
-    // ─── Rating Buttons ───
-    function addRatingButtons(msgId, botData) {
+    // ─── Confidence Badge ───
+    function buildConfidenceBadge(type, badge) {
+        const configs = {
+            direct: { icon: '⚡', label: 'فوري', cls: 'badge-direct' },
+            local: { icon: '🔍', label: 'بحث', cls: 'badge-local' },
+            ai: { icon: '🤖', label: 'AI', cls: 'badge-ai' },
+            fallback: { icon: '⚠️', label: 'احتياطي', cls: 'badge-fallback' }
+        };
+        const cfg = configs[type] || configs.fallback;
+        return `<span class="chat-badge ${cfg.cls}">${cfg.icon} ${cfg.label}</span>`;
+    }
+
+    // ─── Action Buttons (Rating + Share + Read Aloud) ───
+    function addActionButtons(msgId, botData) {
         const msgEl = document.getElementById(msgId);
         if (!msgEl) return;
 
@@ -304,38 +322,56 @@
         const sendBtn = document.getElementById('chat-send-btn');
         if (sendBtn) sendBtn.disabled = true;
 
-        const ratingDiv = document.createElement('div');
-        ratingDiv.className = 'chat-rating';
-        ratingDiv.innerHTML = `
-            <span class="chat-rating-label">قيّم الإجابة</span>
-            <div class="chat-rating-btns">
-                <button class="chat-rate-btn chat-rate-up" data-helpful="true" title="مفيدة">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'chat-actions';
+        actionsDiv.innerHTML = `
+            <div class="chat-actions-row">
+                <button class="chat-action-btn chat-rate-up" data-helpful="true" title="مفيدة">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
                         <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
                     </svg>
                 </button>
-                <button class="chat-rate-btn chat-rate-down" data-helpful="false" title="غير مفيدة">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button class="chat-action-btn chat-rate-down" data-helpful="false" title="غير مفيدة">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/>
                         <path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/>
+                    </svg>
+                </button>
+                <span class="chat-actions-divider"></span>
+                <button class="chat-action-btn chat-copy-btn" title="نسخ الإجابة">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                </button>
+                <button class="chat-action-btn chat-tts-btn" title="اقرأ بصوت عالي">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
                     </svg>
                 </button>
             </div>
         `;
 
         const content = msgEl.querySelector('.chat-msg-content');
-        if (content) content.appendChild(ratingDiv);
+        if (content) content.appendChild(actionsDiv);
 
-        ratingDiv.querySelectorAll('.chat-rate-btn').forEach(btn => {
+        // 👍/👎 Rating
+        actionsDiv.querySelectorAll('[data-helpful]').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const isHelpful = btn.getAttribute('data-helpful') === 'true';
-                // Animate clicked button
                 btn.classList.add('chat-rate-selected');
-                // Replace with done state after animation
-                setTimeout(() => {
-                    ratingDiv.innerHTML = `<span class="chat-rating-done">${isHelpful ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> شكراً لتقييمك!' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> شكراً، سنحسّن الإجابات!'}</span>`;
-                }, 300);
+
+                // Show done state
+                const ratingBtns = actionsDiv.querySelectorAll('[data-helpful]');
+                ratingBtns.forEach(b => {
+                    if (b !== btn) b.style.opacity = '0.3';
+                    b.style.pointerEvents = 'none';
+                });
+                btn.style.color = isHelpful ? 'var(--green)' : 'var(--red)';
+                btn.style.borderColor = isHelpful ? 'var(--green)' : 'var(--red)';
 
                 // ✅ افتح الإدخال تاني
                 awaitingRating = false;
@@ -345,7 +381,6 @@
                     input.placeholder = 'اكتب سؤالك هنا...';
                     input.focus();
                 }
-                // إخفاء الـ notice لو موجود
                 const notice = document.getElementById('chat-rating-notice');
                 if (notice) notice.remove();
 
@@ -365,6 +400,45 @@
                     console.warn('Feedback send failed:', e);
                 }
             });
+        });
+
+        // 📋 Copy
+        const copyBtn = actionsDiv.querySelector('.chat-copy-btn');
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(botData.answer);
+                copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                }, 2000);
+            } catch (e) {
+                console.warn('Copy failed:', e);
+            }
+        });
+
+        // 🔊 Read Aloud
+        const ttsBtn = actionsDiv.querySelector('.chat-tts-btn');
+        ttsBtn.addEventListener('click', () => {
+            if (isSpeaking) {
+                speechSynthesis.cancel();
+                isSpeaking = false;
+                ttsBtn.classList.remove('chat-tts-active');
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(botData.answer);
+            utterance.lang = 'ar';
+            utterance.rate = 0.9;
+            // Try to find Arabic voice
+            const voices = speechSynthesis.getVoices();
+            const arVoice = voices.find(v => v.lang.startsWith('ar'));
+            if (arVoice) utterance.voice = arVoice;
+            utterance.onend = () => {
+                isSpeaking = false;
+                ttsBtn.classList.remove('chat-tts-active');
+            };
+            isSpeaking = true;
+            ttsBtn.classList.add('chat-tts-active');
+            speechSynthesis.speak(utterance);
         });
     }
 
@@ -396,7 +470,7 @@
     }
 
     // ─── Add Message ───
-    function addMsg(role, content, isRaw) {
+    function addMsg(role, content, isRaw, useTypewriter) {
         const container = document.getElementById('chat-messages');
         const id = 'msg-' + Date.now();
 
@@ -408,10 +482,11 @@
         inner.className = 'chat-msg-content';
 
         if (role === 'user') {
-            // User messages: escape HTML for XSS safety
             inner.textContent = content;
+        } else if (useTypewriter && !isRaw) {
+            // 💬 Typewriter effect for bot answers
+            typewriterEffect(inner, content);
         } else {
-            // Bot messages: trust our own HTML (badge, formatting, loading)
             inner.innerHTML = content;
         }
 
@@ -422,10 +497,99 @@
         return id;
     }
 
+    // ─── Typewriter Effect ───
+    function typewriterEffect(el, html) {
+        // Parse HTML to separate tags from visible text
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const fullText = temp.innerHTML;
+        el.innerHTML = '';
+
+        let i = 0;
+        const speed = 12; // ms per character
+        let inTag = false;
+
+        function type() {
+            if (i >= fullText.length) return;
+
+            const char = fullText[i];
+            if (char === '<') inTag = true;
+            if (inTag) {
+                // Add entire tag at once
+                const tagEnd = fullText.indexOf('>', i);
+                if (tagEnd !== -1) {
+                    el.innerHTML += fullText.substring(i, tagEnd + 1);
+                    i = tagEnd + 1;
+                    inTag = false;
+                } else {
+                    el.innerHTML += char;
+                    i++;
+                }
+            } else {
+                el.innerHTML += char;
+                i++;
+            }
+
+            const container = document.getElementById('chat-messages');
+            if (container) container.scrollTop = container.scrollHeight;
+
+            if (i < fullText.length) {
+                setTimeout(type, inTag ? 0 : speed);
+            }
+        }
+        type();
+    }
+
     // ─── Remove Message ───
     function removeMsg(id) {
         const el = document.getElementById(id);
         if (el) el.remove();
+    }
+
+    // ─── Chat History (localStorage) ───
+    function getHistoryKey() {
+        return `chat_history_${lessonId}`;
+    }
+
+    function saveChatHistory(question, answer, type) {
+        try {
+            const key = getHistoryKey();
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.push({ q: question, a: answer, t: type, ts: Date.now() });
+            // Keep last 10 only
+            if (history.length > 10) history.splice(0, history.length - 10);
+            localStorage.setItem(key, JSON.stringify(history));
+        } catch (e) { console.warn('Failed to save chat history:', e); }
+    }
+
+    function loadChatHistory() {
+        try {
+            const key = getHistoryKey();
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            if (history.length === 0) return;
+
+            // Add a divider
+            const container = document.getElementById('chat-messages');
+            const divider = document.createElement('div');
+            divider.className = 'chat-history-divider';
+            divider.innerHTML = `<span>🕛 محادثات سابقة (${history.length})</span>`;
+            container.appendChild(divider);
+
+            // Restore messages (without typewriter)
+            for (const item of history) {
+                addMsg('user', item.q);
+                const badge = buildConfidenceBadge(item.t);
+                addMsg('bot', badge + formatAnswer(item.a));
+            }
+
+            // Add separator for new messages
+            const newDivider = document.createElement('div');
+            newDivider.className = 'chat-history-divider';
+            newDivider.innerHTML = '<span>⬇️ محادثة جديدة</span>';
+            container.appendChild(newDivider);
+
+            container.scrollTop = container.scrollHeight;
+        } catch (e) { console.warn('Failed to load chat history:', e); }
     }
 
     // ─── Inject CSS ───
@@ -703,74 +867,124 @@
     transform: translateX(-4px);
 }
 
-/* ── Rating System (Floating v3) ── */
-.chat-rating {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+/* ── Confidence Badge Variants ── */
+.badge-direct {
+    background: rgba(52,211,153,0.1);
+    color: var(--green);
+    border-color: rgba(52,211,153,0.2);
+}
+.badge-local {
+    background: rgba(96,165,250,0.1);
+    color: #60a5fa;
+    border-color: rgba(96,165,250,0.2);
+}
+.badge-ai {
+    background: rgba(167,139,250,0.1);
+    color: #a78bfa;
+    border-color: rgba(167,139,250,0.2);
+}
+.badge-fallback {
+    background: rgba(251,191,36,0.1);
+    color: #fbbf24;
+    border-color: rgba(251,191,36,0.2);
+}
+
+/* ── Action Buttons Bar ── */
+.chat-actions {
     margin-top: 10px;
-    padding: 8px 14px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.05);
     animation: chat-rating-slide-in 0.4s var(--spring);
 }
 @keyframes chat-rating-slide-in {
-    from { opacity: 0; transform: translateY(10px) scale(0.93); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-.chat-rating-label {
-    font-size: 11px;
-    color: var(--text-secondary);
-    letter-spacing: 0.3px;
-}
-.chat-rating-btns {
+.chat-actions-row {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 4px;
 }
-.chat-rate-btn {
+.chat-actions-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255,255,255,0.08);
+    margin: 0 4px;
+}
+.chat-action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.25s var(--spring);
-    color: rgba(255,255,255,0.45);
+    transition: all 0.2s var(--spring);
+    color: rgba(255,255,255,0.35);
 }
-.chat-rate-btn:hover { transform: scale(1.18); }
+.chat-action-btn:hover {
+    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.06);
+    transform: scale(1.1);
+}
 .chat-rate-up:hover {
-    background: rgba(52,211,153,0.12);
-    border-color: rgba(52,211,153,0.35);
     color: var(--green);
-    box-shadow: 0 0 16px rgba(52,211,153,0.15);
+    border-color: rgba(52,211,153,0.3);
+    background: rgba(52,211,153,0.08);
 }
 .chat-rate-down:hover {
-    background: rgba(248,113,113,0.12);
-    border-color: rgba(248,113,113,0.35);
     color: var(--red);
-    box-shadow: 0 0 16px rgba(248,113,113,0.15);
+    border-color: rgba(248,113,113,0.3);
+    background: rgba(248,113,113,0.08);
 }
-.chat-rate-btn:active { transform: scale(0.88); }
 .chat-rate-selected {
     animation: chat-rate-pop 0.35s var(--spring);
 }
 @keyframes chat-rate-pop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.35) rotate(12deg); }
+    50% { transform: scale(1.3) rotate(10deg); }
     100% { transform: scale(1); }
 }
-.chat-rating-done {
+.chat-copy-btn:hover {
+    color: #60a5fa;
+    border-color: rgba(96,165,250,0.3);
+}
+.chat-tts-btn:hover {
+    color: #a78bfa;
+    border-color: rgba(167,139,250,0.3);
+}
+.chat-tts-active {
+    color: #a78bfa !important;
+    border-color: rgba(167,139,250,0.4) !important;
+    background: rgba(167,139,250,0.1) !important;
+    animation: chat-tts-pulse 1.5s ease-in-out infinite !important;
+}
+@keyframes chat-tts-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.3); }
+    50% { box-shadow: 0 0 8px 2px rgba(167,139,250,0.15); }
+}
+
+/* ── History Divider ── */
+.chat-history-divider {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 10px;
+    padding: 4px 0;
+}
+.chat-history-divider::before,
+.chat-history-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+.chat-history-divider span {
+    font-size: 10px;
     color: var(--text-secondary);
-    animation: chat-rating-slide-in 0.4s var(--spring);
+    white-space: nowrap;
+    letter-spacing: 0.3px;
 }
 
 /* ── Rating Notice ── */

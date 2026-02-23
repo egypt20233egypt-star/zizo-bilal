@@ -55,6 +55,28 @@ const SECTION_LABELS = {
     additionalResources: '📚 مصادر إضافية',
     discussion: '💬 مناقشة',
     homework: '📝 الواجب',
+    // مفاتيح إضافية ممكن تظهر في الدروس
+    name: '📛 الاسم',
+    description: '📝 الوصف',
+    content: '📄 المحتوى',
+    text: '📄 النص',
+    notes: '📌 ملاحظات',
+    tips: '💡 نصائح',
+    evidence: '📜 الأدلة',
+    mistakes: '⚠️ الأخطاء',
+    corrections: '✅ التصحيحات',
+    steps: '📋 الخطوات',
+    actions: '🎯 الإجراءات',
+    verses: '📖 الآيات',
+    hadiths: '📖 الأحاديث',
+    lessons: '📚 الدروس',
+    objectives: '🎯 الأهداف',
+    activities: '🎮 الأنشطة',
+    resources: '📚 المصادر',
+    references: '📚 المراجع',
+    keyMessages: '🔑 الرسائل المفتاحية',
+    mainPoints: '📌 النقاط الرئيسية',
+    practicalSteps: '🎯 الخطوات العملية',
 };
 
 // ============ System Prompt ============
@@ -130,7 +152,7 @@ setInterval(() => {
  * اسم القسم بالعربي (من SECTION_LABELS أو fallback)
  */
 function getSectionLabel(key) {
-    return SECTION_LABELS[key] || key;
+    return SECTION_LABELS[key] || SUB_KEY_LABELS[key] || key;
 }
 
 /**
