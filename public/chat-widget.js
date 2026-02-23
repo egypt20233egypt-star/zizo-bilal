@@ -176,8 +176,11 @@
             const data = await resp.json();
             if (data && data.title) {
                 lessonTitle = data.title;
+                const displayTitle = lessonTitle.length > 25
+                    ? lessonTitle.slice(0, 25) + '...'
+                    : lessonTitle;
                 const titleEl = document.getElementById('chat-title');
-                if (titleEl) titleEl.textContent = `اسأل عن: ${lessonTitle}`;
+                if (titleEl) titleEl.textContent = `اسأل عن: ${displayTitle}`;
             }
         } catch (e) {
             console.warn('Could not load lesson title:', e);

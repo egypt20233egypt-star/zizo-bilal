@@ -68,9 +68,13 @@ app.use(session({
     cookie: {
         maxAge: 7 * 24 * 60 * 60 * 1000, // أسبوع
         httpOnly: true,
-        secure: false // true في production
+        secure: process.env.NODE_ENV === 'production'
     }
 }));
+
+if (!process.env.SESSION_SECRET) {
+    console.warn('⚠️  SESSION_SECRET not set — using fallback (OK for dev, NOT for production!)');
+}
 
 
 // ============ Auth Middleware ============
