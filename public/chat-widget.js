@@ -131,7 +131,7 @@
         fab.addEventListener('click', toggleChat);
         closeBtn.addEventListener('click', toggleChat);
 
-        sendBtn.addEventListener('click', sendMessage);
+        sendBtn.addEventListener('click', () => sendMessage());
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -198,7 +198,7 @@
         }
 
         const input = document.getElementById('chat-input');
-        const text = overrideText || input.value.trim();
+        const text = (typeof overrideText === 'string' && overrideText) || input.value.trim();
         if (text.length < 3) return;
 
         // Remove suggestions if visible
