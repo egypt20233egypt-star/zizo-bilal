@@ -261,9 +261,20 @@
             // Save for feedback
             lastBotData = { question: text, answer: data.answer, source: data.type, lessonId };
 
-            // 📊 Confidence badge (فوري / بحث / AI)
-            const confidenceBadge = buildConfidenceBadge(data.type, data.badge);
-            const msgId = addMsg('bot', confidenceBadge + formatAnswer(data.answer), false, true);
+            // 📊 Confidence badge (فوري / بحث / AI) — سطر منفصل
+            const badgeHtml = buildConfidenceBadge(data.type, data.badge);
+            const msgId = addMsg('bot', formatAnswer(data.answer), false, true);
+
+            // Insert badge BEFORE answer text (as separate element)
+            const msgEl = document.getElementById(msgId);
+            if (msgEl) {
+                const contentEl = msgEl.querySelector('.chat-msg-content');
+                if (contentEl) {
+                    const badgeDiv = document.createElement('div');
+                    badgeDiv.innerHTML = badgeHtml;
+                    contentEl.insertBefore(badgeDiv, contentEl.firstChild);
+                }
+            }
 
             // Add action buttons (rating + share + read aloud)
             addActionButtons(msgId, lastBotData);
@@ -529,21 +540,30 @@
         setTimeout(() => { if (div.parentNode) div.remove(); }, 4000);
     }
 
-    // ─── Format Answer ───
+    // ─── Format Answer (تنسيق متقدم) ───
     function formatAnswer(text) {
         if (!text) return '';
         return text
-            // Decode HTML entities first
+            // Decode HTML entities
             .replace(/&gt;/g, '>')
             .replace(/&lt;/g, '<')
             .replace(/&amp;/g, '&')
             .replace(/&quot;/g, '"')
-            // Markdown formatting
+            // Bold
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            // Inline code
             .replace(/`(.*?)`/g, '<code>$1</code>')
             // Blockquotes (> at line start)
             .replace(/^>\s*(.*)/gm, '<span class="chat-blockquote">$1</span>')
-            // Newlines last  
+            // Numbered lists: "1. text" or "١. text"
+            .replace(/^(\d+[\.\)\-])\s*(.*)/gm, '<div class="chat-list-item"><span class="chat-list-num">$1</span> $2</div>')
+            // Bullet points: "- text" or "• text"
+            .replace(/^[\-\•\*]\s+(.*)/gm, '<div class="chat-list-item"><span class="chat-list-bullet">●</span> $1</div>')
+            // Section headers: lines ending with :
+            .replace(/^([^\n<]{4,30}):$/gm, '<div class="chat-section-title">$1</div>')
+            // Double newlines = paragraph break
+            .replace(/\n\n/g, '<div class="chat-para-break"></div>')
+            // Single newlines
             .replace(/\n/g, '<br>');
     }
 
@@ -1094,6 +1114,40 @@
     font-style: italic;
     background: rgba(212,175,55,0.04);
     border-radius: 0 8px 8px 0;
+}
+
+/* ── Response List Items ── */
+.chat-list-item {
+    display: block;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    line-height: 1.8;
+}
+.chat-list-item:last-child {
+    border-bottom: none;
+}
+.chat-list-num {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 13px;
+}
+.chat-list-bullet {
+    color: var(--gold);
+    font-size: 8px;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+.chat-section-title {
+    display: block;
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 14px;
+    margin: 10px 0 4px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+}
+.chat-para-break {
+    height: 10px;
 }
 
 /* ── Copy Toast ── */
