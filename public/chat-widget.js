@@ -17,6 +17,8 @@
     let isLoading = false;
     let suggestionsLoaded = false;
     let lastBotData = null; // {question, answer, source, type}
+    let awaitingRating = false; // 🔒 يمنع السؤال التالي لحد ما يقيّم
+    let lessonTitle = ''; // اسم الدرس للعرض
 
     let uiCreated = false;
 
@@ -87,7 +89,7 @@
                 <div id="chat-header">
                     <div class="chat-header-info">
                         <span class="chat-header-icon">💬</span>
-                        <span class="chat-header-title">اسأل عن الدرس</span>
+                        <span class="chat-header-title" id="chat-title">اسأل عن الدرس</span>
                     </div>
                     <button id="chat-close-btn" title="إغلاق">✕</button>
                 </div>
@@ -95,7 +97,7 @@
                 <div id="chat-messages">
                     <div class="chat-msg bot">
                         <div class="chat-msg-content">
-                            مرحباً! 👋 اسألني أي سؤال عن محتوى هذا الدرس وسأحاول مساعدتك.
+                            مرحباً! 👋 أنا مُساعدك في منصة <strong>عِلْمٌ يُنْتَفَعُ بِهِ</strong>.<br>اسألني أي سؤال عن محتوى هذا الدرس وسأحاول مساعدتك.
                         </div>
                     </div>
                 </div>
@@ -154,9 +156,10 @@
             win.classList.add('chat-visible');
             fab.classList.add('chat-fab-hidden');
             document.getElementById('chat-input').focus();
-            // Load suggestions on first open
+            // Load suggestions + lesson title on first open
             if (!suggestionsLoaded && lessonId) {
                 loadSuggestions();
+                loadLessonTitle();
                 suggestionsLoaded = true;
             }
         } else {
@@ -166,9 +169,30 @@
         }
     }
 
+    // ─── Load Lesson Title ───
+    async function loadLessonTitle() {
+        try {
+            const resp = await fetch(`/api/public/lessons/${lessonId}`);
+            const data = await resp.json();
+            if (data && data.title) {
+                lessonTitle = data.title;
+                const titleEl = document.getElementById('chat-title');
+                if (titleEl) titleEl.textContent = `اسأل عن: ${lessonTitle}`;
+            }
+        } catch (e) {
+            console.warn('Could not load lesson title:', e);
+        }
+    }
+
     // ─── Send Message ───
     async function sendMessage(overrideText) {
         if (isLoading) return;
+
+        // 🔒 لازم يقيّم الإجابة السابقة الأول
+        if (awaitingRating) {
+            showRatingNotice();
+            return;
+        }
 
         const input = document.getElementById('chat-input');
         const text = overrideText || input.value.trim();
@@ -267,10 +291,20 @@
         const msgEl = document.getElementById(msgId);
         if (!msgEl) return;
 
+        // 🔒 اقفل الإدخال لحد ما يقيّم
+        awaitingRating = true;
+        const input = document.getElementById('chat-input');
+        if (input) {
+            input.disabled = true;
+            input.placeholder = '⬇️ قيّم الإجابة أولاً للمتابعة...';
+        }
+        const sendBtn = document.getElementById('chat-send-btn');
+        if (sendBtn) sendBtn.disabled = true;
+
         const ratingDiv = document.createElement('div');
         ratingDiv.className = 'chat-rating';
         ratingDiv.innerHTML = `
-            <span class="chat-rating-label">هل الإجابة مفيدة؟</span>
+            <span class="chat-rating-label">⭐ قيّم الإجابة لمساعدتنا في التطوير:</span>
             <button class="chat-rate-btn" data-helpful="true" title="مفيدة">👍</button>
             <button class="chat-rate-btn" data-helpful="false" title="غير مفيدة">👎</button>
         `;
@@ -282,6 +316,18 @@
             btn.addEventListener('click', async () => {
                 const isHelpful = btn.getAttribute('data-helpful') === 'true';
                 ratingDiv.innerHTML = `<span class="chat-rating-done">${isHelpful ? '👍 شكراً لتقييمك!' : '👎 شكراً، سنحسن الإجابات!'}</span>`;
+
+                // ✅ افتح الإدخال تاني
+                awaitingRating = false;
+                const input = document.getElementById('chat-input');
+                if (input) {
+                    input.disabled = false;
+                    input.placeholder = 'اكتب سؤالك هنا...';
+                    input.focus();
+                }
+                // إخفاء الـ notice لو موجود
+                const notice = document.getElementById('chat-rating-notice');
+                if (notice) notice.remove();
 
                 try {
                     await fetch(FEEDBACK_URL, {
@@ -300,6 +346,23 @@
                 }
             });
         });
+    }
+
+    // ─── Rating Notice ───
+    function showRatingNotice() {
+        // لو الـ notice موجود بالفعل متضيفوش تاني
+        if (document.getElementById('chat-rating-notice')) return;
+
+        const container = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.id = 'chat-rating-notice';
+        div.className = 'chat-rating-notice';
+        div.innerHTML = '⬆️ من فضلك قيّم الإجابة السابقة (👍 أو 👎) عشان نقدر نطوّر المنصة — شكراً لتعاونك! 🙏';
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+
+        // اختفاء تلقائي بعد 4 ثوانٍ
+        setTimeout(() => { if (div.parentNode) div.remove(); }, 4000);
     }
 
     // ─── Format Answer ───
@@ -579,6 +642,18 @@
 .chat-rating-done {
     font-size: 12px;
     color: rgba(212,175,55,0.7);
+    animation: chat-fade-in 0.3s ease;
+}
+
+/* ── Rating Notice ── */
+.chat-rating-notice {
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.25);
+    color: #d4af37;
+    font-size: 12px;
+    text-align: center;
     animation: chat-fade-in 0.3s ease;
 }
 
