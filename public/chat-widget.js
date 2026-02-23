@@ -8,11 +8,15 @@
 
     // ─── Config ───
     const API_URL = '/api/public/chat';
+    const SUGGESTIONS_URL = '/api/public/chat/suggestions';
+    const FEEDBACK_URL = '/api/public/chat/feedback';
 
     // ─── State ───
     let isOpen = false;
     let lessonId = null;
     let isLoading = false;
+    let suggestionsLoaded = false;
+    let lastBotData = null; // {question, answer, source, type}
 
     let uiCreated = false;
 
@@ -150,6 +154,11 @@
             win.classList.add('chat-visible');
             fab.classList.add('chat-fab-hidden');
             document.getElementById('chat-input').focus();
+            // Load suggestions on first open
+            if (!suggestionsLoaded && lessonId) {
+                loadSuggestions();
+                suggestionsLoaded = true;
+            }
         } else {
             win.classList.remove('chat-visible');
             win.classList.add('chat-hidden');
@@ -158,12 +167,16 @@
     }
 
     // ─── Send Message ───
-    async function sendMessage() {
+    async function sendMessage(overrideText) {
         if (isLoading) return;
 
         const input = document.getElementById('chat-input');
-        const text = input.value.trim();
+        const text = overrideText || input.value.trim();
         if (text.length < 3) return;
+
+        // Remove suggestions if visible
+        const sugBox = document.getElementById('chat-suggestions');
+        if (sugBox) sugBox.remove();
 
         // Add user message
         addMsg('user', text);
@@ -195,9 +208,15 @@
                 return;
             }
 
+            // Save for feedback
+            lastBotData = { question: text, answer: data.answer, source: data.type, lessonId };
+
             // Badge (فوري / بحث / AI)
             const badge = data.badge ? `<span class="chat-badge">${data.badge}</span>` : '';
-            addMsg('bot', badge + formatAnswer(data.answer));
+            const msgId = addMsg('bot', badge + formatAnswer(data.answer));
+
+            // Add rating buttons
+            addRatingButtons(msgId, lastBotData);
 
         } catch (err) {
             removeMsg(loadingId);
@@ -206,6 +225,81 @@
         } finally {
             isLoading = false;
         }
+    }
+
+    // ─── Load Suggestions ───
+    async function loadSuggestions() {
+        try {
+            const resp = await fetch(`${SUGGESTIONS_URL}/${lessonId}`);
+            const data = await resp.json();
+            if (data.suggestions && data.suggestions.length > 0) {
+                showSuggestions(data.suggestions);
+            }
+        } catch (err) {
+            console.warn('Could not load suggestions:', err);
+        }
+    }
+
+    function showSuggestions(questions) {
+        const container = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.id = 'chat-suggestions';
+        div.className = 'chat-suggestions';
+        div.innerHTML = '<p class="chat-sug-title">💡 أسئلة مقترحة:</p>' +
+            questions.map(q =>
+                `<button class="chat-sug-btn" data-q="${q.replace(/"/g, '&quot;')}">${q}</button>`
+            ).join('');
+
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+
+        // Click handlers
+        div.querySelectorAll('.chat-sug-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const q = btn.getAttribute('data-q');
+                sendMessage(q);
+            });
+        });
+    }
+
+    // ─── Rating Buttons ───
+    function addRatingButtons(msgId, botData) {
+        const msgEl = document.getElementById(msgId);
+        if (!msgEl) return;
+
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'chat-rating';
+        ratingDiv.innerHTML = `
+            <span class="chat-rating-label">هل الإجابة مفيدة؟</span>
+            <button class="chat-rate-btn" data-helpful="true" title="مفيدة">👍</button>
+            <button class="chat-rate-btn" data-helpful="false" title="غير مفيدة">👎</button>
+        `;
+
+        const content = msgEl.querySelector('.chat-msg-content');
+        if (content) content.appendChild(ratingDiv);
+
+        ratingDiv.querySelectorAll('.chat-rate-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const isHelpful = btn.getAttribute('data-helpful') === 'true';
+                ratingDiv.innerHTML = `<span class="chat-rating-done">${isHelpful ? '👍 شكراً لتقييمك!' : '👎 شكراً، سنحسن الإجابات!'}</span>`;
+
+                try {
+                    await fetch(FEEDBACK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            lessonId: botData.lessonId,
+                            question: botData.question,
+                            answer: botData.answer,
+                            source: botData.source,
+                            isHelpful
+                        })
+                    });
+                } catch (e) {
+                    console.warn('Feedback send failed:', e);
+                }
+            });
+        });
     }
 
     // ─── Format Answer ───
@@ -422,6 +516,70 @@
 @keyframes chat-dots {
     0%, 80%, 100% { opacity: 0; }
     40% { opacity: 1; }
+}
+
+/* ── Suggested Questions ── */
+.chat-suggestions {
+    padding: 8px 0;
+    animation: chat-fade-in 0.3s ease;
+}
+.chat-sug-title {
+    font-size: 12px;
+    color: rgba(212,175,55,0.7);
+    margin: 0 0 8px 0;
+}
+.chat-sug-btn {
+    display: block;
+    width: 100%;
+    text-align: right;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 10px;
+    background: rgba(212,175,55,0.05);
+    color: #e0e0e0;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.chat-sug-btn:hover {
+    background: rgba(212,175,55,0.15);
+    border-color: #d4af37;
+    color: #d4af37;
+}
+
+/* ── Rating Buttons ── */
+.chat-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+.chat-rating-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+}
+.chat-rate-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.chat-rate-btn:hover {
+    background: rgba(212,175,55,0.15);
+    border-color: #d4af37;
+    transform: scale(1.1);
+}
+.chat-rating-done {
+    font-size: 12px;
+    color: rgba(212,175,55,0.7);
+    animation: chat-fade-in 0.3s ease;
 }
 
 /* ── Input Area ── */

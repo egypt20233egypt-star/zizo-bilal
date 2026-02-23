@@ -224,8 +224,23 @@ function localSearch(contextText, question) {
     return null;
 }
 
+// ============ Feedback Schema (inline — Phase 9B) ============
+const mongoose = require('mongoose');
+const feedbackSchema = new mongoose.Schema({
+    lessonId: { type: String, required: true },
+    question: { type: String, required: true },
+    answer: { type: String, required: true },
+    source: { type: String, enum: ['direct', 'local', 'ai', 'fallback'], default: 'ai' },
+    isHelpful: { type: Boolean, required: true },
+    ip: String,
+    timestamp: { type: Date, default: Date.now }
+});
+feedbackSchema.index({ lessonId: 1, source: 1, isHelpful: 1 });
+const Feedback = mongoose.models.Feedback || mongoose.model('Feedback', feedbackSchema);
+
 // ============ POST /api/public/chat ============
 router.post('/', async (req, res) => {
+    const startTime = Date.now();
     try {
         const { question, lessonId } = req.body;
 
@@ -255,6 +270,7 @@ router.post('/', async (req, res) => {
             const answer = `📚 عنوان الدرس: **${lesson.title}**` + (lesson.subtitle ? `\n📝 ${lesson.subtitle}` : '');
             addToHistory(userIP, lessonId, 'user', cleanQuestion);
             addToHistory(userIP, lessonId, 'assistant', answer);
+            logChat({ lessonId, question: cleanQuestion, source: 'direct', responseTime: Date.now() - startTime });
             return res.json({
                 type: 'direct',
                 answer,
@@ -276,6 +292,7 @@ router.post('/', async (req, res) => {
             }
             addToHistory(userIP, lessonId, 'user', cleanQuestion);
             addToHistory(userIP, lessonId, 'assistant', answer);
+            logChat({ lessonId, question: cleanQuestion, source: 'direct', responseTime: Date.now() - startTime });
             return res.json({
                 type: 'direct',
                 answer,
@@ -292,6 +309,7 @@ router.post('/', async (req, res) => {
         if (localResult && localResult.type === 'exact_match') {
             addToHistory(userIP, lessonId, 'user', cleanQuestion);
             addToHistory(userIP, lessonId, 'assistant', localResult.snippet);
+            logChat({ lessonId, question: cleanQuestion, source: 'local', responseTime: Date.now() - startTime });
             return res.json({
                 type: 'local',
                 answer: localResult.snippet,
@@ -308,6 +326,7 @@ router.post('/', async (req, res) => {
             if (localResult && localResult.type === 'keyword_match') {
                 addToHistory(userIP, lessonId, 'user', cleanQuestion);
                 addToHistory(userIP, lessonId, 'assistant', localResult.snippet);
+                logChat({ lessonId, question: cleanQuestion, source: 'local', responseTime: Date.now() - startTime });
                 return res.json({
                     type: 'local',
                     answer: localResult.snippet,
@@ -315,6 +334,7 @@ router.post('/', async (req, res) => {
                     badge: '🔍 بحث'
                 });
             }
+            logChat({ lessonId, question: cleanQuestion, source: 'fallback', responseTime: Date.now() - startTime });
             return res.json({
                 type: 'fallback',
                 answer: 'عذراً، خدمة الذكاء الاصطناعي غير متاحة حالياً وما وجدت إجابة مباشرة في النص.',
@@ -352,6 +372,7 @@ router.post('/', async (req, res) => {
         // حفظ في المحادثة
         addToHistory(userIP, lessonId, 'user', cleanQuestion);
         addToHistory(userIP, lessonId, 'assistant', aiAnswer);
+        logChat({ lessonId, question: cleanQuestion, source: 'ai', responseTime: Date.now() - startTime });
 
         return res.json({
             type: 'ai',
@@ -362,6 +383,7 @@ router.post('/', async (req, res) => {
 
     } catch (err) {
         console.error('❌ Chatbot Error:', err);
+        logChat({ lessonId: req.body?.lessonId, question: req.body?.question, source: 'error', responseTime: Date.now() - startTime, error: err.message });
 
         // Rate limit / quota errors
         if (err.status === 429 || err.message?.includes('quota') || err.message?.includes('rate')) {
@@ -373,6 +395,103 @@ router.post('/', async (req, res) => {
         return res.status(500).json({ error: 'فشل في معالجة السؤال. حاول تاني.' });
     }
 });
+
+// ============ GET /api/public/chat/suggestions/:lessonId ============
+// Phase 9B: أسئلة مقترحة — بدون AI، مبنية على محتوى الدرس
+router.get('/suggestions/:lessonId', async (req, res) => {
+    try {
+        const lesson = await Lesson.findById(req.params.lessonId)
+            .select('title subtitle sheikhId overview benefits quranHadith fiqh stories characters practicalApplication summary kidsCorner')
+            .lean();
+
+        if (!lesson) return res.json({ suggestions: [] });
+
+        const suggestions = [];
+
+        // أسئلة ذكية مبنية على الأقسام الموجودة في الدرس
+        if (lesson.overview) {
+            suggestions.push(`ما هي أهم نقاط درس "${lesson.title}"؟`);
+        }
+        if (lesson.benefits) {
+            suggestions.push('ما هي أهم الفوائد المذكورة في هذا الدرس؟');
+        }
+        if (lesson.quranHadith) {
+            suggestions.push('ما الآيات والأحاديث المذكورة في الدرس؟');
+        }
+        if (lesson.fiqh) {
+            suggestions.push('ما الأحكام الفقهية في هذا الدرس؟');
+        }
+        if (lesson.stories) {
+            suggestions.push('ما القصص المذكورة في الدرس؟');
+        }
+        if (lesson.characters) {
+            suggestions.push('من الشخصيات المذكورة في هذا الدرس؟');
+        }
+        if (lesson.practicalApplication) {
+            suggestions.push('كيف أطبق ما تعلمت من هذا الدرس في حياتي؟');
+        }
+        if (lesson.summary) {
+            suggestions.push('لخص لي هذا الدرس باختصار');
+        }
+        if (lesson.kidsCorner) {
+            suggestions.push('ما المحتوى المخصص للأطفال في هذا الدرس؟');
+        }
+
+        // دايماً أضف سؤال عام
+        if (suggestions.length === 0) {
+            suggestions.push(
+                `ما هو موضوع درس "${lesson.title}"؟`,
+                'ما أهم النقاط في هذا الدرس؟',
+                'كيف أستفيد من هذا الدرس؟'
+            );
+        }
+
+        // Shuffle وخد 3 بس
+        const shuffled = suggestions.sort(() => 0.5 - Math.random());
+        res.json({ suggestions: shuffled.slice(0, 3) });
+
+    } catch (err) {
+        console.error('❌ Suggestions Error:', err);
+        res.json({ suggestions: [] });
+    }
+});
+
+// ============ POST /api/public/chat/feedback ============
+// Phase 9B: تقييم الإجابة — 👍/👎
+router.post('/feedback', async (req, res) => {
+    try {
+        const { lessonId, question, answer, source, isHelpful } = req.body;
+
+        if (!lessonId || !question || typeof isHelpful !== 'boolean') {
+            return res.status(400).json({ error: 'بيانات ناقصة' });
+        }
+
+        const userIP = req.ip || req.connection?.remoteAddress || 'unknown';
+
+        await Feedback.create({
+            lessonId,
+            question: question.slice(0, 500),
+            answer: (answer || '').slice(0, 2000),
+            source: source || 'unknown',
+            isHelpful,
+            ip: userIP
+        });
+
+        console.log(`📊 [FEEDBACK] ${isHelpful ? '👍' : '👎'} | source=${source} | lesson=${lessonId}`);
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error('❌ Feedback Error:', err);
+        res.status(500).json({ error: 'فشل حفظ التقييم' });
+    }
+});
+
+// ============ Logging Helper ============
+function logChat({ lessonId, question, source, responseTime, error }) {
+    const emoji = { direct: '⚡', local: '🔍', ai: '🤖', fallback: '⚠️', error: '❌' };
+    console.log(`💬 [CHAT] ${emoji[source] || '?'} source=${source} | time=${responseTime}ms | lesson=${lessonId} | q="${(question || '').slice(0, 60)}"`);
+    if (error) console.log(`   └── error: ${error}`);
+}
 
 module.exports = router;
 
