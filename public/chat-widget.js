@@ -549,10 +549,10 @@
             .replace(/&lt;/g, '<')
             .replace(/&amp;/g, '&')
             .replace(/&quot;/g, '"')
-            // Section Titles: **text** → عنوان رئيسي بارز
-            .replace(/\*\*(.+?)\*\*/g, '<div class="chat-section-title">$1</div>')
-            // Verses & Hadiths: *text* → اقتباس مميز (آية/حديث)
-            .replace(/\*(.+?)\*/g, '<div class="chat-verse">$1</div>')
+            // Section Titles: **text** → عنوان رئيسي بارز (min 2 chars)
+            .replace(/\*\*(.{2,}?)\*\*/g, '<div class="chat-section-title">$1</div>')
+            // Verses & Hadiths: *text* → اقتباس مميز (min 3 chars, not starting with space)
+            .replace(/(?<!\*)\*([^\*\n]{3,}?)\*(?!\*)/g, '<div class="chat-verse">$1</div>')
             // Tags: [emoji text] → badge ذهبي
             .replace(/\[([^\]]{2,30})\]/g, '<span class="chat-tag">$1</span>')
             // Inline code
