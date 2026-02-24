@@ -194,7 +194,80 @@ const SUB_KEY_LABELS = {
 const SKIP_KEYS = new Set(['_id', '__v', '$__', '$isNew', 'id', '_doc']);
 
 /**
- * تحويل Object لنص مقروء بـ labels عربية
+ * 🔄 ترجمة ذكية تلقائية لأي مفتاح إنجليزي
+ * بدل ما نضيف كل مفتاح يدوي — بنفكك camelCase ونترجم كلمة كلمة
+ */
+const WORD_TRANSLATIONS = {
+    'text': 'النص', 'name': 'الاسم', 'title': 'العنوان', 'type': 'النوع',
+    'number': 'الرقم', 'num': 'الترتيب', 'count': 'العدد', 'total': 'الإجمالي',
+    'surah': 'السورة', 'ayah': 'الآية', 'verse': 'الآية', 'hadith': 'الحديث',
+    'meaning': 'المعنى', 'purpose': 'الغرض', 'description': 'الوصف',
+    'application': 'التطبيق', 'practical': 'عملي', 'step': 'الخطوة',
+    'steps': 'الخطوات', 'action': 'الإجراء', 'actions': 'الإجراءات',
+    'question': 'السؤال', 'answer': 'الإجابة', 'correct': 'صحيح',
+    'source': 'المصدر', 'reference': 'المرجع', 'evidence': 'الدليل',
+    'category': 'التصنيف', 'level': 'المستوى', 'grade': 'الدرجة',
+    'time': 'الوقت', 'duration': 'المدة', 'date': 'التاريخ',
+    'value': 'القيمة', 'result': 'النتيجة', 'reason': 'السبب',
+    'benefit': 'الفائدة', 'benefits': 'الفوائد', 'tip': 'نصيحة',
+    'warning': 'تحذير', 'warnings': 'التحذيرات', 'note': 'ملاحظة',
+    'rule': 'الحكم', 'ruling': 'الحكم', 'rulings': 'الأحكام',
+    'story': 'القصة', 'stories': 'القصص', 'event': 'الحدث', 'events': 'الأحداث',
+    'person': 'الشخصية', 'character': 'الشخصية', 'role': 'الدور',
+    'stage': 'المرحلة', 'stages': 'المراحل', 'point': 'النقطة', 'points': 'النقاط',
+    'main': 'رئيسي', 'key': 'مفتاحي', 'important': 'مهم',
+    'reward': 'الثواب', 'rewards': 'الأجور', 'punishment': 'العقوبة',
+    'lesson': 'الدرس', 'summary': 'الملخص', 'overview': 'نظرة عامة',
+    'content': 'المحتوى', 'example': 'المثال', 'examples': 'الأمثلة',
+    'age': 'العمر', 'range': 'النطاق', 'target': 'المستهدف',
+    'learning': 'تعليمي', 'outcome': 'المخرج', 'objective': 'الهدف',
+    'impact': 'الأثر', 'condition': 'الشرط', 'method': 'الطريقة',
+    'narrator': 'الراوي', 'explanation': 'الشرح', 'correction': 'التصحيح',
+    'mistake': 'الخطأ', 'is': '', 'the': '', 'and': 'و', 'of': '',
+    'start': 'البداية', 'end': 'النهاية', 'page': 'الصفحة',
+    'author': 'المؤلف', 'publisher': 'الناشر', 'image': 'الصورة',
+    'url': 'الرابط', 'link': 'الرابط', 'practice': 'التطبيق',
+    'context': 'السياق', 'audience': 'الجمهور', 'label': 'التسمية',
+    'volume': 'المجلد', 'tools': 'الأدوات', 'activity': 'النشاط',
+};
+
+/**
+ * ترجمة تلقائية لمفتاح إنجليزي → عربي
+ * 1. يدور في SUB_KEY_LABELS + SECTION_LABELS
+ * 2. لو مش موجود → يفكك camelCase ويترجم كلمة كلمة
+ * 3. لو القيمة عربية → يرجع القيمة بدون label
+ */
+function autoLabel(key, val) {
+    // أولاً: القواميس المحفوظة
+    if (SUB_KEY_LABELS[key]) return SUB_KEY_LABELS[key];
+    if (SECTION_LABELS[key]) return SECTION_LABELS[key];
+
+    // ثانياً: لو المفتاح عربي أصلاً — يرجعه زي ما هو
+    if (/[\u0600-\u06FF]/.test(key)) return key;
+
+    // ثالثاً: تفكيك camelCase وترجمة كل كلمة
+    const words = key
+        .replace(/([A-Z])/g, ' $1')  // camelCase → spaces
+        .replace(/[_-]/g, ' ')        // snake_case/kebab → spaces
+        .trim()
+        .toLowerCase()
+        .split(/\s+/);
+
+    const translated = words
+        .map(w => WORD_TRANSLATIONS[w] || '')
+        .filter(w => w.length > 0);
+
+    if (translated.length > 0) return translated.join(' ');
+
+    // رابعاً: لو القيمة نفسها عربية → نرجعها بدون label
+    if (typeof val === 'string' && /[\u0600-\u06FF]/.test(val)) return null; // null = skip label
+
+    // أخيراً: نرجع null عشان نخفي المفتاح ونعرض القيمة بس
+    return null;
+}
+
+/**
+ * تحويل Object لنص مقروء بـ labels عربية (ديناميكياً!)
  */
 function humanizeObject(obj, depth) {
     if (!depth) depth = 0;
@@ -215,18 +288,20 @@ function humanizeObject(obj, depth) {
         if (!val && val !== 0) continue;
         if (SKIP_KEYS.has(key)) continue;
 
-        var label = SUB_KEY_LABELS[key] || SECTION_LABELS[key] || key;
+        var label = autoLabel(key, val);
 
         if (typeof val === 'boolean') {
-            parts.push(label + ': ' + (val ? 'نعم ✅' : 'لا ❌'));
+            var boolText = val ? 'نعم ✅' : 'لا ❌';
+            parts.push(label ? label + ': ' + boolText : boolText);
         } else if (typeof val === 'number') {
-            parts.push(label + ': ' + val);
+            parts.push(label ? label + ': ' + val : String(val));
         } else if (typeof val === 'string') {
-            parts.push(label + ': ' + val);
+            // لو مفيش label → نعرض القيمة لوحدها (لو عربية)
+            parts.push(label ? label + ': ' + val : val);
         } else if (typeof val === 'object') {
             var nested = humanizeObject(val, depth + 1);
             if (nested && nested.trim()) {
-                parts.push(label + ':\n' + nested);
+                parts.push(label ? label + ':\n' + nested : nested);
             }
         }
     }
