@@ -540,7 +540,7 @@
         setTimeout(() => { if (div.parentNode) div.remove(); }, 4000);
     }
 
-    // ─── Format Answer (تنسيق متقدم) ───
+    // ─── Format Answer (تنسيق متقدم — Premium Unified v2) ───
     function formatAnswer(text) {
         if (!text) return '';
         return text
@@ -549,18 +549,22 @@
             .replace(/&lt;/g, '<')
             .replace(/&amp;/g, '&')
             .replace(/&quot;/g, '"')
-            // Bold
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            // Section Titles: **text** → عنوان رئيسي بارز
+            .replace(/\*\*(.+?)\*\*/g, '<div class="chat-section-title">$1</div>')
+            // Verses & Hadiths: *text* → اقتباس مميز (آية/حديث)
+            .replace(/\*(.+?)\*/g, '<div class="chat-verse">$1</div>')
+            // Tags: [emoji text] → badge ذهبي
+            .replace(/\[([^\]]{2,30})\]/g, '<span class="chat-tag">$1</span>')
             // Inline code
             .replace(/`(.*?)`/g, '<code>$1</code>')
             // Blockquotes (> at line start)
-            .replace(/^>\s*(.*)/gm, '<span class="chat-blockquote">$1</span>')
-            // Numbered lists: "1. text" or "١. text"
+            .replace(/^>\s*(.*)/gm, '<div class="chat-blockquote">$1</div>')
+            // Numbered lists: "1. text" or "1) text"
             .replace(/^(\d+[\.\)\-])\s*(.*)/gm, '<div class="chat-list-item"><span class="chat-list-num">$1</span> $2</div>')
             // Bullet points: "- text" or "• text"
-            .replace(/^[\-\•\*]\s+(.*)/gm, '<div class="chat-list-item"><span class="chat-list-bullet">●</span> $1</div>')
+            .replace(/^[\-\•]\s+(.*)/gm, '<div class="chat-list-item"><span class="chat-list-bullet">●</span> $1</div>')
             // Section headers: lines ending with :
-            .replace(/^([^\n<]{4,30}):$/gm, '<div class="chat-section-title">$1</div>')
+            .replace(/^([^\n<]{4,40}):$/gm, '<div class="chat-section-title">$1</div>')
             // Double newlines = paragraph break
             .replace(/\n\n/g, '<div class="chat-para-break"></div>')
             // Single newlines
@@ -1116,69 +1120,114 @@
     display: block;
     border-right: 3px solid;
     border-image: linear-gradient(180deg, var(--gold), rgba(212,175,55,0.2)) 1;
-    padding: 10px 14px 10px 8px;
-    margin: 8px 0;
-    color: rgba(255,255,255,0.75);
+    padding: 12px 16px 12px 10px;
+    margin: 10px 0;
+    color: rgba(255,255,255,0.8);
     font-style: italic;
-    background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0.01) 100%);
+    background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(212,175,55,0.02) 100%);
     border-radius: 0 10px 10px 0;
     line-height: 1.9;
 }
 
-/* ── Response List Items (Cards) ── */
+/* ── Section Title (العنوان الرئيسي — أعرض وأبرز) ── */
+.chat-section-title {
+    display: block;
+    font-weight: 800;
+    color: var(--gold);
+    font-size: 16px;
+    margin: 16px 0 10px;
+    padding: 10px 14px 8px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.04) 100%);
+    border-radius: 8px;
+    border-right: 4px solid var(--gold);
+    border-bottom: 2px solid;
+    border-image: linear-gradient(90deg, var(--gold), transparent) 1;
+    box-shadow: 0 2px 8px rgba(212,175,55,0.08);
+    letter-spacing: 0.3px;
+    line-height: 1.6;
+}
+
+/* ── Verse / Hadith (آية أو حديث — اقتباس مميز) ── */
+.chat-verse {
+    display: block;
+    border-right: 3px solid var(--gold);
+    padding: 14px 18px 14px 12px;
+    margin: 12px 0;
+    color: rgba(255,255,255,0.85);
+    font-size: 15px;
+    font-style: italic;
+    background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(30,30,30,0.5) 100%);
+    border-radius: 0 10px 10px 0;
+    line-height: 2;
+    position: relative;
+}
+.chat-verse::before {
+    content: '📖';
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    font-size: 16px;
+    opacity: 0.5;
+}
+
+/* ── Tag / Badge (تاج ذهبي) ── */
+.chat-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.08) 100%);
+    color: var(--gold);
+    padding: 3px 10px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 3px 2px;
+    border: 1px solid rgba(212,175,55,0.25);
+    letter-spacing: 0.2px;
+}
+
+/* ── Response List Items (Cards — كروت محسّنة) ── */
 .chat-list-item {
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    padding: 10px 12px;
-    margin: 5px 0;
+    padding: 12px 14px;
+    margin: 6px 0;
     background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-    border: 1px solid rgba(255,255,255,0.04);
-    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-right: 3px solid rgba(212,175,55,0.2);
+    border-radius: 10px;
     line-height: 1.8;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
 }
 .chat-list-item:hover {
     background: rgba(255,255,255,0.06);
-    border-color: rgba(212,175,55,0.1);
+    border-right-color: rgba(212,175,55,0.5);
+    transform: translateX(-3px);
+    box-shadow: 0 2px 8px rgba(212,175,55,0.06);
 }
 .chat-list-num {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    height: 24px;
+    min-width: 26px;
+    height: 26px;
     background: linear-gradient(135deg, var(--gold), #b8941e);
     color: var(--dark-1);
     font-weight: 800;
-    font-size: 11px;
+    font-size: 12px;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-top: 2px;
-    box-shadow: 0 2px 8px rgba(212,175,55,0.2);
+    margin-top: 1px;
+    box-shadow: 0 2px 10px rgba(212,175,55,0.25);
 }
 .chat-list-bullet {
     color: var(--gold);
     font-size: 10px;
     flex-shrink: 0;
     margin-top: 6px;
-    text-shadow: 0 0 6px rgba(212,175,55,0.4);
-}
-.chat-section-title {
-    display: block;
-    font-weight: 700;
-    color: var(--gold);
-    font-size: 15px;
-    margin: 14px 0 6px;
-    padding: 6px 0 4px;
-    background: linear-gradient(90deg, rgba(212,175,55,0.1) 0%, transparent 100%);
-    border-radius: 6px;
-    padding-right: 10px;
-    border-bottom: 2px solid;
-    border-image: linear-gradient(90deg, var(--gold), transparent) 1;
+    text-shadow: 0 0 8px rgba(212,175,55,0.5);
 }
 .chat-para-break {
-    height: 12px;
+    height: 14px;
 }
 
 /* ── Copy Toast ── */
