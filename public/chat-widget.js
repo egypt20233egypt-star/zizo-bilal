@@ -1128,6 +1128,11 @@
     border-radius: 0 10px 10px 0;
     line-height: 1.9;
 }
+/* ── Hide empty styled elements (safety net) ── */
+.chat-section-title:empty,
+.chat-verse:empty,
+.chat-tag:empty,
+.chat-blockquote:empty { display: none !important; }
 
 /* ── Section Title (العنوان الرئيسي — أعرض وأبرز) ── */
 .chat-section-title {
