@@ -185,6 +185,9 @@ const SUB_KEY_LABELS = {
     page: 'الصفحة', volume: 'المجلد', number: 'الرقم',
     grade: 'الدرجة', level: 'المستوى', points: 'النقاط',
     condition: 'الشرط', result: 'النتيجة', reason: 'السبب',
+    application: 'التطبيق العملي', num: 'الترتيب',
+    practice: 'التطبيق', example: 'المثال', context: 'السياق',
+    target: 'المستهدف', audience: 'الجمهور', method: 'الطريقة',
 };
 
 // مفاتيح تقنية نتخطاها — مش مفيدة للمستخدم
