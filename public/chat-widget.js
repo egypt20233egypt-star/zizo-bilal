@@ -34,10 +34,10 @@
         ]
     };
 
-    // Load settings from API (silent fallback to defaults)
+    // Load settings from API (never cache — always fresh)
     async function loadChatSettings() {
         try {
-            const res = await fetch('/api/public/chat-settings');
+            const res = await fetch('/api/public/chat-settings', { cache: 'no-store' });
             if (res.ok) chatSettings = await res.json();
         } catch (e) { /* use defaults */ }
     }

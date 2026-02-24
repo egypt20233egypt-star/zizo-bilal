@@ -137,6 +137,7 @@ app.use('/api/public/chat', chatLimiter, require('./routes/chatbot'));
 app.use('/api/admin/chat-settings', requireAuth, require('./routes/chatSettings'));
 app.use('/api/public/chat-settings', async (req, res) => {
     try {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         const ChatSettings = require('./models/ChatSettings');
         const settings = await ChatSettings.getSettings();
         res.json(settings);
