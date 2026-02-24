@@ -22,6 +22,26 @@
     let ttsUtterance = null; // 🔊 Read Aloud
     let isSpeaking = false;
 
+    // ⚙️ Chat Settings (loaded from API, fallback defaults)
+    let chatSettings = {
+        ratingEnabled: true, ratingRequired: true, ratingStars: 5,
+        copyButtonEnabled: true, whatsappButtonEnabled: true, ttsButtonEnabled: true,
+        suggestionsEnabled: true,
+        quickActions: [
+            { label: 'لخص الدرس', message: 'لخص الدرس', emoji: '📋', enabled: true },
+            { label: 'أهم فوائد', message: 'أهم فوائد الدرس', emoji: '💡', enabled: true },
+            { label: 'آيات وأحاديث', message: 'آيات وأحاديث الدرس', emoji: '📖', enabled: true }
+        ]
+    };
+
+    // Load settings from API (silent fallback to defaults)
+    async function loadChatSettings() {
+        try {
+            const res = await fetch('/api/public/chat-settings');
+            if (res.ok) chatSettings = await res.json();
+        } catch (e) { /* use defaults */ }
+    }
+
     let uiCreated = false;
 
     // Preload TTS voices (async in most browsers)
@@ -31,9 +51,12 @@
     }
 
     // ─── Init ───
-    function init() {
+    async function init() {
         const container = document.getElementById('chat-widget');
         if (!container) return;
+
+        // ⚙️ Load settings from admin panel
+        await loadChatSettings();
 
         lessonId = container.dataset.lessonId || null;
 

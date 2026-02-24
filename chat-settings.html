@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ إعدادات الشات بوت</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111116;
+            --bg-elevated: #1a1a22;
+            --bg-hover: #202029;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-primary: #e8e8ed;
+            --text-secondary: #8888a0;
+            --gold: #DAA520;
+            --accent: #6C5CE7;
+            --success: #00b894;
+            --danger: #e74c3c;
+            --warning: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 1.4rem;
+            color: var(--gold);
+        }
+
+        .back-btn {
+            padding: 8px 20px;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Cards */
+        .settings-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .settings-card:hover {
+            border-color: rgba(218, 165, 32, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            font-size: 1.2rem;
+        }
+
+        /* Toggle Switch */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .setting-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            cursor: pointer;
+        }
+
+        .toggle input {
+            display: none;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 26px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle input:checked+.toggle-slider {
+            background: var(--success);
+        }
+
+        .toggle input:checked+.toggle-slider::before {
+            transform: translateX(22px);
+        }
+
+        /* Number Input */
+        .num-input {
+            width: 60px;
+            padding: 6px 10px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .num-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--gold), #b8941e);
+            color: #1a1a22;
+            width: 100%;
+        }
+
+        .btn-save:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-add {
+            background: var(--accent);
+            color: white;
+            font-size: 13px;
+            padding: 8px 16px;
+        }
+
+        .btn-add:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Quick Actions Table */
+        .qa-table {
+            width: 100%;
+        }
+
+        .qa-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .qa-row:last-child {
+            border-bottom: none;
+        }
+
+        .qa-input {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .qa-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .qa-emoji {
+            width: 50px;
+            text-align: center;
+        }
+
+        .qa-del {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .qa-del:hover {
+            transform: scale(1.2);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--gold);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            z-index: 9999;
+            transition: all 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .toast-error {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .qa-row {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-cog"></i> إعدادات الشات بوت</h1>
+            <a href="/admin" class="back-btn"><i class="fas fa-arrow-right"></i> رجوع للوحة</a>
+        </div>
+
+        <!-- ⭐ Rating Settings -->
+        <div class="settings-card">
+            <div class="card-title"><i class="fas fa-star"></i> إعدادات التقييم</div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">تفعيل التقييم</div>
+                    <div class="setting-desc">إظهار نجوم التقييم بعد كل إجابة</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="ratingEnabled" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">التقييم إلزامي</div>
+                    <div class="setting-desc">المستخدم لازم يقيّم قبل ما يسأل سؤال تاني</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="ratingRequired" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">عدد النجوم</div>
+                    <div class="setting-desc">كم نجمة تظهر في التقييم (3-10)</div>
+                </div>
+                <input type="number" id="ratingStars" class="num-input" min="3" max="10" value="5">
+            </div>
+        </div>
+
+        <!-- 🔘 Button Settings -->
+        <div class="settings-card">
+            <div class="card-title"><i class="fas fa-hand-pointer"></i> أزرار التفاعل</div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">📋 زرار النسخ</div>
+                    <div class="setting-desc">نسخ الإجابة للحافظة</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="copyButtonEnabled" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">📱 زرار الواتساب</div>
+                    <div class="setting-desc">مشاركة الإجابة على الواتساب</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="whatsappButtonEnabled" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">🔊 القراءة الصوتية</div>
+                    <div class="setting-desc">قراءة الإجابة بصوت عالي (TTS)</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="ttsButtonEnabled" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">💡 الأسئلة المقترحة</div>
+                    <div class="setting-desc">إظهار أسئلة مقترحة بعد فتح الشات</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="suggestionsEnabled" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- ⚡ Quick Actions -->
+        <div class="settings-card">
+            <div class="card-title">
+                <i class="fas fa-bolt"></i> الأزرار السريعة
+                <button class="btn btn-add" onclick="addQuickAction()" style="margin-right:auto"><i
+                        class="fas fa-plus"></i> إضافة</button>
+            </div>
+            <div id="quickActionsContainer"></div>
+        </div>
+
+        <!-- 📊 Feedback Stats -->
+        <div class="settings-card">
+            <div class="card-title"><i class="fas fa-chart-bar"></i> إحصائيات التقييمات</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-num" id="statTotal">0</div>
+                    <div class="stat-label">إجمالي</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statPositive">0</div>
+                    <div class="stat-label">👍 إيجابي</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statNegative">0</div>
+                    <div class="stat-label">👎 سلبي</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statAvg">0</div>
+                    <div class="stat-label">⭐ متوسط</div>
+                </div>
+            </div>
+            <button class="btn btn-danger" onclick="deleteAllFeedback()" style="width:100%">
+                <i class="fas fa-trash"></i> حذف كل التقييمات
+            </button>
+        </div>
+
+        <!-- Save -->
+        <button class="btn btn-save" onclick="saveSettings()">
+            <i class="fas fa-save"></i> حفظ الإعدادات
+        </button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API_BASE = '/api/admin/chat-settings';
+        let quickActions = [];
+
+        // ─── Load Settings ───
+        async function loadSettings() {
+            try {
+                const res = await fetch(API_BASE, { credentials: 'include' });
+                if (res.status === 401) { window.location.href = '/admin'; return; }
+                const data = await res.json();
+
+                document.getElementById('ratingEnabled').checked = data.ratingEnabled;
+                document.getElementById('ratingRequired').checked = data.ratingRequired;
+                document.getElementById('ratingStars').value = data.ratingStars;
+                document.getElementById('copyButtonEnabled').checked = data.copyButtonEnabled;
+                document.getElementById('whatsappButtonEnabled').checked = data.whatsappButtonEnabled;
+                document.getElementById('ttsButtonEnabled').checked = data.ttsButtonEnabled;
+                document.getElementById('suggestionsEnabled').checked = data.suggestionsEnabled;
+
+                quickActions = data.quickActions || [];
+                renderQuickActions();
+            } catch (e) {
+                showToast('فشل تحميل الإعدادات: ' + e.message, 'error');
+            }
+        }
+
+        // ─── Save Settings ───
+        async function saveSettings() {
+            const body = {
+                ratingEnabled: document.getElementById('ratingEnabled').checked,
+                ratingRequired: document.getElementById('ratingRequired').checked,
+                ratingStars: parseInt(document.getElementById('ratingStars').value),
+                copyButtonEnabled: document.getElementById('copyButtonEnabled').checked,
+                whatsappButtonEnabled: document.getElementById('whatsappButtonEnabled').checked,
+                ttsButtonEnabled: document.getElementById('ttsButtonEnabled').checked,
+                suggestionsEnabled: document.getElementById('suggestionsEnabled').checked,
+                quickActions: collectQuickActions()
+            };
+
+            try {
+                const res = await fetch(API_BASE, {
+                    method: 'PUT', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ تم حفظ الإعدادات بنجاح!', 'success');
+                } else {
+                    showToast('❌ فشل الحفظ', 'error');
+                }
+            } catch (e) {
+                showToast('❌ خطأ: ' + e.message, 'error');
+            }
+        }
+
+        // ─── Quick Actions ───
+        function renderQuickActions() {
+            const container = document.getElementById('quickActionsContainer');
+            container.innerHTML = quickActions.map((qa, i) => `
+        <div class="qa-row">
+            <input class="qa-input qa-emoji" value="${qa.emoji}" placeholder="📋" data-i="${i}" data-field="emoji">
+            <input class="qa-input" value="${qa.label}" placeholder="اسم الزرار" data-i="${i}" data-field="label">
+            <input class="qa-input" value="${qa.message}" placeholder="الرسالة المرسلة" data-i="${i}" data-field="message">
+            <label class="toggle"><input type="checkbox" ${qa.enabled ? 'checked' : ''} data-i="${i}" data-field="enabled"><span class="toggle-slider"></span></label>
+            <button class="qa-del" onclick="removeQuickAction(${i})"><i class="fas fa-trash-alt"></i></button>
+        </div>
+    `).join('');
+        }
+
+        function addQuickAction() {
+            quickActions.push({ label: '', message: '', emoji: '💡', enabled: true, order: quickActions.length });
+            renderQuickActions();
+        }
+
+        function removeQuickAction(i) {
+            if (confirm('حذف الزرار ده؟')) {
+                quickActions.splice(i, 1);
+                renderQuickActions();
+            }
+        }
+
+        function collectQuickActions() {
+            const rows = document.querySelectorAll('.qa-row');
+            return Array.from(rows).map((row, i) => ({
+                emoji: row.querySelector('[data-field="emoji"]').value || '💡',
+                label: row.querySelector('[data-field="label"]').value,
+                message: row.querySelector('[data-field="message"]').value,
+                enabled: row.querySelector('[data-field="enabled"]').checked,
+                order: i
+            }));
+        }
+
+        // ─── Feedback ───
+        async function loadFeedbackStats() {
+            try {
+                const res = await fetch(API_BASE + '/feedback/stats', { credentials: 'include' });
+                const data = await res.json();
+                document.getElementById('statTotal').textContent = data.total;
+                document.getElementById('statPositive').textContent = data.positive;
+                document.getElementById('statNegative').textContent = data.negative;
+                document.getElementById('statAvg').textContent = data.avgStars;
+            } catch (e) { /* silent */ }
+        }
+
+        async function deleteAllFeedback() {
+            if (!confirm('⚠️ هل أنت متأكد إنك عايز تحذف كل التقييمات؟ ده مش قابل للتراجع!')) return;
+            try {
+                const res = await fetch(API_BASE + '/feedback', {
+                    method: 'DELETE', credentials: 'include'
+                });
+                const data = await res.json();
+                showToast(data.message || 'تم الحذف', 'success');
+                loadFeedbackStats();
+            } catch (e) {
+                showToast('❌ فشل الحذف', 'error');
+            }
+        }
+
+        // ─── Toast ───
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast toast-${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ─── Init ───
+        loadSettings();
+        loadFeedbackStats();
+    </script>
+</body>
+
+</html>

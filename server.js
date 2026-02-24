@@ -133,6 +133,18 @@ app.use('/api/public', require('./routes/public'));
 // 💬 Chatbot Route (Phase 9A — Lesson Chat MVP)
 app.use('/api/public/chat', chatLimiter, require('./routes/chatbot'));
 
+// ⚙️ Chat Settings Routes (Phase 9B+ — Admin Control)
+app.use('/api/admin/chat-settings', requireAuth, require('./routes/chatSettings'));
+app.use('/api/public/chat-settings', async (req, res) => {
+    try {
+        const ChatSettings = require('./models/ChatSettings');
+        const settings = await ChatSettings.getSettings();
+        res.json(settings);
+    } catch (err) {
+        res.status(500).json({ error: 'فشل تحميل الإعدادات' });
+    }
+});
+
 // ============ Page Routes ============
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -148,6 +160,12 @@ app.get('/admin', (req, res) => {
 app.get('/admin/panel', requireAuth, (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(path.join(__dirname, 'admin_panel_v4_merged.html'));
+});
+
+// ⚙️ Chat Settings Page (محمي)
+app.get('/admin/chat-settings', requireAuth, (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile(path.join(__dirname, 'chat-settings.html'));
 });
 
 // Browse (تصفح المشايخ - عام)
