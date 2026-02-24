@@ -173,21 +173,61 @@ const SUB_KEY_LABELS = {
     category: 'التصنيف', type: 'النوع', summary: 'الملخص',
     startingPoint: 'نقطة البداية', mainPoints: 'النقاط الرئيسية',
     practicalSteps: 'الخطوات العملية', impact: 'الأثر',
+    // === مفاتيح إضافية كانت بتظهر بالإنجليزي ===
+    ayahNumber: 'رقم الآية', ayah: 'الآية', surahNumber: 'رقم السورة',
+    meaning: 'المعنى', purpose: 'الغرض', isCorrect: 'الإجابة',
+    stages: 'المراحل', time: 'الوقت', value: 'القيمة',
+    events: 'الأحداث', rewards: 'الأجور والثواب', sunan: 'السنن',
+    warnings: 'التحذيرات', trueFalse: 'صح وخطأ',
+    ayat: 'الآيات', label: 'التسمية', key: 'المفتاح',
+    image: 'الصورة', url: 'الرابط', link: 'الرابط',
+    date: 'التاريخ', author: 'المؤلف', publisher: 'الناشر',
+    page: 'الصفحة', volume: 'المجلد', number: 'الرقم',
+    grade: 'الدرجة', level: 'المستوى', points: 'النقاط',
+    condition: 'الشرط', result: 'النتيجة', reason: 'السبب',
 };
+
+// مفاتيح تقنية نتخطاها — مش مفيدة للمستخدم
+const SKIP_KEYS = new Set(['_id', '__v', '$__', '$isNew', 'id', '_doc']);
 
 /**
  * تحويل Object لنص مقروء بـ labels عربية
  */
-function humanizeObject(obj) {
+function humanizeObject(obj, depth) {
+    if (!depth) depth = 0;
     if (!obj || typeof obj !== 'object') return String(obj || '');
-    const parts = [];
-    for (const [key, val] of Object.entries(obj)) {
-        if (!val) continue;
-        const label = SUB_KEY_LABELS[key] || key;
-        const text = typeof val === 'object' ? JSON.stringify(val) : String(val);
-        parts.push(`${label}: ${text}`);
+    if (depth > 3) return ''; // حماية من التداخل اللانهائي
+
+    // لو Array → نعالج كل عنصر
+    if (Array.isArray(obj)) {
+        return obj.map(function (item) {
+            if (typeof item === 'string') return item;
+            if (typeof item === 'object') return humanizeObject(item, depth + 1);
+            return String(item);
+        }).filter(Boolean).join('\n');
     }
-    return parts.join(' | ');
+
+    var parts = [];
+    for (const [key, val] of Object.entries(obj)) {
+        if (!val && val !== 0) continue;
+        if (SKIP_KEYS.has(key)) continue;
+
+        var label = SUB_KEY_LABELS[key] || SECTION_LABELS[key] || key;
+
+        if (typeof val === 'boolean') {
+            parts.push(label + ': ' + (val ? 'نعم ✅' : 'لا ❌'));
+        } else if (typeof val === 'number') {
+            parts.push(label + ': ' + val);
+        } else if (typeof val === 'string') {
+            parts.push(label + ': ' + val);
+        } else if (typeof val === 'object') {
+            var nested = humanizeObject(val, depth + 1);
+            if (nested && nested.trim()) {
+                parts.push(label + ':\n' + nested);
+            }
+        }
+    }
+    return parts.join('\n');
 }
 
 /**
