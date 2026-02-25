@@ -79,6 +79,37 @@ const SECTION_LABELS = {
     practicalSteps: '🎯 الخطوات العملية',
 };
 
+// ============ SECTION_QUESTIONS (ديناميكي — سؤال لكل section) ============
+const SECTION_QUESTIONS = {
+    overview: (t) => `ما أهم نقاط درس "${t}"؟`,
+    benefits: () => 'ما أهم الفوائد المذكورة في هذا الدرس؟',
+    quranHadith: () => 'ما الآيات والأحاديث المذكورة في الدرس؟',
+    fiqh: () => 'ما الأحكام الفقهية في هذا الدرس؟',
+    stories: () => 'ما القصص المذكورة في الدرس؟',
+    characters: () => 'من الشخصيات المذكورة في هذا الدرس؟',
+    practicalApplication: () => 'كيف أطبق ما تعلمت من هذا الدرس في حياتي؟',
+    summary: () => 'لخص لي هذا الدرس باختصار',
+    kidsCorner: () => 'ما المحتوى المخصص للأطفال في هذا الدرس؟',
+    duaa: () => 'ما الأدعية المذكورة في الدرس؟',
+    scientificMiracles: () => 'ما الإعجاز العلمي المذكور في الدرس؟',
+    commonMistakes: () => 'ما الأخطاء الشائعة المذكورة في الدرس؟',
+    rulings: () => 'ما الأحكام الشرعية في هذا الدرس؟',
+    podcast: () => 'ما محتوى البودكاست في هذا الدرس؟',
+    analysis: () => 'ما التحليل المذكور في هذا الدرس؟',
+    socialMedia: () => 'ما محتوى السوشيال ميديا في الدرس؟',
+    realLifeConnection: () => 'كيف يرتبط هذا الدرس بالواقع؟',
+    lessonPlan: () => 'ما خطة هذا الدرس؟',
+    conclusion: () => 'ما خاتمة هذا الدرس؟',
+    finalConclusion: () => 'ما الخلاصة النهائية للدرس؟',
+    tafseer: () => 'ما التفسير المذكور في الدرس؟',
+    memorization: () => 'ما المطلوب حفظه من هذا الدرس؟',
+    weeklyChallenge: () => 'ما التحدي الأسبوعي في هذا الدرس؟',
+    questions: () => 'ما الأسئلة والأجوبة في هذا الدرس؟',
+    badges: () => 'ما شارات الإنجاز في هذا الدرس؟',
+    discussion: () => 'ما نقاط المناقشة في هذا الدرس؟',
+    homework: () => 'ما واجب هذا الدرس؟',
+};
+
 // ============ System Prompt ============
 const SYSTEM_PROMPT = `أنت مساعد ذكي لمنصة "عِلمٌ يُنتَفَعُ بِه" الدعوية التعليمية.
 
@@ -573,50 +604,57 @@ router.post('/', async (req, res) => {
 });
 
 // ============ GET /api/public/chat/suggestions/:lessonId ============
-// Phase 9B: أسئلة مقترحة — بدون AI، مبنية على محتوى الدرس
+// Phase 9B+: أسئلة مقترحة ذكية — ديناميكية من محتوى الدرس الفعلي
 router.get('/suggestions/:lessonId', async (req, res) => {
     try {
-        const lesson = await Lesson.findById(req.params.lessonId)
-            .select('title subtitle sheikhId overview benefits quranHadith fiqh stories characters practicalApplication summary kidsCorner')
-            .lean();
+        const lesson = await Lesson.findById(req.params.lessonId).lean();
 
         if (!lesson) return res.json({ suggestions: [] });
 
         const suggestions = [];
+        const title = lesson.title || 'الدرس';
 
-        // أسئلة ذكية مبنية على الأقسام الموجودة في الدرس
-        if (lesson.overview) {
-            suggestions.push(`ما هي أهم نقاط درس "${lesson.title}"؟`);
-        }
-        if (lesson.benefits) {
-            suggestions.push('ما هي أهم الفوائد المذكورة في هذا الدرس؟');
-        }
-        if (lesson.quranHadith) {
-            suggestions.push('ما الآيات والأحاديث المذكورة في الدرس؟');
-        }
-        if (lesson.fiqh) {
-            suggestions.push('ما الأحكام الفقهية في هذا الدرس؟');
-        }
-        if (lesson.stories) {
-            suggestions.push('ما القصص المذكورة في الدرس؟');
-        }
-        if (lesson.characters) {
-            suggestions.push('من الشخصيات المذكورة في هذا الدرس؟');
-        }
-        if (lesson.practicalApplication) {
-            suggestions.push('كيف أطبق ما تعلمت من هذا الدرس في حياتي؟');
-        }
-        if (lesson.summary) {
-            suggestions.push('لخص لي هذا الدرس باختصار');
-        }
-        if (lesson.kidsCorner) {
-            suggestions.push('ما المحتوى المخصص للأطفال في هذا الدرس؟');
+        // ⭐ META_KEYS — مفاتيح مش محتوى (نتجاهلها)
+        const META_KEYS = new Set([
+            '_id', '__v', 'title', 'subtitle', 'sheikhId', 'categoryId',
+            'status', 'createdAt', 'updatedAt', 'rawSource', 'content',
+            'order', 'slug', 'views', 'likes'
+        ]);
+
+        // 🧠 Loop ديناميكي على كل sections الدرس
+        for (const [key, value] of Object.entries(lesson)) {
+            if (META_KEYS.has(key)) continue;
+            if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) continue;
+            if (typeof value === 'string' && value.trim().length < 10) continue;
+
+            // لو عندنا سؤال مخصص لهذا الـ section → استخدمه
+            if (SECTION_QUESTIONS[key]) {
+                suggestions.push(SECTION_QUESTIONS[key](title));
+            } else {
+                // 🎯 Fallback ذكي: ولّد سؤال من اسم الـ section
+                const label = SECTION_LABELS[key] || autoLabel(key);
+                if (label && typeof label === 'string') {
+                    const cleanLabel = label.replace(/^[\p{Emoji}\s]+/u, '').trim();
+                    if (cleanLabel.length > 1) {
+                        suggestions.push(`ما محتوى قسم ${cleanLabel} في هذا الدرس؟`);
+                    }
+                }
+            }
         }
 
-        // دايماً أضف سؤال عام
+        // ⭐ Content-aware: لو في آيات، ذكر أول سورة
+        if (lesson.quranHadith && typeof lesson.quranHadith === 'object') {
+            const qhStr = JSON.stringify(lesson.quranHadith);
+            const surahMatch = qhStr.match(/سورة\s+([\u0600-\u06FF]+)/);
+            if (surahMatch) {
+                suggestions.push(`ما الآيات من سورة ${surahMatch[1]} المذكورة في الدرس؟`);
+            }
+        }
+
+        // 🔄 دايماً أضف سؤال عام لو مفيش حاجة
         if (suggestions.length === 0) {
             suggestions.push(
-                `ما هو موضوع درس "${lesson.title}"؟`,
+                `ما هو موضوع درس "${title}"؟`,
                 'ما أهم النقاط في هذا الدرس؟',
                 'كيف أستفيد من هذا الدرس؟'
             );
