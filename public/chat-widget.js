@@ -16,6 +16,7 @@
     let lessonId = null;
     let isLoading = false;
     let suggestionsLoaded = false;
+    let sheikhId = null;  // 🕌 Sheikh mode
     let lastBotData = null; // {question, answer, source, type}
     let awaitingRating = false; // 🔒 يمنع السؤال التالي لحد ما يقيّم
     let lessonTitle = ''; // اسم الدرس للعرض
@@ -59,9 +60,10 @@
         await loadChatSettings();
 
         lessonId = container.dataset.lessonId || null;
+        sheikhId = container.dataset.sheikhId || null;
 
-        // لو مفيش lessonId بعد → نستنى لما يتحط
-        if (!lessonId) {
+        // لو مفيش lessonId ولا sheikhId بعد → نستنى
+        if (!lessonId && !sheikhId) {
             waitForLesson(container);
             return;
         }
@@ -96,15 +98,17 @@
         if (fab) fab.style.display = 'none';
 
         const observer = new MutationObserver(() => {
-            const newId = container.dataset.lessonId;
-            if (newId && newId !== lessonId) {
-                lessonId = newId;
+            const newLessonId = container.dataset.lessonId;
+            const newSheikhId = container.dataset.sheikhId;
+            if ((newLessonId && newLessonId !== lessonId) || (newSheikhId && newSheikhId !== sheikhId)) {
+                lessonId = newLessonId || lessonId;
+                sheikhId = newSheikhId || sheikhId;
                 const fab = document.getElementById('chat-fab');
                 if (fab) fab.style.display = 'flex';
             }
         });
 
-        observer.observe(container, { attributes: true, attributeFilter: ['data-lesson-id'] });
+        observer.observe(container, { attributes: true, attributeFilter: ['data-lesson-id', 'data-sheikh-id'] });
     }
 
     // ─── Create UI ───
@@ -202,9 +206,10 @@
             fab.classList.add('chat-fab-hidden');
             document.getElementById('chat-input').focus();
             // Load suggestions + lesson title on first open
-            if (!suggestionsLoaded && lessonId) {
+            if (!suggestionsLoaded && (lessonId || sheikhId)) {
                 loadSuggestions();
-                loadLessonTitle();
+                if (lessonId) loadLessonTitle();
+                if (sheikhId) loadSheikhTitle();
                 loadChatHistory(); // 🕛 تحميل المحادثات السابقة
                 suggestionsLoaded = true;
             }
@@ -230,6 +235,26 @@
             }
         } catch (e) {
             console.warn('Could not load lesson title:', e);
+        }
+    }
+
+    // ─── Load Sheikh Title (Phase 9C-1) ───
+    async function loadSheikhTitle() {
+        try {
+            const resp = await fetch(`/api/public/sheikhs`);
+            const data = await resp.json();
+            if (data && Array.isArray(data)) {
+                const sheikh = data.find(s => s._id === sheikhId);
+                if (sheikh) {
+                    const displayName = sheikh.name.length > 20
+                        ? sheikh.name.slice(0, 20) + '...'
+                        : sheikh.name;
+                    const titleEl = document.getElementById('chat-title');
+                    if (titleEl) titleEl.textContent = `اسأل عن دروس: ${displayName}`;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not load sheikh title:', e);
         }
     }
 
@@ -264,7 +289,7 @@
             const resp = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: text, lessonId: lessonId })
+                body: JSON.stringify({ question: text, lessonId: lessonId || null, sheikhId: sheikhId || null })
             });
 
             removeMsg(loadingId);
@@ -317,7 +342,13 @@
     // ─── Load Suggestions ───
     async function loadSuggestions() {
         try {
-            const resp = await fetch(`${SUGGESTIONS_URL}/${lessonId}`);
+            let url;
+            if (sheikhId && !lessonId) {
+                url = `${SUGGESTIONS_URL}/sheikh/${sheikhId}`;
+            } else {
+                url = `${SUGGESTIONS_URL}/${lessonId}`;
+            }
+            const resp = await fetch(url);
             const data = await resp.json();
             if (data.suggestions && data.suggestions.length > 0) {
                 showSuggestions(data.suggestions);

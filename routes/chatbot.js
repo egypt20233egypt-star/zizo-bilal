@@ -378,6 +378,80 @@ function buildLessonContext(lesson) {
 }
 
 /**
+ * 🕌 بناء Context من كل دروس شيخ واحد
+ * بيجمع ملخص كل درس (أول 600 حرف) + بيحدد الدرس الأنسب للسؤال
+ */
+async function buildSheikhContext(sheikhId, question) {
+    const lessons = await Lesson.find({ sheikhId }).lean();
+    if (!lessons || lessons.length === 0) return null;
+
+    const sheikh = await Sheikh.findById(sheikhId).select('name').lean();
+    const sheikhName = sheikh?.name || 'الشيخ';
+
+    // 🧠 ترتيب الدروس حسب صلتها بالسؤال (keyword matching)
+    const qLower = (question || '').toLowerCase();
+    const scored = lessons.map(lesson => {
+        const ctx = buildLessonContext(lesson);
+        const keywords = qLower.split(/\s+/).filter(w => w.length > 3);
+        let score = 0;
+        const ctxLower = ctx.toLowerCase();
+        for (const kw of keywords) {
+            if (ctxLower.includes(kw)) score++;
+        }
+        return { lesson, ctx, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+
+    // 📦 بناء الـ Context: الدرس الأنسب كامل + باقي الدروس ملخص
+    let context = `🕌 مكتبة الشيخ ${sheikhName} — ${lessons.length} درس\n\n`;
+    let charCount = context.length;
+    const MAX_CONTEXT = 12000;
+
+    for (let i = 0; i < scored.length; i++) {
+        const { lesson, ctx } = scored[i];
+        const header = `\n=== درس: ${lesson.title} ===\n`;
+
+        if (i === 0 && scored[0].score > 0) {
+            // الدرس الأنسب — ابعت أكتر محتوى
+            const trimmed = ctx.slice(0, 4000);
+            if (charCount + header.length + trimmed.length < MAX_CONTEXT) {
+                context += header + trimmed;
+                charCount += header.length + trimmed.length;
+            }
+        } else {
+            // باقي الدروس — ملخص مختصر
+            const summary = ctx.slice(0, 600);
+            if (charCount + header.length + summary.length < MAX_CONTEXT) {
+                context += header + summary + '\n...(ملخص مختصر)';
+                charCount += header.length + summary.length + 20;
+            } else {
+                break; // وصلنا الحد
+            }
+        }
+    }
+
+    return { context, sheikhName, lessonCount: lessons.length, lessons };
+}
+
+/**
+ * 🕌 System Prompt لوضع الشيخ
+ */
+function getSheikhSystemPrompt(sheikhName, lessonCount) {
+    return `أنت مساعد ذكي لمنصة "عِلمٌ يُنتَفَعُ بِه" الدعوية التعليمية.
+أنت متخصص في الإجابة عن محتوى دروس الشيخ ${sheikhName}.
+لديك ${lessonCount} درس من دروسه.
+
+قواعد صارمة:
+1. أجب فقط من المحتوى المقدم لك (Context) — لا تستخدم معلومات خارجية أبداً
+2. إذا لم تجد الإجابة → قل: "عذراً، لم أجد معلومات كافية عن هذا في دروس الشيخ ${sheikhName}."
+3. استخدم لغة عربية فصحى بسيطة وسلسة
+4. لو فيه آيات قرآنية أو أحاديث في المحتوى → اذكرها بالكامل
+5. أجب بالتفصيل المناسب — لا تختصر المعلومات المهمة
+6. **اذكر عنوان الدرس المصدر** في نهاية إجابتك بين أقواس مربعة مثل [درس: عنوان الدرس]
+7. لو اليوزر سألك سؤال متابعة → راجع سياق المحادثة السابقة واربط الرد`;
+}
+
+/**
  * بحث محلي في نص الدرس عن كلمات من السؤال
  */
 function localSearch(contextText, question) {
@@ -449,18 +523,93 @@ const Feedback = mongoose.models.Feedback || mongoose.model('Feedback', feedback
 router.post('/', async (req, res) => {
     const startTime = Date.now();
     try {
-        const { question, lessonId } = req.body;
+        const { question, lessonId, sheikhId } = req.body;
 
         // ─── Validation ───
         if (!question || typeof question !== 'string' || question.trim().length < 3) {
             return res.status(400).json({ error: 'السؤال لازم يكون 3 حروف على الأقل' });
         }
-        if (!lessonId) {
-            return res.status(400).json({ error: 'lessonId مطلوب' });
+        if (!lessonId && !sheikhId) {
+            return res.status(400).json({ error: 'lessonId أو sheikhId مطلوب' });
         }
 
         const cleanQuestion = question.trim().slice(0, 500); // حد أقصى 500 حرف
         const userIP = req.ip || req.connection?.remoteAddress || 'unknown';
+
+        // ═══════════════════════════════════════
+        // 🕌 SHEIKH MODE — شات عن كل دروس شيخ
+        // ═══════════════════════════════════════
+        if (sheikhId && !lessonId) {
+            const result = await buildSheikhContext(sheikhId, cleanQuestion);
+            if (!result) {
+                return res.status(404).json({ error: 'الشيخ غير موجود أو ليس لديه دروس' });
+            }
+
+            const { context, sheikhName, lessonCount } = result;
+
+            // Local search في context الشيخ
+            const localResult = localSearch(context, cleanQuestion);
+            if (localResult && localResult.type === 'exact_match') {
+                addToHistory(userIP, `sheikh:${sheikhId}`, 'user', cleanQuestion);
+                addToHistory(userIP, `sheikh:${sheikhId}`, 'assistant', localResult.snippet);
+                logChat({ lessonId: `sheikh:${sheikhId}`, question: cleanQuestion, source: 'local', responseTime: Date.now() - startTime });
+                return res.json({
+                    type: 'local',
+                    answer: localResult.snippet,
+                    source: `بحث محلي — دروس الشيخ ${sheikhName}`,
+                    badge: '🔍 بحث'
+                });
+            }
+
+            // AI Fallback
+            if (!aiClient) {
+                if (localResult && localResult.type === 'keyword_match') {
+                    addToHistory(userIP, `sheikh:${sheikhId}`, 'user', cleanQuestion);
+                    addToHistory(userIP, `sheikh:${sheikhId}`, 'assistant', localResult.snippet);
+                    logChat({ lessonId: `sheikh:${sheikhId}`, question: cleanQuestion, source: 'local', responseTime: Date.now() - startTime });
+                    return res.json({
+                        type: 'local',
+                        answer: localResult.snippet,
+                        source: `بحث محلي — دروس الشيخ ${sheikhName}`,
+                        badge: '🔍 بحث'
+                    });
+                }
+                return res.json({
+                    type: 'fallback',
+                    answer: 'عذراً، خدمة الذكاء الاصطناعي غير متاحة حالياً وما وجدت إجابة مباشرة.',
+                    source: 'النظام'
+                });
+            }
+
+            const history = getHistory(userIP, `sheikh:${sheikhId}`);
+            const messages = [
+                { role: 'system', content: getSheikhSystemPrompt(sheikhName, lessonCount) },
+                { role: 'user', content: `المحتوى المتاح:\n\"\"\"\n${context}\n\"\"\"` }
+            ];
+            for (const msg of history) {
+                messages.push({ role: msg.role, content: msg.content });
+            }
+            messages.push({ role: 'user', content: cleanQuestion });
+
+            const completion = await aiClient.chat.completions.create({
+                model: process.env.TENSORIX_MODEL || 'openai/gpt-oss-20b',
+                messages,
+                max_tokens: 1200,
+                temperature: 0.3
+            });
+
+            const aiAnswer = completion.choices?.[0]?.message?.content || 'عذراً، لم أتمكن من توليد إجابة.';
+            addToHistory(userIP, `sheikh:${sheikhId}`, 'user', cleanQuestion);
+            addToHistory(userIP, `sheikh:${sheikhId}`, 'assistant', aiAnswer);
+            logChat({ lessonId: `sheikh:${sheikhId}`, question: cleanQuestion, source: 'ai', responseTime: Date.now() - startTime });
+
+            return res.json({
+                type: 'ai',
+                answer: aiAnswer,
+                source: `🤖 AI — دروس الشيخ ${sheikhName}`,
+                badge: '🤖 AI'
+            });
+        }
 
         // ─── Fetch Lesson ───
         const lesson = await Lesson.findById(lessonId).lean();
@@ -666,6 +815,37 @@ router.get('/suggestions/:lessonId', async (req, res) => {
 
     } catch (err) {
         console.error('❌ Suggestions Error:', err);
+        res.json({ suggestions: [] });
+    }
+});
+
+// ============ GET /api/public/chat/suggestions/sheikh/:sheikhId ============
+// Phase 9C-1: أسئلة مقترحة لشيخ معين
+router.get('/suggestions/sheikh/:sheikhId', async (req, res) => {
+    try {
+        const lessons = await Lesson.find({ sheikhId: req.params.sheikhId }).select('title overview benefits quranHadith stories characters fiqh').lean();
+        if (!lessons || lessons.length === 0) return res.json({ suggestions: [] });
+
+        const sheikh = await Sheikh.findById(req.params.sheikhId).select('name').lean();
+        const sheikhName = sheikh?.name || 'الشيخ';
+
+        const suggestions = [
+            `ما أهم المواضيع التي تناولها الشيخ ${sheikhName}؟`,
+            `لخص لي أهم دروس الشيخ ${sheikhName}`,
+            `ما رأي الشيخ ${sheikhName} في العبادات اليومية؟`,
+        ];
+
+        // أسئلة ديناميكية من عناوين الدروس
+        for (const lesson of lessons.slice(0, 5)) {
+            suggestions.push(`ما أهم نقاط درس "${lesson.title}"؟`);
+        }
+
+        // Shuffle وخد 3
+        const shuffled = suggestions.sort(() => 0.5 - Math.random());
+        res.json({ suggestions: shuffled.slice(0, 3) });
+
+    } catch (err) {
+        console.error('❌ Sheikh Suggestions Error:', err);
         res.json({ suggestions: [] });
     }
 });
