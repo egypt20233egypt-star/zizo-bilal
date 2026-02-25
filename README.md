@@ -202,6 +202,8 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 | 67 | **🐛 إصلاح browser caching للإعدادات**: الإعدادات كانت مش بتتحدث إلا بعد restart السيرفر. السبب: البراوزر بيكاشي API response. الحل: `Cache-Control: no-store` في server + `fetch({ cache: 'no-store' })` في widget | `server.js`, `public/chat-widget.js` |
 | 68 | **🐛 إصلاح JSON الإنجليزي في ردود الشات**: توسيع `SUB_KEY_LABELS` بـ 20+ مفتاح ناقص (ayahNumber, meaning, purpose, stages...) + جعل `humanizeObject()` recursive بدل `JSON.stringify` + إضافة `SKIP_KEYS` للمفاتيح التقنية | `routes/chatbot.js` |
 | 69 | **🤖 ترجمة ديناميكية ذكية للمفاتيح الإنجليزية**: بدل ما نضيف كل مفتاح يدوياً — `autoLabel()` بتفكك camelCase + تترجم كلمة كلمة ب**40+ ترجمة** + لو القيمة عربية تظهر بدون label. نظام مرن لا يحتاج تدخل يدوي | `routes/chatbot.js` |
+| 70 | **🔍 Code Review شامل للمشروع v7.1**: مراجعة كاملة لكل الملفات (server.js + models + routes + middleware) — اكتشاف 15 ملاحظة: 2 أمنية حرجة (.env + SESSION_SECRET) + N+1 queries + Feedback schema مش في models + conversationHistory في RAM + توثيق مكرر. التقييم الإجمالي: 7/10 مع ملاحظة إن التوثيق 9/10 والأمان 6/10 | جميع ملفات المشروع |
+| 71 | **🔗 ربط Admin Panel بصفحة إعدادات الشات**: إضافة زرار "إعدادات الشات" في شريط التابات في `admin_panel_v4_merged.html` — `<a>` tag بنفس ستايل التابات يفتح `/admin/chat-settings` في تاب جديد. تعديل واحد سطر واحد مفيش كسر لأي كود موجود | `admin_panel_v4_merged.html` سطر 3576 |
 
 
 
@@ -1204,8 +1206,14 @@ Phase 10: RAG Pipeline                  ⏳ قدام
 | #5 | [UI] | Tree View مش بيظهر إلا بعد Reload يدوي | الشجرة فاضية أول ما الصفحة تفتح | `loadCategoryTree()` مكانتش في DOMContentLoaded | إضافتها في DOMContentLoaded | ✅ محلول |
 | #6 | [API] | `GET /api/categories/:id` → 404 Not Found | Edit category بيفشل | الـ route مش موجود في `categories.js` | إضافة `GET /single/:id` route | ✅ محلول |
 | #7 | [UI] | `categoriesList` innerHTML = null | Console errors عند التحميل | العنصر مش موجود في HTML الحالي | إضافة null checks | ✅ محلول |
-| #8 | [UI] | الأيقونات emoji قديمة (📚👤📂��🗑️✏️📝) في الواجهة الرئيسية | شكل كرتوني مش احترافي - غير متناسق | استخدام emoji بدل icon library | استبدالها بـ Font Awesome (60+ موقع) في admin_panel_v4_merged | ✅ محلول |
+| #8 | [UI] | الأيقونات emoji قديمة (📚👤📂🗑️✏️📝) في الواجهة الرئيسية | شكل كرتوني مش احترافي - غير متناسق | استخدام emoji بدل icon library | استبدالها بـ Font Awesome (60+ موقع) في admin_panel_v4_merged | ✅ محلول |
 | #9 | [Database] | Username "zizo" لسه ظاهر في الواجهة | اسم المشروع القديم بيظهر في user-info | البيانات في database (users collection) مش في الكود | تحديث username من MongoDB: `db.users.updateOne({username:"zizo"},{$set:{username:"admin"}})` | ⚠️ محتاج user action |
+| #10 | [Security] | `.env` محتوي على MongoDB URI + API Key حساسين | لو اترفع على GitHub ولو مرة واحدة → البيانات مكشوفة في التاريخ | ملف `.env` غير محمي في git history | التحقق بـ `git ls-files --error-unmatch .env` ولو موجود: `git rm --cached .env` + تغيير كلمات المرور | 🔴 مفتوحة |
+| #11 | [Security] | `SESSION_SECRET` fallback نص ثابت في الكود | الـ session قابلة للتزوير لو `.env` مش محمي | `server.js` بيستخدم `|| 'علم ينتفع به-secret-2025'` | إضافة `SESSION_SECRET=<random-64-chars>` في `.env` | 🔴 مفتوحة |
+| #12 | [Performance] | N+1 Queries في `/api/public/landing` للـ categories والـ sheikhs | بطء ملحوظ مع كتر الأقسام والمشايخ | `countDocuments` جوه for loop | استبدال بـ MongoDB `$facet` أو `aggregate` واحد | 🟡 مفتوحة |
+| #13 | [Architecture] | `Feedback` schema معرّف جوه `chatbot.js` | كسر Separation of Concerns — صعب الصيانة | تم تعريفه as inline بدل ملف منفصل | نقله لـ `models/Feedback.js` | 🟡 مفتوحة |
+| #14 | [Documentation] | ترقيم الإنجازات #57-60 متكرر مرتين | إنجازات مكررة في نفس الجدول | دُرجت مرتين في جلستين متقاربتين | ترقيم وحيد — كل إنجاز مرة واحدة بس | ⚠️ معلق - تسجيل فقط |
+| #15 | [Documentation] | `*.md` في `.gitignore` بيخفي كل التوثيق عن GitHub | README.md + GEMINI.md + VIBE_CODING_GUIDE.md مش بتترفعش | قاعدة عامة مضافة في `.gitignore` بتمسح كل `.md` | تحويل `*.md` لأسماء محددة مثل `phase3_5_implementation_plan.md` | 🟡 مفتوحة |
 
 ## 💡 دروس مستفادة
 
@@ -1227,5 +1235,14 @@ Phase 10: RAG Pipeline                  ⏳ قدام
 | #14 | [Frontend] | **localStorage-based Progress Tracking**: حل خفيف وفعال لتتبع المستخدم بدون backend — المهم تستخدم نفس الـ key في كل الصفحات | `ProgressManager` موحد في 3 صفحات |
 | #15 | [Security] | **Regex Sanitization إلزامي في البحث**: `$regex` في MongoDB + user input = ReDoS attack! → escape كل الـ special chars | Search endpoint regex sanitization |
 | #16 | [Frontend] | **Suggestions بدون AI = تكلفة صفر** — لو عندك بيانات منظمة في DB تقدر تولد أسئلة مقترحة من عناوين الأقسام بدون API call — أكتر كفاءة وأسرع | Suggestions endpoint Phase 9B |
+| #17 | [Security] | **`.env` في git history = كارثة** — لو الملف اترفع ولو مرة واحدة قبل `.gitignore`، الـ connection string والـ API key بيبقوا محفوظين في git history حتى بعد الحذف. الحل: `git filter-branch` أو `BFG Repo Cleaner` | Code Review v7.1 — MONGO_URI + TENSORIX_API_KEY مكشوفين في .env |
+| #18 | [Security] | **SESSION_SECRET hardcoded كـ fallback = ثغرة** — لو `SESSION_SECRET` مش موجود في `.env` الكود بيستخدم نص ثابت معروف يسمح بتزوير الـ session! | `server.js` سطر 61 — `secret: process.env.SESSION_SECRET \|\| 'علم ينتفع به-secret-2025'` |
+| #19 | [Performance] | **N+1 Queries في public.js** — الكود بيعمل `countDocuments` في loop لكل category أو sheikh على حدة بدل `aggregate` واحد | `routes/public.js` — `for (let cat of categories)` و `for (let sheikh of sheikhs)` |
+| #20 | [Architecture] | **Feedback schema معرّف جوه chatbot.js مش في models/** — ده بيخالف Separation of Concerns، لو الـ Feedback محتاج يتعدل أو يتحدث لازم نفتح chatbot.js اللي فيه منطق تاني | `routes/chatbot.js` سطر 403 — `const feedbackSchema = new mongoose.Schema(...)` |
+| #21 | [Architecture] | **conversationHistory Map في RAM بس** — كل ما السيرفر يتعيد تشغيله تاريخ كل المحادثات بيضيع، ومش هيشتغل صح لو في أكتر من instance | `routes/chatbot.js` — `const conversationHistory = new Map()` |
+| #22 | [Documentation] | **ترقيم مكرر في سجل الإنجازات** — الإنجازات 57، 58، 59، 60 مكررين مرتين (ظهروا مرتين في نفس الوقت في جلستين مختلفين) | README.md سطر 188-195 = نفس 192-195 تقريباً |
+| #23 | [Documentation] | **ترقيم الدروس المستفادة مش تسلسلي** — القفز من #17 لـ #23 مباشرة (5 أرقام مفقودة) والأرقام #25 و #26 متكررين مرتين | README.md — قسم دروس مستفادة الأول |
+| #24 | [Documentation] | **جدول "الخطوات القادمة" قديم** — البحث في الدروس + Chatbot مسجّلين كـ ❌ رغم إنهم اتنجزوا في Phase 8.5b و Phase 9 | README.md — قسم الخطوات القادمة |
+| #25 | [Architecture] | **`*.md` في .gitignore بيخفي كل التوثيق** — README.md + GEMINI.md + VIBE_CODING_GUIDE.md كلها مش بترتفع على GitHub، اللي بيخلي المشروع بيبان ناقص لأي مطور يشوفه | `.gitignore` سطر 7 |
 
 
