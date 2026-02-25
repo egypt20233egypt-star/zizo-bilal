@@ -204,6 +204,7 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 | 69 | **🤖 ترجمة ديناميكية ذكية للمفاتيح الإنجليزية**: بدل ما نضيف كل مفتاح يدوياً — `autoLabel()` بتفكك camelCase + تترجم كلمة كلمة ب**40+ ترجمة** + لو القيمة عربية تظهر بدون label. نظام مرن لا يحتاج تدخل يدوي | `routes/chatbot.js` |
 | 70 | **🔍 Code Review شامل للمشروع v7.1**: مراجعة كاملة لكل الملفات (server.js + models + routes + middleware) — اكتشاف 15 ملاحظة: 2 أمنية حرجة (.env + SESSION_SECRET) + N+1 queries + Feedback schema مش في models + conversationHistory في RAM + توثيق مكرر. التقييم الإجمالي: 7/10 مع ملاحظة إن التوثيق 9/10 والأمان 6/10 | جميع ملفات المشروع |
 | 71 | **🔗 ربط Admin Panel بصفحة إعدادات الشات**: إضافة زرار "إعدادات الشات" في شريط التابات في `admin_panel_v4_merged.html` — `<a>` tag بنفس ستايل التابات يفتح `/admin/chat-settings` في تاب جديد. تعديل واحد سطر واحد مفيش كسر لأي كود موجود | `admin_panel_v4_merged.html` سطر 3576 |
+| 72 | **🧠 أسئلة مقترحة ذكية ديناميكية**: بدل 9 أسئلة hardcoded → `SECTION_QUESTIONS` قاموس 28 section مع loop ديناميكي يكتشف أي section في الدرس ويولّد سؤال مناسب. Content-aware: لو في آيات بيذكر اسم السورة. Fallback ذكي: أي section جديد بيتولد سؤال من اسمه عبر `autoLabel()`. تكلفة صفر بدون AI | `routes/chatbot.js` |
 
 
 
