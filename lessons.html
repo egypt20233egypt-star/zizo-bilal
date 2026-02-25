@@ -554,9 +554,6 @@
             document.getElementById('breadcrumbSheikh').textContent = sheikhNameFromUrl;
         }
 
-        // 💬 Chat Widget: ربط sheikhId (Phase 9C-1)
-        const chatWidget = document.getElementById('chat-widget');
-        if (chatWidget && sheikhId) chatWidget.dataset.sheikhId = sheikhId;
 
         // ═══════════ Progress Manager (same API as website.html) ═══════════
         const ProgressManager = {
@@ -686,6 +683,13 @@
 
     <!-- 💬 Chat Widget (Phase 9C-1: Sheikh Mode) -->
     <div id="chat-widget"></div>
+    <script>
+        // 🕌 ربط sheikhId قبل ما chat-widget.js يحمّل
+        (function () {
+            const sid = new URLSearchParams(location.search).get('sheikh');
+            if (sid) document.getElementById('chat-widget').dataset.sheikhId = sid;
+        })();
+    </script>
     <script src="/public/chat-widget.js"></script>
 </body>
 

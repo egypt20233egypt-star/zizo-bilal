@@ -2734,15 +2734,15 @@
 
     <!-- 💬 Chat Widget (Phase 9A + 9C-1: Sheikh Mode) -->
     <div id="chat-widget"></div>
-    <script src="/public/chat-widget.js"></script>
     <script>
-        // 🕌 Phase 9C-1: لو الصفحة اتفتحت من صفحة شيخ → فعّل وضع الشيخ
+        // 🕌 Phase 9C-1: لو الصفحة اتفتحت من صفحة شيخ → فعّل وضع الشيخ قبل chat-widget.js
         (function () {
             const urlSheikh = new URLSearchParams(window.location.search).get('sheikh');
             const cw = document.getElementById('chat-widget');
             if (cw && urlSheikh) cw.dataset.sheikhId = urlSheikh;
         })();
     </script>
+    <script src="/public/chat-widget.js"></script>
 </body>
 
 </html>
