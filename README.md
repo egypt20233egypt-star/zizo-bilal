@@ -231,7 +231,7 @@ Phase 9A: Lesson Chat MVP               ✅ تم (Hybrid: Direct + Search + AI +
 Phase 9B: Chat UX + Suggestions + Rating ✅ تم (أسئلة مقترحة + تقييم إلزامي + Logging + UX)
 Phase 9B+: Unified Design + Admin Settings ✅ تم (تصميم موحد + صفحة إعدادات شات كاملة + تحكم ديناميكي)
 Phase 9B++: Smart Auto-Translation       ✅ تم (autoLabel + recursive humanize + 40+ ترجمة ذكية)
-Phase 9C: Sheikh Chat + General Chat    ⏳ قدام
+Phase 9C: Sheikh Chat + General Chat    🔄 جاري (9C-1 شات الشيخ ✅)
 Phase 10: RAG Pipeline                  ⏳ قدام
 ```
 
@@ -260,6 +260,7 @@ Phase 10: RAG Pipeline                  ⏳ قدام
 | #18 | [Frontend] | HTML tags بتظهر كنص في رسائل البوت بالشات | `<span class="chat-badge">🤖 AI</span>` ظاهر كنص عادي بدل ما يتنسق | `addMsg` بتعمل escape لكل HTML (بتحول `<` لـ `&lt;`) ثم تطبق `formatAnswer` → double processing | فصل: user messages → `textContent` / bot messages → `innerHTML` | ✅ محلولة |
 | #19 | [Frontend] | خط أصفر فاضي بيظهر في ردود الشات قبل الـ refresh | `.chat-section-title` أو `.chat-verse` div فاضي بيظهر كخط ذهبي بدون محتوى | `formatAnswer` regex بيعمل match لحاجات قصيرة أو فاضية → ينشئ div فاضي | minimum char requirements (2+ عناوين, 3+ آيات) + CSS `:empty { display: none }` | ✅ محلولة |
 | #20 | [Config] | إعدادات الشات مش بتتحدث إلا بعد restart السيرفر | غيّر إعداد في الأدمن + refresh الشات → الإعداد القديم لسه شغال | البراوزر بيكاشي JSON response من `/api/public/chat-settings` | `Cache-Control: no-store` في server.js + `fetch({ cache: 'no-store' })` في widget | ✅ محلولة |
+| #21 | [Frontend] | شات الشيخ مش بيظهر في صفحة المشايخ `lessons.html` | Widget FAB مش ظاهر خالص — كأن الشات مش موجود | **DOM Timing Issue**: الكود بيعمل `getElementById('chat-widget')` في `<script>` **قبل** ما الـ `<div id="chat-widget">` يتنشئ في الـ DOM → بيرجع `null` → `data-sheikh-id` مبيتحطش | نقل الكود لبعد الـ div: `div → sheikh-init-script → chat-widget.js` (الترتيب مهم!) | ✅ محلولة |
 
 
 ## 📚 دروس مستفادة
@@ -297,6 +298,7 @@ Phase 10: RAG Pipeline                  ⏳ قدام
 | #31 | [Config] | **Browser caching لـ API responses خطير** — لو مفيش `Cache-Control: no-store` البراوزر ممكن يكاشي JSON response وميسألش السيرفر تاني حتى بعد refresh | إصلاح إعدادات الشات |
 | #32 | [Backend] | **Singleton pattern في MongoDB** — لما عايز document واحد بس في collection (إعدادات) استخدم `static getSettings()` بـ `findOne()` + auto-create لو مش موجود | `ChatSettings.js` model |
 | #33 | [Backend] | **Dictionary fallback له حدود — الحل camelCase split + WORD_TRANSLATIONS** — بدل ما تضيف كل مفتاح يدوياً للدكشنري — فكّ المفتاح لكلمات وترجم كل كلمة. مرنية كاملة بدون تدخل | `autoLabel()` في chatbot.js |
+| #34 | [Frontend] | **ترتيب الـ `<script>` tags في HTML مهم جداً!** لو عندك `div → script(init) → chat-widget.js` لازم الـ div يكون **قبل** أي كود بيحاول يوصله بـ `getElementById`. لو حطيت الكود في `<script>` فوق والـ div تحت → `null`! القاعدة: `div أول → data أتاني → external script أخيراً` | إصلاح شات الشيخ في `lessons.html` + `website.html` |
 
 
 ## 🔒 قواعد حماية الملفات
