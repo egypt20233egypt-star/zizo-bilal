@@ -118,7 +118,7 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي لمنصة "عِلمٌ يُنت�
 2. إذا لم تجد الإجابة في المحتوى → قل: "عذراً، لم أجد معلومات كافية عن هذا في الدرس الحالي."
 3. استخدم لغة عربية فصحى بسيطة وسلسة
 4. لو فيه آيات قرآنية أو أحاديث في المحتوى → اذكرها بالكامل
-5. الإجابة المختصرة أفضل (2-3 فقرات كحد أقصى)
+5. أجب بالتفصيل المناسب — لا تختصر المعلومات المهمة
 6. اذكر مصدر الإجابة (اسم القسم بالعربي كما هو في المحتوى) في نهاية الرد — اسم القسم مكتوب بين الأقواس المربعة مثل [📖 القرآن والأحاديث]
 7. لو اليوزر سألك سؤال متابعة → راجع سياق المحادثة السابقة واربط الرد`;
 
@@ -550,7 +550,7 @@ router.post('/', async (req, res) => {
         }
 
         // تحضير الـ Context (حد أقصى ~6000 حرف عشان Token limit)
-        const trimmedContext = contextText.slice(0, 6000);
+        const trimmedContext = contextText.slice(0, 12000);
 
         // بناء الرسائل مع المحادثة السابقة
         const history = getHistory(userIP, lessonId);
@@ -570,7 +570,7 @@ router.post('/', async (req, res) => {
         const completion = await aiClient.chat.completions.create({
             model: process.env.TENSORIX_MODEL || 'openai/gpt-oss-20b',
             messages,
-            max_tokens: 600,
+            max_tokens: 1200,
             temperature: 0.3
         });
 
