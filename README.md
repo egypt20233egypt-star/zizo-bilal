@@ -206,6 +206,7 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 | 71 | **🔗 ربط Admin Panel بصفحة إعدادات الشات**: إضافة زرار "إعدادات الشات" في شريط التابات في `admin_panel_v4_merged.html` — `<a>` tag بنفس ستايل التابات يفتح `/admin/chat-settings` في تاب جديد. تعديل واحد سطر واحد مفيش كسر لأي كود موجود | `admin_panel_v4_merged.html` سطر 3576 |
 | 72 | **🧠 أسئلة مقترحة ذكية ديناميكية**: بدل 9 أسئلة hardcoded → `SECTION_QUESTIONS` قاموس 28 section مع loop ديناميكي يكتشف أي section في الدرس ويولّد سؤال مناسب. Content-aware: لو في آيات بيذكر اسم السورة. Fallback ذكي: أي section جديد بيتولد سؤال من اسمه عبر `autoLabel()`. تكلفة صفر بدون AI | `routes/chatbot.js` |
 | 73 | **🔧 إصلاح قطع ردود AI**: الشات كان بيقطع كلامه في النص! 3 تعديلات: `max_tokens` 600→1200 (ضعف طول الرد) + `context slice` 6000→12000 حرف (AI يشوف الدرس كامل) + System Prompt "2-3 فقرات" → "أجب بالتفصيل المناسب" (مش يختصر) | `routes/chatbot.js` سطر 121, 553, 573 |
+| 74 | **🕌 Phase 9C-1: شات الشيخ**: شات جديد بيجاوب عن **كل دروس شيخ معين** مش درس واحد! Backend: `buildSheikhContext()` بيجمع ملخصات الدروس + يحدد الدرس الأنسب للسؤال + `getSheikhSystemPrompt()` + suggestions endpoint. Frontend: `data-sheikh-id` support + `loadSheikhTitle()` + تعديل sendMessage و loadSuggestions. مفيش كسر لأي كود موجود — backwards compatible | `routes/chatbot.js`, `public/chat-widget.js` |
 
 
 
