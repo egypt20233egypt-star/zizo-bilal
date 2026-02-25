@@ -121,9 +121,9 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 
 | البند | القيمة |
 |-------|---------|
-| الإصدار | v7.0-chat-settings |
-| الحالة | ✅ Phase 9B+ مكتملة — تصميم موحد + لوحة إعدادات الشات كاملة + تحكم ديناميكي |
-| آخر commit آمن | `87bc452` |
+| الإصدار | v7.1-smart-translate |
+| الحالة | ✅ Phase 9B++ مكتملة — ترجمة ديناميكية ذكية لكل مفاتيح الدروس |
+| آخر commit آمن | `f5e1c02` |
 
 ## 🏆 سجل الإنجازات
 
@@ -200,6 +200,8 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 | 65 | **🎛️ Phase 9B+: صفحة إعدادات الشات بوت (Admin Chat Settings)**: Backend: `ChatSettings` singleton MongoDB model + CRUD API (`/api/admin/chat-settings`) + public endpoint (`/api/public/chat-settings`) + delete all feedback + feedback stats. Frontend: `chat-settings.html` صفحة مستقلة بتصميم premium (toggles + number input + CRUD quick actions + stats grid + delete all) | `models/ChatSettings.js`, `routes/chatSettings.js`, `chat-settings.html`, `server.js` |
 | 66 | **🔗 ربط الويدجت بإعدادات الأدمن**: `chat-widget.js` دلوقتي بيحمّل إعدادات من API عند init + نجوم ديناميكية + أزرار conditional (نسخ/واتساب/TTS) + quick actions من الأدمن + تقييم إلزامي/اختياري حسب الإعدادات | `public/chat-widget.js` |
 | 67 | **🐛 إصلاح browser caching للإعدادات**: الإعدادات كانت مش بتتحدث إلا بعد restart السيرفر. السبب: البراوزر بيكاشي API response. الحل: `Cache-Control: no-store` في server + `fetch({ cache: 'no-store' })` في widget | `server.js`, `public/chat-widget.js` |
+| 68 | **🐛 إصلاح JSON الإنجليزي في ردود الشات**: توسيع `SUB_KEY_LABELS` بـ 20+ مفتاح ناقص (ayahNumber, meaning, purpose, stages...) + جعل `humanizeObject()` recursive بدل `JSON.stringify` + إضافة `SKIP_KEYS` للمفاتيح التقنية | `routes/chatbot.js` |
+| 69 | **🤖 ترجمة ديناميكية ذكية للمفاتيح الإنجليزية**: بدل ما نضيف كل مفتاح يدوياً — `autoLabel()` بتفكك camelCase + تترجم كلمة كلمة ب**40+ ترجمة** + لو القيمة عربية تظهر بدون label. نظام مرن لا يحتاج تدخل يدوي | `routes/chatbot.js` |
 
 
 
@@ -222,6 +224,7 @@ Phase 8.5b: UX Enhancements             ✅ تم (بحث شامل + أسماء �
 Phase 9A: Lesson Chat MVP               ✅ تم (Hybrid: Direct + Search + AI + Conversation History)
 Phase 9B: Chat UX + Suggestions + Rating ✅ تم (أسئلة مقترحة + تقييم إلزامي + Logging + UX)
 Phase 9B+: Unified Design + Admin Settings ✅ تم (تصميم موحد + صفحة إعدادات شات كاملة + تحكم ديناميكي)
+Phase 9B++: Smart Auto-Translation       ✅ تم (autoLabel + recursive humanize + 40+ ترجمة ذكية)
 Phase 9C: Sheikh Chat + General Chat    ⏳ قدام
 Phase 10: RAG Pipeline                  ⏳ قدام
 ```
@@ -287,6 +290,7 @@ Phase 10: RAG Pipeline                  ⏳ قدام
 | #30 | [Frontend] | **Regex order matters** — لازم `**bold**` يتعمل replace قبل `*italic*` عشان الـ double-star يتلقط الأول. لو قلبتهم → `**text**` هيتحول لـ `*<em>text</em>*` | تصميم `formatAnswer` الموحد |
 | #31 | [Config] | **Browser caching لـ API responses خطير** — لو مفيش `Cache-Control: no-store` البراوزر ممكن يكاشي JSON response وميسألش السيرفر تاني حتى بعد refresh | إصلاح إعدادات الشات |
 | #32 | [Backend] | **Singleton pattern في MongoDB** — لما عايز document واحد بس في collection (إعدادات) استخدم `static getSettings()` بـ `findOne()` + auto-create لو مش موجود | `ChatSettings.js` model |
+| #33 | [Backend] | **Dictionary fallback له حدود — الحل camelCase split + WORD_TRANSLATIONS** — بدل ما تضيف كل مفتاح يدوياً للدكشنري — فكّ المفتاح لكلمات وترجم كل كلمة. مرنية كاملة بدون تدخل | `autoLabel()` في chatbot.js |
 
 
 ## 🔒 قواعد حماية الملفات
