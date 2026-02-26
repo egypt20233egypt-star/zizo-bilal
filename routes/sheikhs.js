@@ -8,13 +8,12 @@ router.get('/', async (req, res) => {
         const sheikhs = await Sheikh.find().lean();
         const Lesson = require('../models/Lesson');
 
-        // Count lessons per sheikh (sheikhId is stored as String in Lesson model)
-        const result = await Promise.all(
-            sheikhs.map(async (s) => ({
-                ...s,
-                lessonCount: await Lesson.countDocuments({ sheikhId: s._id.toString() })
-            }))
-        );
+        // ⚡ aggregate بدل N+1 — query واحدة لكل الأعداد
+        const counts = await Lesson.aggregate([
+            { $group: { _id: '$sheikhId', count: { $sum: 1 } } }
+        ]);
+        const countMap = Object.fromEntries(counts.map(c => [String(c._id), c.count]));
+        const result = sheikhs.map(s => ({ ...s, lessonCount: countMap[String(s._id)] || 0 }));
 
         res.json(result);
     } catch (err) {

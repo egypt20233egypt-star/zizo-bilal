@@ -34,13 +34,21 @@ router.get('/landing', async (req, res) => {
             .limit(6)
             .lean();
 
-        // حساب عدد الدروس لكل قسم
-        for (let cat of categories) {
-            cat.lessonCount = await Lesson.countDocuments({
-                categoryId: cat._id,
-                status: 'published'
-            });
-        }
+        // ⚡ حساب عدد الدروس لكل قسم + شيخ — aggregate بدل N+1
+        const [catCounts, sheikhCounts] = await Promise.all([
+            Lesson.aggregate([
+                { $match: { status: 'published' } },
+                { $group: { _id: '$categoryId', count: { $sum: 1 } } }
+            ]),
+            Lesson.aggregate([
+                { $match: { status: 'published' } },
+                { $group: { _id: '$sheikhId', count: { $sum: 1 } } }
+            ])
+        ]);
+        const catCountMap = Object.fromEntries(catCounts.map(c => [String(c._id), c.count]));
+        const sheikhCountMap = Object.fromEntries(sheikhCounts.map(s => [String(s._id), s.count]));
+
+        categories.forEach(cat => { cat.lessonCount = catCountMap[String(cat._id)] || 0; });
 
         // ═══ 3. المشايخ + عدد دروسهم ═══
         const sheikhs = await Sheikh.find({ isActive: true })
@@ -50,10 +58,7 @@ router.get('/landing', async (req, res) => {
         // بناء map لأسماء المشايخ (sheikhId = String في Lesson)
         const sheikhMap = {};
         for (let sheikh of sheikhs) {
-            sheikh.lessonCount = await Lesson.countDocuments({
-                sheikhId: sheikh._id.toString(),
-                status: 'published'
-            });
+            sheikh.lessonCount = sheikhCountMap[String(sheikh._id)] || 0;
             sheikhMap[sheikh._id.toString()] = sheikh.name;
         }
 
@@ -107,13 +112,13 @@ router.get('/sheikhs', async (req, res) => {
             .select('name image bio')
             .lean();
 
-        // حساب عدد الدروس لكل شيخ (sheikhId = String)
-        for (let sheikh of sheikhs) {
-            sheikh.lessonCount = await Lesson.countDocuments({
-                sheikhId: sheikh._id.toString(),
-                status: 'published'
-            });
-        }
+        // ⚡ حساب عدد الدروس لكل شيخ — aggregate بدل N+1
+        const sheikhLessonCounts = await Lesson.aggregate([
+            { $match: { status: 'published' } },
+            { $group: { _id: '$sheikhId', count: { $sum: 1 } } }
+        ]);
+        const sheikhCountMap = Object.fromEntries(sheikhLessonCounts.map(s => [String(s._id), s.count]));
+        sheikhs.forEach(sheikh => { sheikh.lessonCount = sheikhCountMap[String(sheikh._id)] || 0; });
 
         // ترتيب حسب عدد الدروس (الأكثر أولاً)
         sheikhs.sort((a, b) => b.lessonCount - a.lessonCount);

@@ -67,14 +67,20 @@ router.get('/feedback/stats', async (req, res) => {
         if (!Feedback) {
             return res.json({ total: 0, positive: 0, negative: 0, avgStars: 0 });
         }
-        const total = await Feedback.countDocuments();
-        const positive = await Feedback.countDocuments({ isHelpful: true });
-        const negative = await Feedback.countDocuments({ isHelpful: false });
-        const starResult = await Feedback.aggregate([
-            { $match: { stars: { $gt: 0 } } },
-            { $group: { _id: null, avg: { $avg: '$stars' } } }
+        // ⚡ aggregate واحد بدل 3 queries + 1 aggregate
+        const [feedbackStats] = await Feedback.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: 1 },
+                    positive: { $sum: { $cond: ['$isHelpful', 1, 0] } },
+                    negative: { $sum: { $cond: ['$isHelpful', 0, 1] } },
+                    avgStars: { $avg: { $cond: [{ $gt: ['$stars', 0] }, '$stars', null] } }
+                }
+            }
         ]);
-        const avgStars = starResult.length > 0 ? starResult[0].avg.toFixed(1) : 0;
+        const { total = 0, positive = 0, negative = 0, avgStars: rawAvg } = feedbackStats || {};
+        const avgStars = rawAvg ? rawAvg.toFixed(1) : 0;
         res.json({ total, positive, negative, avgStars });
     } catch (err) {
         res.status(500).json({ error: 'فشل تحميل الإحصائيات' });
