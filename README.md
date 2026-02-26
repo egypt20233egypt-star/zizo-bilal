@@ -208,6 +208,7 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 | 73 | **🔧 إصلاح قطع ردود AI**: الشات كان بيقطع كلامه في النص! 3 تعديلات: `max_tokens` 600→1200 (ضعف طول الرد) + `context slice` 6000→12000 حرف (AI يشوف الدرس كامل) + System Prompt "2-3 فقرات" → "أجب بالتفصيل المناسب" (مش يختصر) | `routes/chatbot.js` سطر 121, 553, 573 |
 | 74 | **🕌 Phase 9C-1: شات الشيخ**: شات جديد بيجاوب عن **كل دروس شيخ معين** مش درس واحد! Backend: `buildSheikhContext()` بيجمع ملخصات الدروس + يحدد الدرس الأنسب للسؤال + `getSheikhSystemPrompt()` + suggestions endpoint. Frontend: `data-sheikh-id` support + `loadSheikhTitle()` + تعديل sendMessage و loadSuggestions. مفيش كسر لأي كود موجود — backwards compatible | `routes/chatbot.js`, `public/chat-widget.js` |
 | 75 | **🔧 إظهار شات الشيخ في الصفحات**: Widget كان مفيش في `lessons.html` أصلاً! إضافة Widget + script + ربط `sheikhId` من URL parameter. كمان `website.html` بيفعّل sheikh mode لو URL فيها `?sheikh=` | `lessons.html`, `website.html` |
+| 76 | **⚡ إصلاح N+1 Queries — تحسين Performance**: 4 مشاكل N+1 + 1 تحسين. كل `for` loop + `countDocuments` اتحول لـ `$group` aggregate (query واحدة بدل N). `public.js` landing (أقسام+مشايخ) + `/sheikhs` endpoint + `sheikhs.js` admin + `chatSettings.js` feedback stats (3 queries دُمجت في aggregate واحد) | `routes/public.js`, `routes/sheikhs.js`, `routes/chatSettings.js` |
 
 
 
