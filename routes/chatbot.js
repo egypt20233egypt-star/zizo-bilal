@@ -122,6 +122,17 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي لمنصة "عِلمٌ يُنت�
 6. اذكر مصدر الإجابة (اسم القسم بالعربي كما هو في المحتوى) في نهاية الرد — اسم القسم مكتوب بين الأقواس المربعة مثل [📖 القرآن والأحاديث]
 7. لو اليوزر سألك سؤال متابعة → راجع سياق المحادثة السابقة واربط الرد`;
 
+// ============ 🌐 Phase 9C-2: Platform System Prompt ============
+const PLATFORM_SYSTEM_PROMPT = `أنت مساعد ذكي لمنصة "عِلمٌ يُنتَفَعُ بِه" الدعوية.
+قواعد:
+1. أجب عن أسئلة عامة عن المنصة فقط من المعلومات المتاحة
+2. للأسئلة عن درس معين → وجّه المستخدم لصفحة /website واختيار الدرس
+3. للأسئلة عن شيخ معين → وجّه لصفحة /browse واختيار الشيخ
+4. ⛔ لو سألك سؤال فقهي أو فتوى → اعتذر بلباقة وقل "أنصحك بمراجعة دروس المشايخ على المنصة"
+5. ⛔ لا تفضّل شيخ على آخر — وجّه للتصفح وخلي المستخدم يختار
+6. كن ودياً ومختصراً. استخدم لغة عربية بسيطة
+7. لا تستخدم معلومات خارجية أبداً`;
+
 // ============ META_KEYS (نفس stats.js) ============
 const META_KEYS = new Set([
     '_id', '__v', 'title', 'subtitle', 'sheikhId', 'categoryId',
@@ -519,22 +530,92 @@ const feedbackSchema = new mongoose.Schema({
 feedbackSchema.index({ lessonId: 1, source: 1, isHelpful: 1 });
 const Feedback = mongoose.models.Feedback || mongoose.model('Feedback', feedbackSchema);
 
+// ============ 🌐 Phase 9C-2: Platform Context (مع Cache 5 دقائق) ============
+let platformCtxCache = null;
+let platformCtxExpiry = 0;
+
+async function buildPlatformContext() {
+    if (platformCtxCache && Date.now() < platformCtxExpiry) return platformCtxCache;
+    const [lessonCount, sheikhCount] = await Promise.all([
+        Lesson.countDocuments({ status: 'published' }),
+        Sheikh.countDocuments()
+    ]);
+    platformCtxCache = `منصة "عِلمٌ يُنتَفَعُ بِه" الدعوية التعليمية:
+- عدد الدروس المتاحة: ${lessonCount} درس
+- عدد المشايخ: ${sheikhCount} شيخ
+- الهدف: نشر العلم الشرعي بأسلوب حديث وسهل
+- المميزات: دروس مفصّلة بتحليل ذكي + شات مساعد + أسئلة مقترحة
+- صفحة المشايخ: /browse | صفحة الدروس: /website
+- كل درس فيه: نظرة عامة، فوائد، قرآن وأحاديث، قصص، فقه، تطبيق عملي`;
+    platformCtxExpiry = Date.now() + 5 * 60 * 1000;
+    return platformCtxCache;
+}
+
 // ============ POST /api/public/chat ============
 router.post('/', async (req, res) => {
     const startTime = Date.now();
     try {
-        const { question, lessonId, sheikhId } = req.body;
+        const { question, lessonId, sheikhId, generalMode } = req.body;
 
         // ─── Validation ───
         if (!question || typeof question !== 'string' || question.trim().length < 3) {
             return res.status(400).json({ error: 'السؤال لازم يكون 3 حروف على الأقل' });
         }
-        if (!lessonId && !sheikhId) {
-            return res.status(400).json({ error: 'lessonId أو sheikhId مطلوب' });
+        if (!lessonId && !sheikhId && !generalMode) {
+            return res.status(400).json({ error: 'lessonId أو sheikhId أو generalMode مطلوب' });
         }
 
         const cleanQuestion = question.trim().slice(0, 500); // حد أقصى 500 حرف
         const userIP = req.ip || req.connection?.remoteAddress || 'unknown';
+
+        // ═══════════════════════════════════════
+        // 🌐 GENERAL MODE — شات عام عن المنصة (Phase 9C-2)
+        // ═══════════════════════════════════════
+        if (generalMode && !lessonId && !sheikhId) {
+            const context = await buildPlatformContext();
+
+            if (!aiClient) {
+                logChat({ lessonId: 'general', question: cleanQuestion, source: 'fallback', responseTime: Date.now() - startTime });
+                return res.json({
+                    type: 'fallback',
+                    answer: 'مرحباً! منصة "عِلمٌ يُنتَفَعُ بِه" هي منصة دعوية تعليمية فيها دروس من مشايخ موثوقين. تصفّح المشايخ من /browse واختار الدرس اللي يناسبك!',
+                    source: 'النظام',
+                    badge: '⚠️ احتياطي'
+                });
+            }
+
+            const history = getHistory(userIP, 'general');
+            const messages = [
+                { role: 'system', content: PLATFORM_SYSTEM_PROMPT },
+                { role: 'user', content: `معلومات المنصة:\n"""\n${context}\n"""` }
+            ];
+            for (const msg of history) {
+                messages.push({ role: msg.role, content: msg.content });
+            }
+            messages.push({ role: 'user', content: cleanQuestion });
+
+            try {
+                const completion = await aiClient.chat.completions.create({
+                    model: process.env.TENSORIX_MODEL || 'openai/gpt-oss-20b',
+                    messages,
+                    max_tokens: 800,
+                    temperature: 0.4
+                });
+                const aiAnswer = completion.choices?.[0]?.message?.content || 'عذراً، لم أتمكن من الإجابة.';
+                addToHistory(userIP, 'general', 'user', cleanQuestion);
+                addToHistory(userIP, 'general', 'assistant', aiAnswer);
+                logChat({ lessonId: 'general', question: cleanQuestion, source: 'ai', responseTime: Date.now() - startTime });
+                return res.json({ type: 'ai', answer: aiAnswer, source: '🤖 AI — معلومات المنصة', badge: '🤖 AI' });
+            } catch (err) {
+                console.error('❌ General Chat AI Error:', err.message);
+                logChat({ lessonId: 'general', question: cleanQuestion, source: 'fallback', responseTime: Date.now() - startTime, error: err.message });
+                return res.json({
+                    type: 'fallback',
+                    answer: 'مرحباً! منصة "عِلمٌ يُنتَفَعُ بِه" منصة دعوية تعليمية. تصفّح المشايخ من /browse!',
+                    source: 'النظام', badge: '⚠️ احتياطي'
+                });
+            }
+        }
 
         // ═══════════════════════════════════════
         // 🕌 SHEIKH MODE — شات عن كل دروس شيخ
@@ -884,6 +965,18 @@ router.post('/feedback', async (req, res) => {
         console.error('❌ Feedback Error:', err);
         res.status(500).json({ error: 'فشل حفظ التقييم' });
     }
+});
+
+// ============ GET /suggestions/platform ============
+// Phase 9C-2: أسئلة مقترحة للمنصة
+router.get('/suggestions/platform', (req, res) => {
+    res.json({
+        suggestions: [
+            'ما هي منصة عِلمٌ يُنتَفَعُ بِه؟',
+            'كم عدد المشايخ والدروس المتاحة؟',
+            'كيف أتصفح الدروس؟'
+        ]
+    });
 });
 
 // ============ Logging Helper ============

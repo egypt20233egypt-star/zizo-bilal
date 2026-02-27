@@ -17,6 +17,7 @@
     let isLoading = false;
     let suggestionsLoaded = false;
     let sheikhId = null;  // 🕌 Sheikh mode
+    let generalMode = false;  // 🌐 General mode (Phase 9C-2)
     let lastBotData = null; // {question, answer, source, type}
     let awaitingRating = false; // 🔒 يمنع السؤال التالي لحد ما يقيّم
     let lessonTitle = ''; // اسم الدرس للعرض
@@ -61,9 +62,10 @@
 
         lessonId = container.dataset.lessonId || null;
         sheikhId = container.dataset.sheikhId || null;
+        generalMode = container.dataset.generalMode === 'true';  // 🌐 Phase 9C-2
 
-        // لو مفيش lessonId ولا sheikhId بعد → نستنى
-        if (!lessonId && !sheikhId) {
+        // لو مفيش lessonId ولا sheikhId ولا generalMode → نستنى
+        if (!lessonId && !sheikhId && !generalMode) {
             waitForLesson(container);
             return;
         }
@@ -206,10 +208,17 @@
             fab.classList.add('chat-fab-hidden');
             document.getElementById('chat-input').focus();
             // Load suggestions + lesson title on first open
-            if (!suggestionsLoaded && (lessonId || sheikhId)) {
+            if (!suggestionsLoaded && (lessonId || sheikhId || generalMode)) {
                 loadSuggestions();
                 if (lessonId) loadLessonTitle();
                 if (sheikhId) loadSheikhTitle();
+                if (generalMode) {
+                    // 🌐 Phase 9C-2: عنوان + رسالة ترحيب للشات العام
+                    const titleEl = document.getElementById('chat-title');
+                    if (titleEl) titleEl.textContent = '💬 اسأل عن المنصة';
+                    const welcomeMsg = document.querySelector('#chat-messages .chat-msg.bot .chat-msg-content');
+                    if (welcomeMsg) welcomeMsg.innerHTML = 'مرحباً! 👋 أنا مُساعدك الذكي. اسألني أي سؤال عن منصة <strong>عِلمٌ يُنتَفَعُ بِه</strong> أو كيفية استخدامها.';
+                }
                 loadChatHistory(); // 🕛 تحميل المحادثات السابقة
                 suggestionsLoaded = true;
             }
@@ -289,7 +298,12 @@
             const resp = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: text, lessonId: lessonId || null, sheikhId: sheikhId || null })
+                body: JSON.stringify({
+                    question: text,
+                    lessonId: lessonId || null,
+                    sheikhId: sheikhId || null,
+                    ...(generalMode && { generalMode: true })  // 🌐 Phase 9C-2
+                })
             });
 
             removeMsg(loadingId);
@@ -343,7 +357,9 @@
     async function loadSuggestions() {
         try {
             let url;
-            if (sheikhId && !lessonId) {
+            if (generalMode && !lessonId && !sheikhId) {
+                url = `${SUGGESTIONS_URL}/platform`;  // 🌐 Phase 9C-2
+            } else if (sheikhId && !lessonId) {
                 url = `${SUGGESTIONS_URL}/sheikh/${sheikhId}`;
             } else {
                 url = `${SUGGESTIONS_URL}/${lessonId}`;
