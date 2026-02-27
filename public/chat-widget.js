@@ -706,6 +706,8 @@
 
             if (i < fullText.length) {
                 setTimeout(type, inTag ? 0 : speed);
+            } else {
+                el.innerHTML = html; // 🔧 Fix: re-render عشان الـ links تشتغل
             }
         }
         type();
