@@ -632,7 +632,9 @@
             // Double newlines = paragraph break
             .replace(/\n\n/g, '<div class="chat-para-break"></div>')
             // Single newlines
-            .replace(/\n/g, '<br>');
+            .replace(/\n/g, '<br>')
+            // 🌐 Phase 9C-2: تحويل paths المنصة لروابط مضغوطة
+            .replace(/\/(browse|website|lessons)\b/g, '<a href="/$1" class="chat-link" target="_blank">/$1 ←</a>');
     }
 
     // ─── Add Message ───
@@ -1251,6 +1253,24 @@
     margin: 3px 2px;
     border: 1px solid rgba(212,175,55,0.25);
     letter-spacing: 0.2px;
+}
+
+/* 🌐 Phase 9C-2: روابط المنصة في الشات */
+.chat-link {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+    background: rgba(212,175,55,0.12);
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(212,175,55,0.3);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 13px;
+}
+.chat-link:hover {
+    background: rgba(212,175,55,0.25);
+    transform: scale(1.03);
 }
 
 /* ── Response List Items (Cards — كروت محسّنة) ── */
