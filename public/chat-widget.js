@@ -678,7 +678,10 @@
         let inTag = false;
 
         function type() {
-            if (i >= fullText.length) return;
+            if (i >= fullText.length) {
+                el.innerHTML = html; // 🔧 Fix: re-render HTML الكامل عشان الـ links تشتغل
+                return;
+            }
 
             const char = fullText[i];
             if (char === '<') inTag = true;
