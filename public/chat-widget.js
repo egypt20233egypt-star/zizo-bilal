@@ -379,21 +379,44 @@
         const div = document.createElement('div');
         div.id = 'chat-suggestions';
         div.className = 'chat-suggestions';
-        div.innerHTML = '<p class="chat-sug-title">💡 أسئلة مقترحة:</p>' +
+
+        // ✨ Phase 9E: عنوان ذكي + أيقونات
+        div.innerHTML = '<p class="chat-sug-title">✨ أسئلة ذكية من الدرس <span class="sug-badge">AI</span></p>' +
             questions.map(q =>
-                `<button class="chat-sug-btn" data-q="${q.replace(/"/g, '&quot;')}">${q}</button>`
+                `<button class="chat-sug-btn" data-q="${q.replace(/"/g, '&quot;')}"><span class="sug-icon">💎</span> ${q}</button>`
             ).join('');
+
+        // 🔄 Refresh button (insertAdjacentHTML — safe!)
+        div.insertAdjacentHTML('beforeend',
+            '<button class="chat-sug-refresh" title="أسئلة جديدة"><span class="refresh-icon">🔄</span> تحديث</button>'
+        );
 
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
 
-        // Click handlers
+        // 💫 Stagger animation
+        div.querySelectorAll('.chat-sug-btn').forEach((btn, i) => {
+            btn.style.animationDelay = `${i * 0.1}s`;
+        });
+
+        // Click handlers — أسئلة
         div.querySelectorAll('.chat-sug-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const q = btn.getAttribute('data-q');
                 sendMessage(q);
             });
         });
+
+        // 🔄 Refresh handler
+        const refreshBtn = div.querySelector('.chat-sug-refresh');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                const icon = refreshBtn.querySelector('.refresh-icon');
+                if (icon) icon.style.transform = 'rotate(360deg)';
+                suggestionsLoaded = false;
+                setTimeout(() => { div.remove(); loadSuggestions(); }, 300);
+            });
+        }
     }
 
     // ─── Confidence Badge ───
@@ -1026,37 +1049,95 @@
     40% { transform: scale(1); opacity: 1; }
 }
 
-/* ── Suggested Questions ── */
+/* ── Suggested Questions (Phase 9E — Premium) ── */
 .chat-suggestions {
-    padding: 6px 0;
+    padding: 8px 0;
     animation: chat-fade-in 0.4s var(--smooth);
 }
 .chat-sug-title {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin: 0 0 8px 0;
-    letter-spacing: 0.3px;
+    font-size: 12px;
+    color: var(--gold);
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+.sug-badge {
+    background: linear-gradient(135deg, var(--gold), #e6c47a);
+    color: #1a1a2e;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 6px rgba(212,175,55,0.3);
 }
 .chat-sug-btn {
     display: block;
     width: 100%;
     text-align: right;
-    padding: 10px 14px;
-    margin-bottom: 6px;
-    border: 1px solid rgba(212,175,55,0.12);
-    border-radius: 12px;
-    background: rgba(212,175,55,0.04);
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.05), rgba(212,175,55,0.02));
     color: var(--text-primary);
     font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s var(--smooth);
+    font-family: inherit;
+    animation: sug-slide-in 0.4s var(--smooth) both;
+    position: relative;
+    overflow: hidden;
+}
+.chat-sug-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.1), transparent);
+    transition: left 0.5s ease;
+}
+.chat-sug-btn:hover::before { left: 100%; }
+.chat-sug-btn:hover {
+    background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.08));
+    border-color: rgba(212,175,55,0.4);
+    color: var(--gold);
+    transform: translateX(-4px) scale(1.01);
+    box-shadow: 0 4px 16px rgba(212,175,55,0.15);
+}
+.chat-sug-btn:active {
+    transform: translateX(-2px) scale(0.98);
+}
+.sug-icon { margin-left: 4px; font-size: 12px; }
+.chat-sug-refresh {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin: 6px auto 0;
+    background: none;
+    border: 1px dashed rgba(212,175,55,0.2);
+    border-radius: 8px;
+    padding: 6px 16px;
+    color: var(--text-secondary);
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.25s var(--smooth);
     font-family: inherit;
 }
-.chat-sug-btn:hover {
-    background: rgba(212,175,55,0.12);
-    border-color: rgba(212,175,55,0.35);
+.chat-sug-refresh:hover {
+    border-color: var(--gold);
     color: var(--gold);
-    transform: translateX(-4px);
+    background: rgba(212,175,55,0.05);
+    border-style: solid;
+}
+.refresh-icon {
+    display: inline-block;
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.chat-sug-refresh:hover .refresh-icon { transform: rotate(360deg); }
+@keyframes sug-slide-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Confidence Badge Variants ── */
