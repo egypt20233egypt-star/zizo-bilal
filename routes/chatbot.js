@@ -79,35 +79,93 @@ const SECTION_LABELS = {
     practicalSteps: '🎯 الخطوات العملية',
 };
 
-// ============ SECTION_QUESTIONS (ديناميكي — سؤال لكل section) ============
+// ============ Phase 9D: Smart Suggestions Helpers ============
+
+// 🔧 إزالة التشكيل العربي عشان "الصَّلاة" = "الصلاة"
+function stripDiacritics(text) {
+    return text.replace(/[\u064B-\u065F]/g, '');
+}
+
+// 🔍 مصطلحات إسلامية موثوقة (لا أسماء أشخاص — false positives)
+const ISLAMIC_TERMS = new Set([
+    'التوبة', 'التوكل', 'الصبر', 'الشكر', 'الإخلاص', 'التقوى',
+    'الخشوع', 'الصدقة', 'الزكاة', 'الصيام', 'الذكر', 'الدعاء',
+    'الاستغفار', 'التوحيد', 'الإيمان', 'الإحسان', 'العبادة', 'الصلاة',
+    'الحج', 'الجهاد'
+]);
+
+// 🧠 استخراج keywords من محتوى section (سور + مصطلحات)
+function extractKeywords(sectionData) {
+    const raw = typeof sectionData === 'string'
+        ? sectionData : JSON.stringify(sectionData);
+    const text = stripDiacritics(raw);
+    const kw = [];
+    // 1. سور قرآنية (آمن 100%)
+    const surahs = [...new Set(
+        (text.match(/سورة\s+([\u0600-\u06FF]+)/g) || []).map(s => s.trim())
+    )];
+    kw.push(...surahs);
+    // 2. مصطلحات شرعية من قائمة محددة
+    const terms = [...new Set(
+        (text.match(/[\u0600-\u06FF]{3,}/g) || []).filter(w => ISLAMIC_TERMS.has(w))
+    )].slice(0, 2);
+    kw.push(...terms);
+    return [...new Set(kw)].slice(0, 3);
+}
+
+// 🔀 Fisher-Yates Shuffle (عادل ومضمون)
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+// 💾 Cache suggestions (5 دقايق + max 100)
+const suggestionsCache = new Map();
+const SUGGESTIONS_TTL = 5 * 60 * 1000;
+function setCacheEntry(map, key, value) {
+    if (map.size >= 100) map.delete(map.keys().next().value);
+    map.set(key, { data: value, ts: Date.now() });
+}
+
+// ⭐ META_KEYS — module-level (مش كل request)
+const SUGGESTIONS_META_KEYS = new Set([
+    '_id', '__v', 'title', 'subtitle', 'sheikhId', 'categoryId',
+    'status', 'createdAt', 'updatedAt', 'rawSource', 'content',
+    'order', 'slug', 'views', 'likes'
+]);
+
+// ============ SECTION_QUESTIONS (Phase 9D — ديناميكي مع keywords) ============
 const SECTION_QUESTIONS = {
-    overview: (t) => `ما أهم نقاط درس "${t}"؟`,
-    benefits: () => 'ما أهم الفوائد المذكورة في هذا الدرس؟',
-    quranHadith: () => 'ما الآيات والأحاديث المذكورة في الدرس؟',
-    fiqh: () => 'ما الأحكام الفقهية في هذا الدرس؟',
-    stories: () => 'ما القصص المذكورة في الدرس؟',
-    characters: () => 'من الشخصيات المذكورة في هذا الدرس؟',
-    practicalApplication: () => 'كيف أطبق ما تعلمت من هذا الدرس في حياتي؟',
-    summary: () => 'لخص لي هذا الدرس باختصار',
-    kidsCorner: () => 'ما المحتوى المخصص للأطفال في هذا الدرس؟',
-    duaa: () => 'ما الأدعية المذكورة في الدرس؟',
-    scientificMiracles: () => 'ما الإعجاز العلمي المذكور في الدرس؟',
-    commonMistakes: () => 'ما الأخطاء الشائعة المذكورة في الدرس؟',
-    rulings: () => 'ما الأحكام الشرعية في هذا الدرس؟',
-    podcast: () => 'ما محتوى البودكاست في هذا الدرس؟',
-    analysis: () => 'ما التحليل المذكور في هذا الدرس؟',
-    socialMedia: () => 'ما محتوى السوشيال ميديا في الدرس؟',
-    realLifeConnection: () => 'كيف يرتبط هذا الدرس بالواقع؟',
-    lessonPlan: () => 'ما خطة هذا الدرس؟',
-    conclusion: () => 'ما خاتمة هذا الدرس؟',
-    finalConclusion: () => 'ما الخلاصة النهائية للدرس؟',
-    tafseer: () => 'ما التفسير المذكور في الدرس؟',
-    memorization: () => 'ما المطلوب حفظه من هذا الدرس؟',
-    weeklyChallenge: () => 'ما التحدي الأسبوعي في هذا الدرس؟',
-    questions: () => 'ما الأسئلة والأجوبة في هذا الدرس؟',
-    badges: () => 'ما شارات الإنجاز في هذا الدرس؟',
-    discussion: () => 'ما نقاط المناقشة في هذا الدرس؟',
-    homework: () => 'ما واجب هذا الدرس؟',
+    overview: (t, kw) => kw?.length ? `ما علاقة ${kw[0]} بدرس "${t}"؟` : `ما أهم نقاط درس "${t}"؟`,
+    benefits: (t, kw) => kw?.length ? `ما فوائد ${kw[0]} في الدرس؟` : 'ما أهم الفوائد المذكورة في هذا الدرس؟',
+    quranHadith: (t, kw) => kw?.length ? `ما آيات ${kw[0]} المذكورة في الدرس؟` : 'ما الآيات والأحاديث المذكورة في الدرس؟',
+    fiqh: (t, kw) => kw?.length ? `ما حكم ${kw[0]} في الدرس؟` : 'ما الأحكام الفقهية في هذا الدرس؟',
+    stories: (t, kw) => kw?.length ? `ما قصة ${kw[0]} في الدرس؟` : 'ما القصص المذكورة في الدرس؟',
+    characters: (t, kw) => kw?.length ? `ما دور ${kw[0]} في الدرس؟` : 'من الشخصيات المذكورة في هذا الدرس؟',
+    practicalApplication: (t, kw) => kw?.length ? `كيف أطبق ${kw[0]} عملياً؟` : 'كيف أطبق ما تعلمت من هذا الدرس في حياتي؟',
+    summary: (t, kw) => 'لخص لي هذا الدرس باختصار',
+    kidsCorner: (t, kw) => 'ما المحتوى المخصص للأطفال في هذا الدرس؟',
+    duaa: (t, kw) => 'ما الأدعية المذكورة في الدرس؟',
+    scientificMiracles: (t, kw) => 'ما الإعجاز العلمي المذكور في الدرس؟',
+    commonMistakes: (t, kw) => 'ما الأخطاء الشائعة المذكورة في الدرس؟',
+    rulings: (t, kw) => kw?.length ? `ما حكم ${kw[0]}؟` : 'ما الأحكام الشرعية في هذا الدرس؟',
+    podcast: (t, kw) => 'ما محتوى البودكاست في هذا الدرس؟',
+    analysis: (t, kw) => 'ما التحليل المذكور في هذا الدرس؟',
+    socialMedia: (t, kw) => 'ما محتوى السوشيال ميديا في الدرس؟',
+    realLifeConnection: (t, kw) => 'كيف يرتبط هذا الدرس بالواقع؟',
+    lessonPlan: (t, kw) => 'ما خطة هذا الدرس؟',
+    conclusion: (t, kw) => 'ما خاتمة هذا الدرس؟',
+    finalConclusion: (t, kw) => 'ما الخلاصة النهائية للدرس؟',
+    tafseer: (t, kw) => kw?.length ? `ما تفسير ${kw[0]} في الدرس؟` : 'ما التفسير المذكور في الدرس؟',
+    memorization: (t, kw) => 'ما المطلوب حفظه من هذا الدرس؟',
+    weeklyChallenge: (t, kw) => 'ما التحدي الأسبوعي في هذا الدرس؟',
+    questions: (t, kw) => 'ما الأسئلة والأجوبة في هذا الدرس؟',
+    badges: (t, kw) => 'ما شارات الإنجاز في هذا الدرس؟',
+    discussion: (t, kw) => 'ما نقاط المناقشة في هذا الدرس؟',
+    homework: (t, kw) => 'ما واجب هذا الدرس؟',
 };
 
 // ============ System Prompt ============
@@ -834,34 +892,33 @@ router.post('/', async (req, res) => {
 });
 
 // ============ GET /api/public/chat/suggestions/:lessonId ============
-// Phase 9B+: أسئلة مقترحة ذكية — ديناميكية من محتوى الدرس الفعلي
+// Phase 9D: أسئلة مقترحة ذكية — Smart Suggestions مع Cache + Keywords
 router.get('/suggestions/:lessonId', async (req, res) => {
     try {
-        const lesson = await Lesson.findById(req.params.lessonId).lean();
+        const { lessonId } = req.params;
 
+        // 💾 Cache check
+        const cached = suggestionsCache.get(lessonId);
+        if (cached && Date.now() - cached.ts < SUGGESTIONS_TTL) {
+            return res.json({ suggestions: cached.data });
+        }
+
+        const lesson = await Lesson.findById(lessonId).lean();
         if (!lesson) return res.json({ suggestions: [] });
 
         const suggestions = [];
         const title = lesson.title || 'الدرس';
 
-        // ⭐ META_KEYS — مفاتيح مش محتوى (نتجاهلها)
-        const META_KEYS = new Set([
-            '_id', '__v', 'title', 'subtitle', 'sheikhId', 'categoryId',
-            'status', 'createdAt', 'updatedAt', 'rawSource', 'content',
-            'order', 'slug', 'views', 'likes'
-        ]);
-
-        // 🧠 Loop ديناميكي على كل sections الدرس
+        // 🧠 Loop ديناميكي مع extractKeywords
         for (const [key, value] of Object.entries(lesson)) {
-            if (META_KEYS.has(key)) continue;
+            if (SUGGESTIONS_META_KEYS.has(key)) continue;
             if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) continue;
             if (typeof value === 'string' && value.trim().length < 10) continue;
 
-            // لو عندنا سؤال مخصص لهذا الـ section → استخدمه
             if (SECTION_QUESTIONS[key]) {
-                suggestions.push(SECTION_QUESTIONS[key](title));
+                const kw = extractKeywords(value);
+                suggestions.push(SECTION_QUESTIONS[key](title, kw));
             } else {
-                // 🎯 Fallback ذكي: ولّد سؤال من اسم الـ section
                 const label = SECTION_LABELS[key] || autoLabel(key);
                 if (label && typeof label === 'string') {
                     const cleanLabel = label.replace(/^[\p{Emoji}\s]+/u, '').trim();
@@ -872,16 +929,7 @@ router.get('/suggestions/:lessonId', async (req, res) => {
             }
         }
 
-        // ⭐ Content-aware: لو في آيات، ذكر أول سورة
-        if (lesson.quranHadith && typeof lesson.quranHadith === 'object') {
-            const qhStr = JSON.stringify(lesson.quranHadith);
-            const surahMatch = qhStr.match(/سورة\s+([\u0600-\u06FF]+)/);
-            if (surahMatch) {
-                suggestions.push(`ما الآيات من سورة ${surahMatch[1]} المذكورة في الدرس؟`);
-            }
-        }
-
-        // 🔄 دايماً أضف سؤال عام لو مفيش حاجة
+        // 🔄 Fallback
         if (suggestions.length === 0) {
             suggestions.push(
                 `ما هو موضوع درس "${title}"؟`,
@@ -890,9 +938,13 @@ router.get('/suggestions/:lessonId', async (req, res) => {
             );
         }
 
-        // Shuffle وخد 3 بس
-        const shuffled = suggestions.sort(() => 0.5 - Math.random());
-        res.json({ suggestions: shuffled.slice(0, 3) });
+        // 🔀 Fisher-Yates + limit 3
+        const result = shuffle(suggestions).slice(0, 3);
+
+        // 💾 Cache save
+        setCacheEntry(suggestionsCache, lessonId, result);
+
+        res.json({ suggestions: result });
 
     } catch (err) {
         console.error('❌ Suggestions Error:', err);
@@ -921,9 +973,8 @@ router.get('/suggestions/sheikh/:sheikhId', async (req, res) => {
             suggestions.push(`ما أهم نقاط درس "${lesson.title}"؟`);
         }
 
-        // Shuffle وخد 3
-        const shuffled = suggestions.sort(() => 0.5 - Math.random());
-        res.json({ suggestions: shuffled.slice(0, 3) });
+        // 🔀 Fisher-Yates + limit 3
+        res.json({ suggestions: shuffle(suggestions).slice(0, 3) });
 
     } catch (err) {
         console.error('❌ Sheikh Suggestions Error:', err);
