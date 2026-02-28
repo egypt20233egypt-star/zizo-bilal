@@ -900,8 +900,10 @@ router.get('/suggestions/:lessonId', async (req, res) => {
         // 💾 Cache check
         const cached = suggestionsCache.get(lessonId);
         if (cached && Date.now() - cached.ts < SUGGESTIONS_TTL) {
+            console.log('⚡ Cache HIT:', lessonId.toString().slice(-6));
             return res.json({ suggestions: cached.data });
         }
+        console.log('🔄 Cache MISS:', lessonId.toString().slice(-6));
 
         const lesson = await Lesson.findById(lessonId).lean();
         if (!lesson) return res.json({ suggestions: [] });
