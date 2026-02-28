@@ -1189,6 +1189,8 @@ Phase 10: RAG Pipeline                  ⏳ قدام
 | 23 | 🔗 **روابط مضغوطة في رد AI + إصلاح Typewriter** — تحويل `/browse` و`/website` و`/lessons` لروابط ذهبية + إصلاح bug الـ typewriter اللي كان بيكسرهم | `public/chat-widget.js` | ✅ |
 | 24 | 🧠 **Phase 9D: Smart Suggestions** — `extractKeywords` (سور + مصطلحات إسلامية) + `stripDiacritics` (إزالة تشكيل) + Fisher-Yates shuffle + Cache 5 دقائق + Max 100 + `SUGGESTIONS_META_KEYS` خارج handler + `SECTION_QUESTIONS` بتقبل keywords (7 sections ذكية) | `routes/chatbot.js` | ✅ |
 | 25 | 🔍 **Observation Phase** — سطرين `console.log` لمراقبة Cache HIT/MISS + بلان مراقبة أسبوع بدون كود + معايير قرار للخطوة الجاية | `routes/chatbot.js` | ✅ |
+| 26 | 💎 **Phase 9E: UX Polish** — عنوان "✨ أسئلة ذكية من الدرس" + badge AI ذهبي + أيقونة 💎 + Stagger animation + Shimmer/Glow hover + زرار تحديث 🔄 spinning + `insertAdjacentHTML` + guard | `public/chat-widget.js` | ✅ |
+| 27 | 🔄 **إصلاح زرار التحديث** — تخطي Cache عند `?refresh=true` لتوليد أسئلة جديدة فعلاً (Fisher-Yates shuffle كل مرة) | `routes/chatbot.js`, `public/chat-widget.js` | ✅ |
 
 
 ## 📁 الملفات الجديدة
