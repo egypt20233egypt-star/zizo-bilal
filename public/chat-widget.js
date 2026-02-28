@@ -354,7 +354,7 @@
     }
 
     // ─── Load Suggestions ───
-    async function loadSuggestions() {
+    async function loadSuggestions(forceRefresh) {
         try {
             let url;
             if (generalMode && !lessonId && !sheikhId) {
@@ -364,6 +364,7 @@
             } else {
                 url = `${SUGGESTIONS_URL}/${lessonId}`;
             }
+            if (forceRefresh) url += (url.includes('?') ? '&' : '?') + 'refresh=true';
             const resp = await fetch(url);
             const data = await resp.json();
             if (data.suggestions && data.suggestions.length > 0) {
@@ -414,7 +415,7 @@
                 const icon = refreshBtn.querySelector('.refresh-icon');
                 if (icon) icon.style.transform = 'rotate(360deg)';
                 suggestionsLoaded = false;
-                setTimeout(() => { div.remove(); loadSuggestions(); }, 300);
+                setTimeout(() => { div.remove(); loadSuggestions(true); }, 300);
             });
         }
     }

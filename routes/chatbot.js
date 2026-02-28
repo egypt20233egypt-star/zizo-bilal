@@ -897,9 +897,10 @@ router.get('/suggestions/:lessonId', async (req, res) => {
     try {
         const { lessonId } = req.params;
 
-        // 💾 Cache check
+        // 💾 Cache check (skip if ?refresh=true)
+        const skipCache = req.query.refresh === 'true';
         const cached = suggestionsCache.get(lessonId);
-        if (cached && Date.now() - cached.ts < SUGGESTIONS_TTL) {
+        if (!skipCache && cached && Date.now() - cached.ts < SUGGESTIONS_TTL) {
             console.log('⚡ Cache HIT:', lessonId.toString().slice(-6));
             return res.json({ suggestions: cached.data });
         }
