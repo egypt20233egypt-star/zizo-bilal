@@ -149,3 +149,36 @@ Stable — No regression — Ready for users
  
 
  
+
+ تحسينات اختيارية (لو عايز أعلى مستوى 👑)
+
+مش مطلوبة دلوقتي، بس أسيبها معاك:
+
+🔹 1. Tooltip صغير (CSS only)
+
+على العنوان:
+
+“الأسئلة دي متولدة تلقائيًا من محتوى الدرس”
+
+🔹 2. Disable زر Refresh أثناء التحميل
+
+UX polish بسيط:
+
+refreshBtn.disabled = true;
+🔹 3. Color variation حسب section (لاحقًا)
+
+مثلاً:
+
+قرآن = أخضر
+
+فقه = أزرق
+
+قصص = بنفسجي
+
+⛔ بس ده Phase لاحق، مش دلوقتي.
+
+
+
+
+
+
