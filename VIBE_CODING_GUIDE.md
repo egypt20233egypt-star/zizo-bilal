@@ -567,4 +567,45 @@ DELETE /api/nav-items/:id     → حذف
 - **Search endpoint**: بيعمل regex sanitization — **متشيلهاش!**
 - **Breadcrumbs**: `website.html` hidden by default → `display:flex` لما درس يتحمل
 
+---
 
+## 💬 Phase 9: Chat System الذكي (v6.0 → v8.0) ✅
+
+> **أكبر مرحلة — 5 Phases فرعية بنت نظام شات كامل بـ AI!**
+
+### الملفات:
+| ملف | الوظيفة |
+|------|---------|
+| `public/chat-widget.js` | Widget كامل (1500+ سطر) — CSS + JS + 3 أوضاع |
+| `routes/chatbot.js` | Backend API — chat + suggestions + feedback + cache |
+| `models/ChatSettings.js` | إعدادات الشات (singleton — API key + model) |
+| `chat-settings.html` | صفحة أدمن لإعدادات الشات |
+
+### API Endpoints:
+```
+POST   /api/public/chat                   → إرسال سؤال (rate limited: 10/min)
+GET    /api/public/chat/suggestions/:id    → أسئلة مقترحة ذكية (cached 5 دقائق)
+GET    /api/public/chat/suggestions/:id?refresh=true  → أسئلة جديدة (تخطي cache)
+POST   /api/public/chat/feedback           → تقييم رد (👍/👎)
+GET    /api/public/chat-settings           → إعدادات الشات
+```
+
+### الأوضاع الثلاثة:
+| الوضع | التفعيل | الملفات |
+|-------|---------|---------|
+| 🎓 **Lesson Mode** | `website.html?lesson=ID` | محتوى الدرس = context |
+| 👨‍🏫 **Sheikh Mode** | `lessons.html?sheikh=ID` | أسئلة عن الشيخ + دروسه |
+| 🌐 **General Mode** | `index.html` + `browse.html` | أسئلة عن المنصة |
+
+### ⚠️ قواعد مهمة:
+- **`chat-widget.js`** = ملف واحد فيه CSS + JS — **متفصلهمش!**
+- **Tensorix API** = بديل OpenAI مجاني — المفتاح في `.env`
+- **`suggestionsLoaded`** flag يمنع double-loading — **متشيلوش!**
+- **`insertAdjacentHTML`** بدل `innerHTML +=` — **عشان الـ typewriter مينكسرش!**
+- **Fisher-Yates shuffle** في Backend — مش `Math.random().sort()` — **أدق!**
+- **Cache**: `suggestionsCache` + TTL 5 دقائق + Max 100 — `?refresh=true` بيتخطاه
+- **System Prompt**: إسلامي + بيرفض الفتاوى في General Mode
+
+---
+
+*آخر تحديث: v8.0-observation → Phase 9E + Observation Phase*
