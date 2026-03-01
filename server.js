@@ -19,7 +19,14 @@ app.use('/style.css', express.static(path.join(__dirname, 'style.css')));
 app.use('/script.js', express.static(path.join(__dirname, 'script.js')));
 app.use('/admin-modern.css', express.static(path.join(__dirname, 'admin-modern.css')));
 app.use('/v3_enhancements.css', express.static(path.join(__dirname, 'v3_enhancements.css')));
+
+// 🔒 Security: منع الوصول لـ public/admin.html القديم (JWT legacy — غير آمن)
+app.get('/public/admin.html', (req, res) => {
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
+});
+
 app.use('/public', express.static(path.join(__dirname, 'public')));
+
 
 // 🔔 Rate Limiting على الـ API العامة
 const apiLimiter = rateLimit({
