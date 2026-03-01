@@ -284,6 +284,21 @@
             flex-shrink: 0;
         }
 
+        /* 📅 Phase 10: Date badge in lesson cards */
+        .lesson-date-mini {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: .73rem;
+            color: var(--gold);
+            opacity: .8;
+        }
+
+        .lesson-date-mini .date-year {
+            font-weight: 700;
+            color: var(--gold);
+        }
+
         /* ═══ Empty / Error / Loading ═══ */
         .state-msg {
             text-align: center;
@@ -655,6 +670,15 @@
 
             list.innerHTML = lessons.map((l, i) => {
                 const isRead = ProgressManager.isRead(l._id);
+                // 📅 Phase 10: Date badge
+                let dateHtml = '';
+                if (l.lessonDate) {
+                    const d = new Date(l.lessonDate + 'T00:00:00');
+                    const day = d.getDate();
+                    const mn = d.toLocaleDateString('ar-EG', { month: 'short' });
+                    const yr = String(d.getFullYear()).slice(-2);
+                    dateHtml = `<span class="lesson-date-mini">📅 ${day} ${mn} <span class="date-year">'${yr}</span></span>`;
+                }
                 return `
                 <div class="lesson-card" onclick="location.href='/website?lesson=${l._id}'">
                     <div class="lesson-num">${isRead ? '<i class="fas fa-check" style="color:#10b981;font-size:.8rem;"></i>' : (i + 1)}</div>
@@ -662,6 +686,7 @@
                         <div class="lesson-title">${l.title}${isRead ? ' <span style="color:#10b981;font-size:.75rem;">✅</span>' : ''}</div>
                         <div class="lesson-meta">
                             ${l.categoryName ? `<span><i class="fas fa-folder"></i>${l.categoryName}</span>` : ''}
+                            ${dateHtml}
                         </div>
                     </div>
                     <i class="fas fa-chevron-left lesson-arrow"></i>

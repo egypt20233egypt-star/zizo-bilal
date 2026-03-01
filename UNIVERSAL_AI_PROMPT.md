@@ -85,11 +85,12 @@ zizo-bilal-main-v2/
 ├── .env                               # 🔒 MONGODB_URI + SESSION_SECRET + TENSORIX_API_KEY
 │
 ├── models/                            # 📊 MongoDB Models (Mongoose)
-│   ├── Lesson.js                      #   Schema: title, subtitle, sheikhId, categoryId, status,
-│   │                                  #   aiAnalyzed, rawContent, rawSource(سري), tags,
+│   ├── Lesson.js                      #   Schema: title, subtitle, sheikhId, lessonDate(YYYY-MM-DD),
+│   │                                  #   categoryId, status, aiAnalyzed, rawContent, rawSource(سري), tags,
 │   │                                  #   overview/podcast/characters/quranHadith/fiqh/
 │   │                                  #   questions/benefits/stories/analysis (كلهم Mixed)
 │   │                                  #   ⚠️ strict: false — يقبل أي حقل إضافي!
+│   │                                  #   📅 Phase 10: Unique sparse index (sheikhId + lessonDate)
 │   ├── Sheikh.js                      #   Schema: name, image, bio, isActive
 │   ├── Category.js                    #   Schema: name, parentId(هرمي), icon, color, order
 │   ├── Section.js                     #   Schema: key, label (Section Registry)
@@ -102,6 +103,7 @@ zizo-bilal-main-v2/
 ├── routes/                            # 🛤️ API Routes
 │   ├── auth.js                        #   POST /api/admin/login, GET /api/admin/check, POST /api/admin/logout
 │   ├── lessons.js                     #   CRUD /api/lessons + /copy + /move + /batch (⚠️ محمي بـ requireAuth)
+│   │                                  #   📅 Phase 10: GET /taken-dates/:sheikhId + POST/PUT validation
 │   ├── sheikhs.js                     #   CRUD /api/sheikhs (⚠️ محمي)
 │   ├── categories.js                  #   CRUD /api/categories + /tree + /children (⚠️ محمي)
 │   ├── sections.js                    #   CRUD /api/sections (Auth inside)

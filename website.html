@@ -1668,8 +1668,12 @@
             const dateBadge = document.getElementById('lessonDateBadge');
             if (lesson.lessonDate) {
                 const d = new Date(lesson.lessonDate + 'T00:00:00');
-                dateBadge.querySelector('.date-day-name').textContent = d.toLocaleDateString('ar-EG', { weekday: 'long' });
-                dateBadge.querySelector('.date-full').textContent = d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+                const dayName = d.toLocaleDateString('ar-EG', { weekday: 'long' });
+                const dayNum = d.getDate();
+                const month = d.toLocaleDateString('ar-EG', { month: 'long' });
+                const shortYear = String(d.getFullYear()).slice(-2);
+                dateBadge.querySelector('.date-day-name').textContent = dayName;
+                dateBadge.querySelector('.date-full').innerHTML = `${dayNum} ${month} <span style="color:#d4af37;font-weight:700;">'${shortYear}</span>`;
                 dateBadge.style.display = 'inline-flex';
             } else {
                 dateBadge.style.display = 'none';
@@ -1824,6 +1828,7 @@
                 'sheikhId', 'categoryId', 'selectedCategoryId', 'sectionId',
                 // Enriched fields from Public API
                 'sheikhName', 'sheikhImage', 'categoryName', 'categoryIcon', 'categoryColor',
+                'lessonDate',  // 📅 Phase 10
                 // Smart Section Resolver metadata
                 '_sectionLabels'];
 

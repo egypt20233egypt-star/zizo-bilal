@@ -121,9 +121,9 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 
 | البند | القيمة |
 |-------|---------|
-| الإصدار | v7.1-smart-translate |
-| الحالة | ✅ Phase 9B++ مكتملة — ترجمة ديناميكية ذكية لكل مفاتيح الدروس |
-| آخر commit آمن | `f5e1c02` |
+| الإصدار | v8.0-smart-calendar |
+| الحالة | ✅ Phase 10 مكتملة — تقويم ذكي + Date Badge + منع تكرار حجز الشيخ |
+| آخر commit آمن | `763c320` |
 
 ## 🏆 سجل الإنجازات
 
@@ -209,6 +209,7 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 | 74 | **🕌 Phase 9C-1: شات الشيخ**: شات جديد بيجاوب عن **كل دروس شيخ معين** مش درس واحد! Backend: `buildSheikhContext()` بيجمع ملخصات الدروس + يحدد الدرس الأنسب للسؤال + `getSheikhSystemPrompt()` + suggestions endpoint. Frontend: `data-sheikh-id` support + `loadSheikhTitle()` + تعديل sendMessage و loadSuggestions. مفيش كسر لأي كود موجود — backwards compatible | `routes/chatbot.js`, `public/chat-widget.js` |
 | 75 | **🔧 إظهار شات الشيخ في الصفحات**: Widget كان مفيش في `lessons.html` أصلاً! إضافة Widget + script + ربط `sheikhId` من URL parameter. كمان `website.html` بيفعّل sheikh mode لو URL فيها `?sheikh=` | `lessons.html`, `website.html` |
 | 76 | **⚡ إصلاح N+1 Queries — تحسين Performance**: 4 مشاكل N+1 + 1 تحسين. كل `for` loop + `countDocuments` اتحول لـ `$group` aggregate (query واحدة بدل N). `public.js` landing (أقسام+مشايخ) + `/sheikhs` endpoint + `sheikhs.js` admin + `chatSettings.js` feedback stats (3 queries دُمجت في aggregate واحد) | `routes/public.js`, `routes/sheikhs.js`, `routes/chatSettings.js` |
+| 77 | **📅 Phase 10: تقويم ذكي (Smart Calendar)**: حقل `lessonDate` String YYYY-MM-DD + Unique sparse index `(sheikhId, lessonDate)` + `GET /taken-dates/:sheikhId` endpoint (قبل /:id route) + POST/PUT validation + Flatpickr CDN+Arabic + Calendar JS ديناميكي + Date Badge مختصر في website + date mini badge في كروت lessons | `models/Lesson.js`, `routes/lessons.js`, `admin_panel_v4_merged.html`, `website.html`, `lessons.html` |
 
 
 
@@ -233,7 +234,8 @@ Phase 9B: Chat UX + Suggestions + Rating ✅ تم (أسئلة مقترحة + ت�
 Phase 9B+: Unified Design + Admin Settings ✅ تم (تصميم موحد + صفحة إعدادات شات كاملة + تحكم ديناميكي)
 Phase 9B++: Smart Auto-Translation       ✅ تم (autoLabel + recursive humanize + 40+ ترجمة ذكية)
 Phase 9C: Sheikh Chat + General Chat    🔄 جاري (9C-1 شات الشيخ ✅)
-Phase 10: RAG Pipeline                  ⏳ قدام
+Phase 10: Smart Calendar                ✅ تم (تقويم ذكي + Date Badge + Flatpickr + حماية تكرار)
+Phase 11: RAG Pipeline                  ⏳ قدام
 ```
 
 ## ⚠️ سجل المشاكل
@@ -1267,5 +1269,6 @@ Phase 10: RAG Pipeline                  ⏳ قدام
 | #28 | [Performance] | **`sort(() => 0.5 - Math.random())` مش عادل** — JavaScript الـ sort مع random comparator بيدي توزيع غير منتظم للعناصر. الحل: Fisher-Yates Shuffle (`for (let i = arr.length - 1; i > 0; i--)` مع swap) | `routes/chatbot.js` — suggestions shuffle | ✅ متحلة |
 | #29 | [Performance] | **`META_KEYS` جوه handler = بيتعمل كل request** — الحل: نقلها خارج handler كـ module-level constant | `routes/chatbot.js` | ✅ متحلة |
 | #30 | [Performance] | **مفيش cache للـ suggestions** — كل request بيقرأ الدرس من DB + يعمل extractKeywords. الحل: `suggestionsCache` Map مع TTL 5 دقائق + Max 100 entry | `routes/chatbot.js` | ✅ متحلة |
+| #31 | [Frontend] | **`knownKeys` لازم تتحدث في كل الأماكن** — `lessonDate` اتضاف في `buildNavigation()` بس اتنست في `renderLessonContent()` ← ظهرت كقسم ديناميكي `Lesson Date ✨`. **الدرس:** أي metadata field جديد لازم يتحط في كل skip lists في الملف | `website.html` — buildNavigation knownKeys + renderLessonContent knownKeys |
 
 
