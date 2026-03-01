@@ -23,7 +23,7 @@
 | البند | القيمة |
 |-------|--------|
 | **الاسم** | منصة زيزو وبلال — منصة دعوية تعليمية لنشر العلم الشرعي |
-| **الإصدار** | v8.0-observation |
+| **الإصدار** | v8.0-smart-calendar |
 | **الاستضافة** | Render.com |
 | **الريبو** | GitHub (private) |
 | **اللغة الأساسية** | عربي (RTL) |
@@ -151,8 +151,8 @@ zizo-bilal-main-v2/
 ├── v3_enhancements.css                # تحسينات إضافية (sticky nav fix, FAB outline fix)
 │
 ├── README.md                          # 📝 سجل المشروع الحي (141KB!) — إنجازات + مشاكل + دروس
-├── GEMINI.md                          # 🛡️ قواعد الحماية للـ AI
-├── VIBE_CODING_GUIDE.md               # 📘 دليل التطوير (7 خطوات ذهبية)
+├── GEMINI.md                          # 🛡️ قواعد AI + Master Prompt + Icon Strategy + Nav + Chat + Calendar
+├── docs/archive/                      # 📦 ملفات مؤرشفة (VIBE_CODING_GUIDE + walkthrough)
 └── .gitignore                         # استبعاد node_modules, .env, uploads/
 ```
 
@@ -220,6 +220,7 @@ zizo-bilal-main-v2/
 | GET | `/api/admin/check` | هل مسجل دخول؟ |
 | POST | `/api/admin/logout` | تسجيل خروج |
 | CRUD | `/api/lessons` | إدارة الدروس |
+| GET | `/api/lessons/taken-dates/:sheikhId` | 📅 تواريخ محجوزة لشيخ (Phase 10) |
 | POST | `/api/lessons/:id/copy` | نسخ درس |
 | PUT | `/api/lessons/:id/move` | نقل درس |
 | POST | `/api/lessons/batch` | استيراد بالجملة |

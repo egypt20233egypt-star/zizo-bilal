@@ -842,31 +842,82 @@ if (!res.ok) { fallback() أو throw error }
 
 ---
 
-## 🔒 Phase 8.5 — Security Middleware
+## 🎨 Icon System Strategy (من VIBE_CODING_GUIDE)
 
-### الإعدادات النشطة في `server.js`:
-```javascript
-// Compression (gzip)
-app.use(compression());
+### القاعدة العامة:
+**استخدم FontAwesome الموجود بالفعل - ممنوع إضافة مكتبات جديدة**
 
-// Rate Limiting (100 req/15min on public API)
-app.use('/api/public', rateLimit({ windowMs: 15*60*1000, max: 100 }));
+| Library | الحالة | متى نستخدمها؟ |
+|---------|--------|---------------|
+| **Font Awesome v6** | ✅ Installed | Default choice |
+| **Lucide/Heroicons/etc** | ❌ Not installed | لو FA مبقاش كافي (future phase) |
 
-// Static files: ملفات محددة بس (مش __dirname!)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/style.css', express.static(path.join(__dirname, 'style.css')));
-```
-
-### ملف 404:
-- `404.html` — بيتسرف تلقائي لأي route مش موجود
+### الملفات اللي فيها FA:
+- `admin_panel_v4_merged.html` → FA v6.5.1
+- `website.html` → FA v6.4.0
 
 ---
 
-## 🚀 Phase 8.5b — UX Enhancements (قيد التنفيذ)
+## 🧭 نظام شريط التنقل الديناميكي (v4.5)
 
-| # | الميزة | الملفات |
-|---|--------|---------|
-| 1 | 🎨 Loading Skeleton (shimmer) | `browse.html`, `lessons.html` |
-| 2 | 🔗 Breadcrumbs | `browse.html`, `lessons.html`, `website.html` |
-| 3 | 🎯 Progress Tracking | `website.html`, `lessons.html`, `browse.html` |
-| 4 | 🔍 بحث شامل | `routes/public.js`, `index.html` |
+### قواعد مهمة:
+- ⚠️ **Cache**: أي تعديل في navItems.js لازم يعمل `navCache.invalidate()` عشان الهوم يتحدث فوراً
+- ⚠️ **Center Button**: واحد بس — مفيش اتنين مركزيين — **وبيتنقل بحرية زي أي أيقونة (مفيش auto-center)**
+- ⚠️ **displayMode**: `fixed` (🔒 ثابت) أو `rotating` (🎲 عشوائي) — العشوائيين بيتبدلوا كل زيارة
+- ⚠️ **الأيقونات**: لازم تبدأ بـ `fa-` (Font Awesome)
+
+---
+
+## 💬 Phase 9: Chat System الذكي (v6.0 → v8.0)
+
+> **أكبر مرحلة — 5 Phases فرعية بنت نظام شات كامل بـ AI!**
+
+### الملفات:
+| ملف | الوظيفة |
+|------|---------|
+| `public/chat-widget.js` | Widget كامل (1500+ سطر) — CSS + JS + 3 أوضاع |
+| `routes/chatbot.js` | Backend API — chat + suggestions + feedback + cache |
+| `models/ChatSettings.js` | إعدادات الشات (singleton — API key + model) |
+| `chat-settings.html` | صفحة أدمن لإعدادات الشات |
+
+### الأوضاع الثلاثة:
+| الوضع | التفعيل | الملفات |
+|-------|---------|---------|
+| 🎓 **Lesson Mode** | `website.html?lesson=ID` | محتوى الدرس = context |
+| 👨‍🏫 **Sheikh Mode** | `lessons.html?sheikh=ID` | أسئلة عن الشيخ + دروسه |
+| 🌐 **General Mode** | `index.html` + `browse.html` | أسئلة عن المنصة |
+
+### ⚠️ قواعد مهمة:
+- **`chat-widget.js`** = ملف واحد فيه CSS + JS — **متفصلهمش!**
+- **Tensorix API** = بديل OpenAI مجاني — المفتاح في `.env`
+- **`suggestionsLoaded`** flag يمنع double-loading — **متشيلوش!**
+- **`insertAdjacentHTML`** بدل `innerHTML +=` — **عشان الـ typewriter مينكسرش!**
+- **Fisher-Yates shuffle** في Backend — مش `Math.random().sort()` — **أدق!**
+- **Cache**: `suggestionsCache` + TTL 5 دقائق + Max 100 — `?refresh=true` بيتخطاه
+
+---
+
+## 📅 Phase 10: Smart Calendar (التقويم الذكي)
+
+### الملفات:
+| ملف | التعديل |
+|------|---------|
+| `models/Lesson.js` | حقل `lessonDate` String YYYY-MM-DD + Unique sparse index `(sheikhId, lessonDate)` |
+| `routes/lessons.js` | `GET /taken-dates/:sheikhId` **قبل** `/:id` + POST/PUT validation |
+| `admin_panel_v4_merged.html` | Flatpickr CDN+Arabic + Calendar JS ديناميكي |
+| `website.html` | Date Badge مختصر (يوم • ١٥ يناير '٢٦) |
+| `lessons.html` | Date mini badge ذهبي في كروت الدروس |
+
+### ⚠️ قواعد مهمة:
+- **Route ordering**: `taken-dates/:sheikhId` لازم يكون **قبل** `/:id` عشان Express مياكلوش!
+- **التاريخ String مش Date** — يتجنب timezone bugs
+- **`knownKeys`** لازم تتحدث في **كل الأماكن** (`buildNavigation` + `renderLessonContent`)
+
+---
+
+## 📦 ملاحظة: ملفات مؤرشفة
+
+> الملفات التالية اتنقلت لـ `docs/archive/` — مرجع تاريخي فقط:
+> - `VIBE_CODING_GUIDE.md` ← مدمج في هذا الملف
+> - `walkthrough.md.resolved` ← كل المعلومات في README.md
+
