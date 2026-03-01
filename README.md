@@ -1191,6 +1191,7 @@ Phase 10: RAG Pipeline                  ⏳ قدام
 | 25 | 🔍 **Observation Phase** — سطرين `console.log` لمراقبة Cache HIT/MISS + بلان مراقبة أسبوع بدون كود + معايير قرار للخطوة الجاية | `routes/chatbot.js` | ✅ |
 | 26 | 💎 **Phase 9E: UX Polish** — عنوان "✨ أسئلة ذكية من الدرس" + badge AI ذهبي + أيقونة 💎 + Stagger animation + Shimmer/Glow hover + زرار تحديث 🔄 spinning + `insertAdjacentHTML` + guard | `public/chat-widget.js` | ✅ |
 | 27 | 🔄 **إصلاح زرار التحديث** — تخطي Cache عند `?refresh=true` لتوليد أسئلة جديدة فعلاً (Fisher-Yates shuffle كل مرة) | `routes/chatbot.js`, `public/chat-widget.js` | ✅ |
+| 28 | 🔒 **Security Fix: حجب /public/admin.html** — الملف القديم (JWT legacy + كلمة سر default) كان accessible لأي حد. أضفنا route في `server.js` يرجع 404 قبل static serve | `server.js` | ✅ |
 
 
 ## 📁 الملفات الجديدة
