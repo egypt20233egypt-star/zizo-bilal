@@ -210,6 +210,7 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 | 75 | **🔧 إظهار شات الشيخ في الصفحات**: Widget كان مفيش في `lessons.html` أصلاً! إضافة Widget + script + ربط `sheikhId` من URL parameter. كمان `website.html` بيفعّل sheikh mode لو URL فيها `?sheikh=` | `lessons.html`, `website.html` |
 | 76 | **⚡ إصلاح N+1 Queries — تحسين Performance**: 4 مشاكل N+1 + 1 تحسين. كل `for` loop + `countDocuments` اتحول لـ `$group` aggregate (query واحدة بدل N). `public.js` landing (أقسام+مشايخ) + `/sheikhs` endpoint + `sheikhs.js` admin + `chatSettings.js` feedback stats (3 queries دُمجت في aggregate واحد) | `routes/public.js`, `routes/sheikhs.js`, `routes/chatSettings.js` |
 | 77 | **📅 Phase 10: تقويم ذكي (Smart Calendar)**: حقل `lessonDate` String YYYY-MM-DD + Unique sparse index `(sheikhId, lessonDate)` + `GET /taken-dates/:sheikhId` endpoint (قبل /:id route) + POST/PUT validation + Flatpickr CDN+Arabic + Calendar JS ديناميكي + Date Badge مختصر في website + date mini badge في كروت lessons | `models/Lesson.js`, `routes/lessons.js`, `admin_panel_v4_merged.html`, `website.html`, `lessons.html` |
+| 78 | **📁 تنظيم التوثيق: 5 ملفات → 3 فعّالة + 2 أرشيف**: دمج `VIBE_CODING_GUIDE.md` في `GEMINI.md` (Icon Strategy + Nav System + Phase 9 Chat + Phase 10 Calendar) + نقل `VIBE_CODING_GUIDE.md` و `walkthrough.md.resolved` لـ `docs/archive/` + تحديث `UNIVERSAL_AI_PROMPT.md` (v8.0 + taken-dates + هيكل ملفات) — حذف Phase 8.5 المكررة من GEMINI | `GEMINI.md`, `UNIVERSAL_AI_PROMPT.md`, `docs/archive/` |
 
 
 
