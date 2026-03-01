@@ -4,6 +4,18 @@ const Lesson = require('../models/Lesson');
 const LessonHistory = require('../models/LessonHistory');
 const { validateLessonData } = require('../utils/lessonValidator');
 
+// ============ SSOT: Dangerous fields blocklist ============
+// حقول MongoDB الخطيرة اللي ممنوع المستخدم يبعتها
+const BLOCKED_FIELDS = ['_id', '__v', '$set', '$unset', '$push', '$pull', '$inc'];
+function stripDangerousFields(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    const clean = { ...obj };
+    BLOCKED_FIELDS.forEach(f => delete clean[f]);
+    // حذف أي key يبدأ بـ $ (MongoDB operator injection)
+    Object.keys(clean).forEach(k => { if (k.startsWith('$')) delete clean[k]; });
+    return clean;
+}
+
 // ============ Cache Invalidation Helper ============
 function invalidatePublicCache() {
     try {
@@ -272,7 +284,8 @@ router.put('/:id/move', async (req, res) => {
 // POST new lesson
 router.post('/', async (req, res) => {
     try {
-        const lesson = new Lesson(req.body);
+        const safeData = stripDangerousFields(req.body);
+        const lesson = new Lesson(safeData);
         await lesson.save();
 
         // Save initial version
@@ -297,16 +310,17 @@ router.put('/:id', async (req, res) => {
         // Save old version to history
         const source = req.body._importSource || 'manual';
         const note = req.body._changeNote || 'تحديث';
-        delete req.body._importSource;
-        delete req.body._changeNote;
 
         await LessonHistory.saveVersion(req.params.id, oldLesson.toObject(), source, note);
 
-        // Update lesson
-        req.body.updatedAt = new Date();
+        // Update lesson — strip dangerous fields
+        const safeData = stripDangerousFields(req.body);
+        delete safeData._importSource;
+        delete safeData._changeNote;
+        safeData.updatedAt = new Date();
         const lesson = await Lesson.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            safeData,
             { new: true }
         );
 

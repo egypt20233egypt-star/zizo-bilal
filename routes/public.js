@@ -195,6 +195,7 @@ async function enrichLessons(lessons) {
 let lessonsListCache = null;
 let lessonsListCacheTime = 0;
 const lessonCache = new Map(); // per-lesson cache
+const MAX_LESSON_CACHE = 200; // حد أقصى عشان منأكلش الـ RAM
 const LESSONS_CACHE_TTL = 5 * 60 * 1000;  // 5 دقائق
 const LESSON_CACHE_TTL = 10 * 60 * 1000;  // 10 دقائق
 
@@ -286,7 +287,12 @@ router.get('/lessons/:id', async (req, res) => {
         // إثراء بالأسماء
         const [enriched] = await enrichLessons([lesson]);
 
-        // Cache per lesson
+        // Cache per lesson (with max size limit)
+        if (lessonCache.size >= MAX_LESSON_CACHE) {
+            // حذف أقدم entry (أول واحد في Map)
+            const oldestKey = lessonCache.keys().next().value;
+            lessonCache.delete(oldestKey);
+        }
         lessonCache.set(id, { data: enriched, time: Date.now() });
 
         res.json(enriched);

@@ -81,7 +81,9 @@ router.get('/tree', async (req, res) => {
 // ============ إضافة قسم جديد ============
 router.post('/', async (req, res) => {
     try {
-        const category = new Category(req.body);
+        // Whitelist — حقول مسموح بيها بس
+        const { name, icon, color, parentId, order, description, isActive } = req.body;
+        const category = new Category({ name, icon, color, parentId, order, description, isActive });
         await category.save();
         res.status(201).json(category);
     } catch (err) {
@@ -92,10 +94,21 @@ router.post('/', async (req, res) => {
 // ============ تعديل قسم ============
 router.put('/:id', async (req, res) => {
     try {
+        // Whitelist — حقول مسموح بتعديلها بس
+        const { name, icon, color, parentId, order, description, isActive } = req.body;
+        const updateData = {};
+        if (name !== undefined) updateData.name = name;
+        if (icon !== undefined) updateData.icon = icon;
+        if (color !== undefined) updateData.color = color;
+        if (parentId !== undefined) updateData.parentId = parentId;
+        if (order !== undefined) updateData.order = order;
+        if (description !== undefined) updateData.description = description;
+        if (isActive !== undefined) updateData.isActive = isActive;
+
         const category = await Category.findByIdAndUpdate(
             req.params.id,
-            req.body,
-            { new: true }
+            updateData,
+            { new: true, runValidators: true }
         );
         if (!category) {
             return res.status(404).json({ error: 'القسم غير موجود' });
@@ -107,23 +120,27 @@ router.put('/:id', async (req, res) => {
 });
 
 // ============ حذف قسم (وكل أبنائه) ============
+// ⚠️ الأبناء أول وبعدين الأب — عشان منعملش orphans
 router.delete('/:id', async (req, res) => {
     try {
-        // حذف القسم نفسه
-        const category = await Category.findByIdAndDelete(req.params.id);
+        // تأكد إن القسم موجود الأول
+        const category = await Category.findById(req.params.id);
         if (!category) {
             return res.status(404).json({ error: 'القسم غير موجود' });
         }
 
-        // حذف كل الأقسام الفرعية (recursively)
+        // حذف كل الأقسام الفرعية أولاً (recursively)
         async function deleteChildren(parentId) {
             const children = await Category.find({ parentId });
             for (const child of children) {
-                await deleteChildren(child._id);
-                await Category.findByIdAndDelete(child._id);
+                await deleteChildren(child._id);  // احذف أحفاد الطفل الأول
+                await Category.findByIdAndDelete(child._id);  // بعدين الطفل نفسه
             }
         }
         await deleteChildren(req.params.id);
+
+        // بعدين احذف الأب
+        await Category.findByIdAndDelete(req.params.id);
 
         res.json({ message: 'تم حذف القسم وكل أقسامه الفرعية' });
     } catch (err) {

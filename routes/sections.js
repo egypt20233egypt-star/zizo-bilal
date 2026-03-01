@@ -1,16 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const SectionRegistry = require('../models/SectionRegistry');
-
-/**
- * Middleware للحماية - نفس اللي في admin.js
- */
-function requireAuth(req, res, next) {
-    if (!req.session.adminId) {
-        return res.status(401).json({ error: 'غير مصرح - سجل دخول الأول' });
-    }
-    next();
-}
+const { requireAuth } = require('../middleware/requireAuth');
 
 // ============================================
 // 🗄️ Cache Configuration (5 دقائق)

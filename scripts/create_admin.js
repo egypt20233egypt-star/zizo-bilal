@@ -5,8 +5,9 @@ const Admin = require('../models/Admin');
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/zizo-bilal';
 
 /**
- * Script لإنشاء admin user جديد
- * بيحذف أي admin قديم ويعمل واحد جديد
+ * Script لإنشاء admin user جديد (آمن)
+ * بيتحقق لو الأدمن موجود → يعدله. لو مش موجود → يعمل واحد جديد.
+ * ⛔ ممنوع deleteMany — عشان ميمسحش أدمن موجودين في production!
  */
 async function createAdmin() {
     try {
@@ -14,30 +15,33 @@ async function createAdmin() {
         await mongoose.connect(MONGODB_URI);
         console.log('✅ MongoDB connected');
 
-        // حذف كل الـ admins القديمة (للتطوير فقط)
-        const deletedCount = await Admin.deleteMany({});
-        if (deletedCount.deletedCount > 0) {
-            console.log(`🗑️  Deleted ${deletedCount.deletedCount} old admin(s)`);
+        const username = process.argv[2] || 'admin';
+        const password = process.argv[3] || 'admin123';
+
+        // تحقق لو الأدمن موجود
+        const existingAdmin = await Admin.findOne({ username });
+
+        if (existingAdmin) {
+            // تحديث الباسورد بدل الحذف
+            existingAdmin.password = password;
+            await existingAdmin.save();
+            console.log(`\n✅ Admin "${username}" updated with new password!`);
+        } else {
+            // إنشاء admin جديد
+            const admin = new Admin({
+                username,
+                password,  // سيتم تشفيرها تلقائياً
+                email: 'admin@example.com'
+            });
+            await admin.save();
+            console.log(`\n✅ Admin "${username}" created successfully!`);
         }
 
-        // إنشاء admin جديد
-        const admin = new Admin({
-            username: 'admin',
-            password: 'admin123',  // سيتم تشفيرها تلقائياً
-            email: 'admin@example.com'
-        });
-
-        await admin.save();
-
-        console.log('');
-        console.log('✅ Admin created successfully!');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('Username: admin');
-        console.log('Password: admin123');
+        console.log(`Username: ${username}`);
+        console.log(`Password: ${password}`);
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('');
-        console.log('🔒 تأكد إنك تغير الباسورد ده في production!');
-        console.log('');
+        console.log('\n🔒 تأكد إنك تغير الباسورد ده في production!\n');
 
         process.exit(0);
 

@@ -15,7 +15,6 @@ app.use(express.json({ limit: '10mb' }));
 
 // 🔒 Security: سرف الملفات العامة فقط (مش كل المشروع!)
 // منع الوصول لـ .env, server.js, models/, routes/ إلخ
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/style.css', express.static(path.join(__dirname, 'style.css')));
 app.use('/script.js', express.static(path.join(__dirname, 'script.js')));
 app.use('/admin-modern.css', express.static(path.join(__dirname, 'admin-modern.css')));
@@ -47,9 +46,19 @@ const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 if (MONGO_URI) {
     mongoose.connect(MONGO_URI)
         .then(() => console.log('✅ MongoDB Connected Successfully!'))
-        .catch(err => console.error('❌ MongoDB Connection Error:', err));
+        .catch(err => {
+            console.error('❌ MongoDB Connection Error:', err.message);
+            console.error('🛑 Server cannot work without database — exiting...');
+            process.exit(1);
+        });
+
+    // مراقبة اتصال MongoDB
+    mongoose.connection.on('error', err => console.error('❌ MongoDB runtime error:', err.message));
+    mongoose.connection.on('disconnected', () => console.warn('⚠️ MongoDB disconnected — trying to reconnect...'));
+    mongoose.connection.on('reconnected', () => console.log('✅ MongoDB reconnected!'));
 } else {
-    console.log('⚠️ No MongoDB URI found - API routes will not work');
+    console.error('❌ No MongoDB URI found — server cannot start!');
+    process.exit(1);
 }
 
 // ============ Session (Admin v4.0) ============
@@ -109,10 +118,19 @@ const upload = multer({
 // Serve uploads explicitly (أأمن من express.static(__dirname))
 app.use('/uploads', express.static(uploadsDir));
 
-// Upload endpoint (محمي)
-app.post('/api/upload/avatar', requireAuth, upload.single('avatar'), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'مفيش ملف' });
-    res.json({ url: '/uploads/' + req.file.filename });
+// Upload endpoint (محمي) — مع Multer error handling
+app.post('/api/upload/avatar', requireAuth, (req, res) => {
+    upload.single('avatar')(req, res, (err) => {
+        if (err) {
+            // خطأ Multer (حجم / نوع ملف)
+            const message = err.code === 'LIMIT_FILE_SIZE'
+                ? 'حجم الملف أكبر من 2MB'
+                : err.message || 'خطأ في رفع الملف';
+            return res.status(400).json({ error: message });
+        }
+        if (!req.file) return res.status(400).json({ error: 'مفيش ملف' });
+        res.json({ url: '/uploads/' + req.file.filename });
+    });
 });
 
 // ============ API Routes ============
@@ -199,6 +217,17 @@ app.get('/api/status', (req, res) => {
         api: 'عِلمٌ يُنتَفَعُ بِه API v2.0',
         mongodb: mongoose.connection.readyState === 1,
         endpoints: ['/api/lessons', '/api/lessons/published']
+    });
+});
+
+// ============ Global Error Handler ============
+// بيمسك أي error مش متعامل معاه في الـ routes
+app.use((err, req, res, next) => {
+    console.error('💥 Unhandled Error:', err.stack || err.message || err);
+    res.status(err.status || 500).json({
+        error: process.env.NODE_ENV === 'production'
+            ? 'حدث خطأ في السيرفر'
+            : err.message || 'خطأ غير متوقع'
     });
 });
 
