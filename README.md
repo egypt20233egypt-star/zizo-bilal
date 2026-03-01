@@ -117,13 +117,13 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 > ⛔ **أي خانة "اتمسح" = وقف + استأذن زيزو الأول!**
 
 ## 📌 الحالة العامة
-<!-- آخر رقم مشكلة مستخدم: #20 -->
+<!-- آخر رقم مشكلة مستخدم: #21 -->
 
 | البند | القيمة |
 |-------|---------|
 | الإصدار | v8.0-smart-calendar |
 | الحالة | ✅ Phase 10 مكتملة — تقويم ذكي + Date Badge + منع تكرار حجز الشيخ |
-| آخر commit آمن | `763c320` |
+| آخر commit آمن | `9d613b4` |
 
 ## 🏆 سجل الإنجازات
 
@@ -1231,6 +1231,8 @@ Phase 11: RAG Pipeline                  ⏳ قدام
 | #13 | [Architecture] | `Feedback` schema معرّف جوه `chatbot.js` | كسر Separation of Concerns — صعب الصيانة | تم تعريفه as inline بدل ملف منفصل | نقله لـ `models/Feedback.js` | 🟡 مفتوحة |
 | #14 | [Documentation] | ترقيم الإنجازات #57-60 متكرر مرتين | إنجازات مكررة في نفس الجدول | دُرجت مرتين في جلستين متقاربتين | ترقيم وحيد — كل إنجاز مرة واحدة بس | ⚠️ معلق - تسجيل فقط |
 | #15 | [Documentation] | `*.md` في `.gitignore` بيخفي كل التوثيق عن GitHub | README.md + GEMINI.md + VIBE_CODING_GUIDE.md مش بتترفعش | قاعدة عامة مضافة في `.gitignore` بتمسح كل `.md` | تحويل `*.md` لأسماء محددة مثل `phase3_5_implementation_plan.md` | 🟡 مفتوحة |
+
+| #16 | [Frontend] | **`lessonDate` ظهر كقسم ديناميكي "Lesson Date ✨"** | التاريخ بيظهر كقسم بدل badge | `lessonDate` مضافتش في `renderLessonContent()` knownKeys | إضافة `lessonDate` في knownKeys (سطر 1827) | ✅ محلول |
 
 ## 💡 دروس مستفادة
 
