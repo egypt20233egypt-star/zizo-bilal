@@ -484,6 +484,43 @@
             text-overflow: ellipsis;
             max-width: 180px;
         }
+
+        /* 📅 Phase 10: Date Badge */
+        .lesson-date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            margin: 12px auto 0;
+            transition: all 0.3s ease;
+        }
+
+        .lesson-date-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+        }
+
+        .date-day-name {
+            color: #d4af37;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .date-separator {
+            color: rgba(212, 175, 55, 0.4);
+        }
+
+        .date-full {
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+
+        .date-badge-icon {
+            font-size: 20px;
+        }
     </style>
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap"
@@ -517,6 +554,15 @@
             <h1 id="lessonTitle">عِلمٌ يُنتَفَعُ بِه</h1>
             <p class="subtitle" id="lessonSubtitle">منصة دعوية تعليمية</p>
             <div class="tags" id="lessonTags"></div>
+            <!-- 📅 Phase 10: Date Badge -->
+            <div class="lesson-date-badge" id="lessonDateBadge" style="display:none">
+                <span class="date-badge-icon">📅</span>
+                <div class="date-badge-text">
+                    <span class="date-day-name"></span>
+                    <span class="date-separator">•</span>
+                    <span class="date-full"></span>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -1618,6 +1664,17 @@
                 ).join('');
             }
 
+            // 📅 Phase 10: Date Badge
+            const dateBadge = document.getElementById('lessonDateBadge');
+            if (lesson.lessonDate) {
+                const d = new Date(lesson.lessonDate + 'T00:00:00');
+                dateBadge.querySelector('.date-day-name').textContent = d.toLocaleDateString('ar-EG', { weekday: 'long' });
+                dateBadge.querySelector('.date-full').textContent = d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+                dateBadge.style.display = 'inline-flex';
+            } else {
+                dateBadge.style.display = 'none';
+            }
+
             // Build navigation
             buildNavigation(lesson);
 
@@ -1643,7 +1700,8 @@
                 // Metadata fields
                 'sheikhId', 'categoryId', 'selectedCategoryId', 'sectionId',
                 // Enriched fields from Public API
-                'sheikhName', 'sheikhImage', 'categoryName', 'categoryIcon', 'categoryColor'];
+                'sheikhName', 'sheikhImage', 'categoryName', 'categoryIcon', 'categoryColor',
+                'lessonDate'];  // 📅 Phase 10
 
             // Check available known sections
             sections.push({ id: 'lessons', icon: '📚', name: 'الدروس' });

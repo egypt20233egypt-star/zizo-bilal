@@ -148,6 +148,21 @@ router.post('/batch', async (req, res) => {
     }
 });
 
+// ═══ 📅 Phase 10: GET التواريخ المحجوزة للشيخ ═══
+// ⚠️ FIX #1: لازم يجي قبل /:id عشان Express مياكلوش!
+router.get('/taken-dates/:sheikhId', async (req, res) => {
+    try {
+        if (!req.params.sheikhId) return res.json([]);
+        const dates = await Lesson.find({
+            sheikhId: req.params.sheikhId,
+            lessonDate: { $ne: null }
+        }).select('lessonDate -_id').lean();
+        res.json(dates.map(d => d.lessonDate));
+    } catch (err) {
+        res.status(500).json({ error: 'خطأ في تحميل التواريخ' });
+    }
+});
+
 // GET all lessons
 router.get('/', async (req, res) => {
     try {
@@ -285,6 +300,18 @@ router.put('/:id/move', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const safeData = stripDangerousFields(req.body);
+
+        // 📅 Phase 10: منع تكرار (شيخ + تاريخ)
+        if (safeData.lessonDate && safeData.sheikhId) {
+            const conflict = await Lesson.findOne({
+                sheikhId: safeData.sheikhId,
+                lessonDate: safeData.lessonDate
+            });
+            if (conflict) {
+                return res.status(400).json({ error: `التاريخ ${safeData.lessonDate} محجوز مسبقاً لهذا الشيخ` });
+            }
+        }
+
         const lesson = new Lesson(safeData);
         await lesson.save();
 
@@ -317,6 +344,19 @@ router.put('/:id', async (req, res) => {
         const safeData = stripDangerousFields(req.body);
         delete safeData._importSource;
         delete safeData._changeNote;
+
+        // 📅 Phase 10: منع تكرار (شيخ + تاريخ) عند التعديل
+        if (safeData.lessonDate) {
+            const currentSheikhId = safeData.sheikhId || oldLesson.sheikhId;
+            const conflict = await Lesson.findOne({
+                sheikhId: currentSheikhId,
+                lessonDate: safeData.lessonDate,
+                _id: { $ne: req.params.id }
+            });
+            if (conflict) {
+                return res.status(400).json({ error: 'التاريخ محجوز مسبقاً لنفس الشيخ' });
+            }
+        }
         safeData.updatedAt = new Date();
         const lesson = await Lesson.findByIdAndUpdate(
             req.params.id,

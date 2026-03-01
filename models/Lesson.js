@@ -8,6 +8,7 @@ const LessonSchema = new mongoose.Schema({
     title: { type: String, required: true },
     subtitle: String,
     sheikhId: String,
+    lessonDate: { type: String, default: null },  // 📅 Phase 10: YYYY-MM-DD (String — تجنب Timezone)
     categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
     status: { type: String, default: 'draft' },
     aiAnalyzed: { type: Boolean, default: false },
@@ -36,5 +37,12 @@ const LessonSchema = new mongoose.Schema({
 }, {
     strict: false  // Accept any additional fields not defined in schema
 });
+
+// 📅 Phase 10: Unique Index — نفس الشيخ مايقدرش يكرر نفس التاريخ
+// sparse: true → يسمح لـ lessonDate: null بالتكرار (دروس بدون تاريخ)
+LessonSchema.index(
+    { sheikhId: 1, lessonDate: 1 },
+    { unique: true, sparse: true }
+);
 
 module.exports = mongoose.model('Lesson', LessonSchema);
