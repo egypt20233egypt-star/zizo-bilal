@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize all features
     initNavigation();
-    initScrollTop();
+
     initSearch();
     initNavHighlight();
 });
@@ -75,25 +75,7 @@ function initNavHighlight() {
     });
 }
 
-/* === Scroll to Top Button === */
-function initScrollTop() {
-    const scrollTopBtn = document.getElementById('scrollTop');
 
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 500) {
-            scrollTopBtn.classList.add('visible');
-        } else {
-            scrollTopBtn.classList.remove('visible');
-        }
-    });
-
-    scrollTopBtn.addEventListener('click', () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
-}
 
 /* === Search Functionality === */
 function initSearch() {

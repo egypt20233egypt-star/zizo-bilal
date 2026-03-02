@@ -600,7 +600,7 @@
     <!-- Floating Buttons (v3 Style) -->
     <div class="fab-container">
         <button class="fab fab-blue" id="searchBtn" aria-label="بحث"><i class="fas fa-search"></i></button>
-        <button class="fab fab-gold" id="scrollTop" aria-label="للأعلى"><i class="fas fa-arrow-up"></i></button>
+
     </div>
 
     <!-- Search Modal -->
@@ -693,7 +693,7 @@
                 document.getElementById('loadingScreen').classList.add('hidden');
             }, 800);
 
-            initScrollTop();
+
             initSearch();
         });
 
@@ -2495,20 +2495,7 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        function initScrollTop() {
-            const scrollTopBtn = document.getElementById('scrollTop');
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 500) {
-                    scrollTopBtn.classList.add('visible');
-                } else {
-                    scrollTopBtn.classList.remove('visible');
-                }
-            });
 
-            scrollTopBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-        }
 
         function initSearch() {
             const searchBtn = document.getElementById('searchBtn');

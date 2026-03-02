@@ -56,16 +56,8 @@ body {
     transform: scale(0.9);
 }
 
-.fab-gold {
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    color: var(--black);
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
-    animation-delay: 0.5s;
-}
+/* Removed: .fab-gold (scroll-to-top cleanup) */
 
-.fab-gold:hover {
-    box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
-}
 
 .fab-blue {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
