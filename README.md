@@ -121,9 +121,9 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/zizo-bilal?retryWrite
 
 | البند | القيمة |
 |-------|---------|
-| الإصدار | v8.0-smart-calendar |
-| الحالة | ✅ Phase 10 مكتملة — تقويم ذكي + Date Badge + منع تكرار حجز الشيخ |
-| آخر commit آمن | `9d613b4` |
+| الإصدار | v8.1-cleanup |
+| الحالة | ✅ Phase 10 مكتملة + تنظيف FABs (مسح scroll-to-top من website + index) + إصلاح تغطية البحث بـ CSS شرطي |
+| آخر commit آمن | `8f81f89` |
 
 ## 🏆 سجل الإنجازات
 
@@ -834,6 +834,8 @@ Phase 11: RAG Pipeline                  ⏳ قدام
 | 20 | `[Backend]` | **ترتيب Express routes مهم جداً** - `/:id` catch-all لازم يكون **آخر حاجة**. أي route فيها `/:id/action` لازم تكون **قبل** `/:id` | 404 على /copy و /move |
 | 21 | `[UI]` | **CSS classes أفضل من inline styles** - بدل onmouseover/onmouseout inline خلي الـ hover في CSS classes. أنظف + أسهل صيانة + أقل كود HTML | Premium Add Category Form |
 | 22 | `[UI]` | **متغير محسوب مبيتستخدمش = bug مستني يحصل** - لو حسبت `userIcon = cat.icon` بس بعدها استخدمت `displayIcon = 'fa-folder'` ثابت، يبقى الـ fallback مش شغال والأيقونة المختارة مش بتظهر | Tree Icons مشكلة الأيقونات الموحدة |
+| 23 | `[Debug]` | **ابحث عن الـ call مش الـ function بس** — لو مسحت function ونسيت الـ call → `ReferenceError` يوقف الصفحة. لازم تدور على كل المواضع (grep `initScrollTop`) مش بس مكان التعريف | مسح `initScrollTop` من website.html + script.js |
+| 24 | `[UI]` | **CSS شرطي (`body.has-class`) أفضل من hard-coded values** — لما تحتاج تغير layout بناءً على وجود component معين، استخدم class على الـ body بدل تغيير قيمة ثابتة للجميع. أكثر مرونة وما بيأثرش على صفحات تانية | إصلاح FAB overlap بين البحث والشات |
 
 ---
 
