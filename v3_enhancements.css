@@ -33,6 +33,11 @@ body {
     gap: 16px;
 }
 
+/* رفع البحث فوق الشات لما يكون موجود */
+body.has-chat-fab .fab-container {
+    bottom: 155px;
+}
+
 .fab {
     width: 56px;
     height: 56px;

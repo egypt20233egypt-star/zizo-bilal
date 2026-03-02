@@ -857,9 +857,7 @@
             text-decoration: none;
         }
 
-        .fab-btn:nth-child(2) {
-            animation-delay: -1.2s;
-        }
+
 
         .fab-btn:hover {
             transform: translateY(-4px) scale(1.12);
@@ -867,18 +865,7 @@
             color: #1a1a1a;
         }
 
-        .fab-top-btn {
-            opacity: 0;
-            transform: translateY(16px) scale(0.8);
-            pointer-events: none;
-            transition: all .35s;
-        }
 
-        .fab-top-btn.show {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            pointer-events: all;
-        }
 
         @keyframes fabBounce {
 
@@ -1474,11 +1461,7 @@
         <a href="/admin" target="_blank" class="footer-admin"><i class="fa-solid fa-gear"></i> لوحة التحكم</a>
     </footer>
 
-    <!-- FAB -->
-    <div class="fab-wrap">
-        <a class="fab-btn fab-top-btn" id="fabTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i
-                class="fa-solid fa-arrow-up"></i></a>
-    </div>
+    <!-- FAB removed: scroll-to-top cleanup -->
 
     <!-- Bottom Navigation (ديناميكي - يتحمل من API) -->
     <nav class="bottom-nav" id="bottomNav">
@@ -1633,11 +1616,11 @@
             nav.appendChild(div);
         }
         function initNav() {
-            const n = document.getElementById('navbar'), fabTop = document.getElementById('fabTop');
+            const n = document.getElementById('navbar');
             loadBottomNav();
             window.addEventListener('scroll', () => {
                 n.classList.toggle('scrolled', scrollY > 60);
-                fabTop.classList.toggle('show', scrollY > 500);
+
                 const sections = ['hero', 'categories', 'lessons', 'sheikhs'];
                 let cur = 'hero';
                 sections.forEach(id => { const el = document.getElementById(id); if (el && scrollY >= el.offsetTop - 200) cur = id; });

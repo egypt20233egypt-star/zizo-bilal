@@ -57,6 +57,9 @@
         const container = document.getElementById('chat-widget');
         if (!container) return;
 
+        // إعلام CSS إن الشات موجود — لرفع FABs فوقه
+        document.body.classList.add('has-chat-fab');
+
         // ⚙️ Load settings from admin panel
         await loadChatSettings();
 
